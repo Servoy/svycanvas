@@ -1,0 +1,16 @@
+addEmptyValue:1,
+customValues:"Red|red\
+Blue|blue\
+Black|black\
+White|white\
+Yellow|yellow\
+Green|green\
+Teal|teal\
+Gray|gray\
+\
+",
+displayValueType:12,
+name:"colors",
+realValueType:12,
+typeid:34,
+uuid:"ED59A5B7-AEBC-4AA5-9080-4310F3243190"

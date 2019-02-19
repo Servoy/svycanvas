@@ -1,0 +1,11 @@
+addEmptyValue:1,
+customValues:"Circle|Circle\
+Rectangle|Rect\
+Triangle|Triangle\
+Image|Image\
+Text|Text",
+displayValueType:12,
+name:"type",
+realValueType:12,
+typeid:34,
+uuid:"135F8BE0-65B4-43A5-AD32-42A501D62E1B"
