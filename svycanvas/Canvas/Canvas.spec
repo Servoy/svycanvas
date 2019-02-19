@@ -19,7 +19,6 @@
 		"showGrid": {"type": "boolean","default": "false"},
 		"snapToGrid": {"type": "boolean","default": "true"},
 		"gridSize":{"type": "int","default": "10"},
-		"useStaticCanvas": {"type": "boolean","default": "false"},
 		"canvasOptions": {"type": "canvasOptions"},
 		"imagesLoader": {"type": "media[]"}
 	},
