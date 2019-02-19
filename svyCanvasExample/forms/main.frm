@@ -67,7 +67,7 @@ width:"75%"
 gridSize:50,
 hideGrid:false,
 imagesLoader:[
-1073742546
+1073741979
 ],
 onClick:"4808D737-EAA1-471E-8D6B-D58F29A69F63",
 onDataChange:"785FE9D3-7F17-4B0D-9E11-CFB0C3A579C2",
