@@ -16,9 +16,9 @@
 	"model": 
 	{
 		"canvasObjects": {"type": "canvasObject[]","pushToServer": "allow"},
-		"showGrid": {"type": "boolean","default": "false"},
-		"snapToGrid": {"type": "boolean","default": "true"},
-		"gridSize":{"type": "int","default": "10"},
+		"showGrid": {"type": "int","values": [{"Yes": 1},{"No": 0}],"default": 0},
+		"snapToGrid": {"type": "int","values": [{"Yes": 1},{"No": 0}],"default": 0},
+		"gridSize":{"type": "int","default": 10},
 		"canvasOptions": {"type": "canvasOptions"},
 		"imagesLoader": {"type": "media[]"}
 	},
@@ -27,11 +27,11 @@
 	{
 		"canvasOptions": 
 		{
-			"selectable": {"type": "boolean","default": "true"},
-			"skipTargetFind": {"type": "boolean","default": "false"},
-			"hasRotatingPoint": {"type": "boolean","default": "true"},
-			"renderOnAddRemove": {"type": "boolean","default": "false"},
-			"skipOffscreen": {"type": "boolean","default": "true"}
+			"selectable": {"type": "int","values": [{"Yes": 1},{"No": 0}],"default": 1},
+			"skipTargetFind": {"type": "int","values": [{"Yes": 1},{"No": 0}],"default": 0},
+			"hasRotatingPoint": {"type": "int","values": [{"Yes": 1},{"No": 0}],"default": 1},
+			"renderOnAddRemove": {"type": "int","values": [{"Yes": 1},{"No": 0}],"default": 0},
+			"skipOffscreen": {"type": "int","values": [{"Yes": 1},{"No": 0}],"default": 1}
 		},
 
 		"canvasObject": 

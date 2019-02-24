@@ -119,7 +119,7 @@ function onClick(id, obj) {
  * @properties={typeid:24,uuid:"C3ED9010-8F7E-403F-A490-82D96B999683"}
  */
 function onDataChange$allowEdit(oldValue, newValue, event) {
-	elements.canvas.canvasOptions.selectable = newValue;
+	elements.canvas.canvasOptions.selectable = newValue;	
 	return true
 }
 
@@ -152,22 +152,6 @@ function onDataChange$hideGrid(oldValue, newValue, event) {
  */
 function onAction$removeSelectedItem(event) {
 	elements.canvas.removeObject(null);
-}
-
-/**
- * Callback method for when form is shown.
- *
- * @param {Boolean} firstShow form is shown first time after load
- * @param {JSEvent} event the event that triggered the action
- *
- * @private
- *
- * @properties={typeid:24,uuid:"FE9E528E-F3EC-4AB7-AB0E-075EF977897D"}
- */
-function onShow(firstShow, event) {
-	elements.canvas.gridSize = gridSize;
-	elements.canvas.showGrid = showGrid;
-	elements.canvas.canvasOptions.selectable = editable;
 }
 
 /**
@@ -277,6 +261,7 @@ function onAction$selectItem(event) {
 	var o = elements.canvas.canvasObjects;
 	var selection = []
 	for (var i = 0; i < o.length; i++) {
+		if (o[i])
 		selection.push(o[i].id);
 	}
 	elements.canvas.setSelectedObject(selection);
@@ -318,4 +303,21 @@ function onAction$createRectTextBox(event) {
 function onDataChange(oldValue, newValue, event) {
 	elements.canvas.gridSize = newValue;
 	return true
+}
+
+/**
+ * Callback method when form is (re)loaded.
+ *
+ * @param {JSEvent} event the event that triggered the action
+ *
+ * @private
+ *
+ * @properties={typeid:24,uuid:"7E76F231-22EF-423A-8926-9366E55E0030"}
+ */
+function onLoad(event) {
+	elements.canvas.gridSize = gridSize;
+	elements.canvas.showGrid = showGrid;
+	elements.canvas.snapToGrid = snap;		
+	//allow user to edit
+	elements.canvas.canvasOptions.selectable = editable;	
 }

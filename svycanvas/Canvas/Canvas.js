@@ -105,7 +105,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                 } catch (e) {}
             }
 
-            function updateModelObj(o) {                
+            function updateModelObj(o) {
                 //if it has no identifier don't update
                 if (!o.id) return;
                 // console.log('update ' + o.id);
@@ -324,8 +324,8 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                 }
                 $window.executeInlineScript(cb.formname, cb.script, [JSON.stringify($scope.model.canvasObjects)]);
             }
-            $scope.api.updateObject = function(obj,setItemActive) {
-                if (obj) {                    
+            $scope.api.updateObject = function(obj, setItemActive) {
+                if (obj) {
                     var sel = [];
                     var ob = $scope.model.canvasObjects;
                     if (!ob) return;
@@ -344,7 +344,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                     $scope.svyServoyapi.apply("canvasObjects");
                     $scope.api.draw();
                     if (setItemActive)
-                    $scope.api.setSelectedObject(sel);                    
+                        $scope.api.setSelectedObject(sel);
                 }
             }
             $scope.api.loadCanvas = function(data) {
@@ -464,25 +464,32 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                 if ($scope.canvas) {
                     $scope.canvas.dispose();
                 }
+
+                if (!$scope.model.canvasOptions) {
+                    $scope.model.canvasOptions = {};
+                }
+
                 $scope.canvas = new fabric.Canvas($scope.model.svyMarkupId, $scope.model.canvasOptions);
                 fabric.Object.prototype.transparentCorners = false;
+                $scope.canvas.selection = $scope.model.canvasOptions.selectable;
                 var gridWidth = document.getElementById($scope.model.svyMarkupId + '-wrapper').clientWidth;
                 var gridHeight = document.getElementById($scope.model.svyMarkupId + '-wrapper').clientHeight;
-
+                
                 //draw grid
                 if ($scope.model.showGrid) {
                     // create grid
-                    for (var i = 0; i < (gridWidth / grid); i++) {
-                        $scope.canvas.add(new fabric.Line([i * grid, 0, i * grid, gridWidth], {
+                    var gridSize = (gridWidth > gridHeight) ? gridWidth : gridHeight
+                    for (var i = 0; i < (gridSize / grid); i++) {
+                        $scope.canvas.add(new fabric.Line([i * grid, 0, i * grid, gridSize], {
                             id: 'grid',
                             stroke: '#ccc',
                             selectable: false
                         }));
-                        $scope.canvas.add(new fabric.Line([0, i * grid, gridWidth, i * grid], {
+                        $scope.canvas.add(new fabric.Line([0, i * grid, gridSize, i * grid], {
                             id: 'grid',
                             stroke: '#ccc',
                             selectable: false
-                        }))
+                        }));
                     }
                 }
 
@@ -498,7 +505,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                     $scope.objects[g[j].id] = createObject(type, g[j]);
                 }
                 setupEvents();
-                console.log($scope.canvas.getObjects().length);
+                // console.log($scope.canvas.getObjects().length);
                 if ($scope.canvas.getObjects().length > 1000) {
                     console.log('WARNING - over 1000 objects created. Client performance will be impacted.');
                 }
@@ -631,7 +638,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                     obj.set({
                         opacity: 1
                     });
-                    if ($scope.handlers.onClick && !$scope.model.canvasOptions.selectable) {
+                    if ($scope.handlers.onClick && !$scope.model.canvasOptions.selectable && (typeof obj.id != 'undefined')) {
                         $scope.handlers.onClick(obj.id, obj);
                         //when clicking don't allow overlapping
                         $scope.canvas.discardActiveObject();
@@ -699,6 +706,13 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                         opacity: 1
                     });
                     cloneAndSave(obj);
+                });
+                $scope.canvas.on('mouse:over', function(e) {
+                    if (!$scope.model.canvasOptions.selectable) {
+                    	if (e.target)
+                        e.target.hoverCursor = 'pointer';
+                    }
+
                 });
             }
             window.addEventListener("resize", $scope.api.draw);
