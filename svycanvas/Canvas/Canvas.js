@@ -11,7 +11,9 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
             $scope.canvas = null;
             $scope.objects = {};
             $scope.images = {};
-
+            $scope.zoom = null;
+            $scope.zoomX = null;
+            $scope.zoomY = null;
             if (!$scope.model.canvasObjects) {
                 $scope.model.canvasObjects = [];
             }
@@ -324,6 +326,12 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                 }
                 $window.executeInlineScript(cb.formname, cb.script, [JSON.stringify($scope.model.canvasObjects)]);
             }
+            $scope.api.ZoomOnPoint = function(x,y,zoom){            
+          	  $scope.zoomX = x;
+          	  $scope.zoomX = y;
+          	  $scope.zoom = zoom;
+          	  $scope.api.draw();
+            }
             $scope.api.updateObject = function(obj, setItemActive) {
                 if (obj) {
                     var sel = [];
@@ -474,6 +482,10 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                 $scope.canvas.selection = $scope.model.canvasOptions.selectable;
                 var gridWidth = document.getElementById($scope.model.svyMarkupId + '-wrapper').clientWidth;
                 var gridHeight = document.getElementById($scope.model.svyMarkupId + '-wrapper').clientHeight;
+                
+                //setup zoom
+                if ($scope.zoom)
+                $scope.canvas.zoomToPoint({ x: $scope.zoomX, y: $scope.zoomY }, $scope.zoom);
                 
                 //draw grid
                 if ($scope.model.showGrid) {
@@ -629,7 +641,22 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                     //     $scope.handlers.onMove(obj.id, obj.left, obj.top);
                     // }
                     $scope.canvas.renderAll();
-                });
+                });                           
+                $scope.canvas.on('mouse:wheel', function(opt) {
+                	if (!$scope.model.canvasOptions.ZoomOnMouseScroll) return;
+                	  var delta = opt.e.deltaY;
+                	  var pointer = $scope.canvas.getPointer(opt.e);
+                	  var zoom = $scope.canvas.getZoom();
+                	  zoom = zoom + delta/1000;
+                	  if (zoom > 20) zoom = 20;
+                	  if (zoom < 0.01) zoom = 0.01;
+                	  $scope.zoomX = opt.e.offsetX;
+                	  $scope.zoomX = opt.e.offsetY;
+                	  $scope.zoom = zoom;
+                	  $scope.api.draw();
+                	  opt.e.preventDefault();
+                	  opt.e.stopPropagation();
+                	});
                 $scope.canvas.on('mouse:up', function(options) {
                     var obj = $scope.canvas.getActiveObject();
                     if (!obj) return;

@@ -31,7 +31,8 @@
 			"skipTargetFind": {"type": "int","values": [{"Yes": 1},{"No": 0}],"default": 0},
 			"hasRotatingPoint": {"type": "int","values": [{"Yes": 1},{"No": 0}],"default": 1},
 			"renderOnAddRemove": {"type": "int","values": [{"Yes": 1},{"No": 0}],"default": 0},
-			"skipOffscreen": {"type": "int","values": [{"Yes": 1},{"No": 0}],"default": 1}
+			"skipOffscreen": {"type": "int","values": [{"Yes": 1},{"No": 0}],"default": 1},
+			"ZoomOnMouseScroll": {"type": "int","values": [{"Yes": 1},{"No": 0}],"default": 0}
 		},
 
 		"canvasObject": 
@@ -79,7 +80,8 @@
 		"getSelectedObject": {"parameters": [{"name": "saveCB","type": "function"}]},
 		"setSelectedObject": {"parameters": [{"name": "ids","type": "object"}]},
 		"saveCanvas": {"parameters": [{"name": "saveCB","type": "function"}]},
-		"loadCanvas": {"parameters": [{"name": "data","type": "string"}]}
+		"loadCanvas": {"parameters": [{"name": "data","type": "string"}]},
+		"ZoomOnPoint": {"parameters": [{"name": "x","type": "int"},{"name": "y","type": "int"},{"name": "zoom","type": "int"}]}
 	},
 
 	"handlers": 
