@@ -321,3 +321,38 @@ function onLoad(event) {
 	//allow user to edit
 	elements.canvas.canvasOptions.selectable = editable;	
 }
+
+/**
+ * Perform the element default action.
+ *
+ * @param {JSEvent} event the event that triggered the action
+ *
+ * @private
+ *
+ * @properties={typeid:24,uuid:"6AF0BD59-C390-4F8F-9E06-93A32001A4C7"}
+ */
+function onAction$ZoomOnSelection(event) {
+	elements.canvas.getSelectedObject(cbZoom);
+}
+
+/**
+ * @param o
+ *
+ * @properties={typeid:24,uuid:"06D14A08-1038-4F40-9940-16E8D8A90142"}
+ */
+function cbZoom(o){
+	elements.canvas.ZoomOnPoint(o[0].x,o[0].y,1.5)
+}
+
+/**
+ * Perform the element default action.
+ *
+ * @param {JSEvent} event the event that triggered the action
+ *
+ * @private
+ *
+ * @properties={typeid:24,uuid:"7098A246-5056-4E41-9372-7DDCA305015A"}
+ */
+function onAction$resetZoom(event) {
+	elements.canvas.ZoomOnPoint(0,0,1)
+}

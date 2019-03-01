@@ -22,6 +22,15 @@ typeid:4,
 uuid:"05632B44-0D12-4CAA-867A-86C39CF46E9A"
 },
 {
+cssPosition:"543,-1,-1,78%,20%,28",
+onActionMethodID:"6AF0BD59-C390-4F8F-9E06-93A32001A4C7",
+onDoubleClickMethodID:"-1",
+onRightClickMethodID:"-1",
+text:"Zoom On Selection",
+typeid:7,
+uuid:"0776A644-0D83-4273-9896-6C66FD26B817"
+},
+{
 cssPosition:"422,-1,-1,78%,20%,28",
 onActionMethodID:"88EB32CA-0C89-469E-A2FE-30E18BD7A9B2",
 onDoubleClickMethodID:"-1",
@@ -66,6 +75,15 @@ typeid:7,
 uuid:"25F8EA2A-C7B3-4869-AF09-CE951B2AF130"
 },
 {
+cssPosition:"576,-1,-1,78%,20%,28",
+onActionMethodID:"7098A246-5056-4E41-9372-7DDCA305015A",
+onDoubleClickMethodID:"-1",
+onRightClickMethodID:"-1",
+text:"Reset Zoom",
+typeid:7,
+uuid:"303EC8C7-4E84-42DF-BDC3-24EE56812154"
+},
+{
 cssPosition:"192,-1,-1,78%,20%,28",
 dataProviderID:"color",
 displayType:2,
@@ -101,7 +119,7 @@ typeid:7,
 uuid:"58C8C2FE-E127-4F1D-B4C4-CE38D3596F8E"
 },
 {
-height:560,
+height:632,
 partType:5,
 typeid:19,
 uuid:"66F1115B-137F-49E2-9E83-E90683A0DF1B"
@@ -117,6 +135,7 @@ uuid:"6D7E7027-B2D9-44BE-B2E2-190C1D01EC16"
 cssPosition:"0,-1,-1,0,75%,100%",
 json:{
 canvasOptions:{
+ZoomOnMouseScroll:1,
 svyUUID:"335540C4-1CDC-449F-A34E-11B500002182"
 },
 cssPosition:{
