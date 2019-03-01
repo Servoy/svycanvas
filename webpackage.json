@@ -9,5 +9,6 @@
     "releases": [
     	{"version": "1.0.0","url": "https://github.com/Servoy/svycanvas/releases/download/v1.0.0/svycanvas.zip","servoy-version":"8.1.1"},
     	{"version": "1.0.1","url": "https://github.com/Servoy/svycanvas/releases/download/v1.0.1/svycanvas.zip","servoy-version":"8.1.1"},
+        {"version": "1.0.2","url": "https://github.com/Servoy/svycanvas/releases/download/v1.0.2/svycanvas.zip","servoy-version":"8.1.1"},
     ]
 }
