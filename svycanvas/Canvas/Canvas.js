@@ -410,6 +410,10 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                 $scope.canvas.discardActiveObject();
                 $scope.canvas.renderAll();
             }
+            $scope.api.clearCanvas = function() {
+                $scope.canvas.clear();
+                $scope.api.draw();
+            }
             $scope.api.setSelectedObject = function(ids) {
                 var o = $scope.canvas.getObjects();
                 if (ids && ids.length > 0) {

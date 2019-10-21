@@ -77,6 +77,7 @@
 		"copySelectedObject": {"parameters": []},
 		"updateObject": {"parameters": [{"name": "object","type": "object"},{"name": "selectActiveItems","type": "boolean"}]},
 		"removeObject": {"parameters": [{"name": "id","type": "string"}]},
+        "clearCanvas":{},
 		"getSelectedObject": {"parameters": [{"name": "saveCB","type": "function"}]},
 		"setSelectedObject": {"parameters": [{"name": "ids","type": "object"}]},
 		"saveCanvas": {"parameters": [{"name": "saveCB","type": "function"}]},
