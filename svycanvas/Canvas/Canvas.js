@@ -171,7 +171,9 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                             hasControls: $scope.model.canvasOptions.selectable,
                             selectable: true,
                             lockMovementX: !$scope.model.canvasOptions.selectable,
-                            lockMovementY: !$scope.model.canvasOptions.selectable
+                            lockMovementY: !$scope.model.canvasOptions.selectable,
+                            stroke: g.stroke||g.fill,
+                            strokeWidth: g.strokeWidth||0
                         });
                         break;
                     case 'Rect':
@@ -195,6 +197,9 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                             selectable: true,
                             lockMovementX: !$scope.model.canvasOptions.selectable,
                             lockMovementY: !$scope.model.canvasOptions.selectable,
+                            stroke: g.stroke||g.fill,
+                            strokeWidth: g.strokeWidth||0,
+                            radius: g.radius ||0
                         });
                         break;
                     case 'Triangle':
@@ -218,6 +223,8 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                             selectable: true,
                             lockMovementX: !$scope.model.canvasOptions.selectable,
                             lockMovementY: !$scope.model.canvasOptions.selectable,
+                            stroke: g.stroke||g.fill,
+                            strokeWidth: g.strokeWidth||0
                         });
                         break;
                     case 'Image':
@@ -239,7 +246,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                             selectable: true,
                             lockMovementX: !$scope.model.canvasOptions.selectable,
                             lockMovementY: !$scope.model.canvasOptions.selectable,
-                            mediaName: g.mediaName,
+                            mediaName: g.mediaName
                         });
                         break;
                     case 'Text':
@@ -263,6 +270,8 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                             selectable: true,
                             lockMovementX: !$scope.model.canvasOptions.selectable,
                             lockMovementY: !$scope.model.canvasOptions.selectable,
+                            stroke: g.stroke||g.fill,
+                            strokeWidth: g.strokeWidth||0
                         });
                         break;
                     default:
@@ -361,7 +370,10 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                 $scope.model.canvasObjects = JSON.parse(data);
                 $scope.svyServoyapi.apply("canvasObjects");
             }
-            $scope.api.addObject = function(objs) {
+            $scope.api.addObject = function(objs, setActive) {
+                if(setActive != false) {
+                    setActive = true;
+                }
                 var s = new fabric.ActiveSelection([], {
                     canvas: $scope.canvas
                 });
@@ -372,7 +384,9 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                 } else if (objs) {
                     s.addWithUpdate(createObject(objs.objectType, objs))
                 }
-                $scope.canvas.setActiveObject(s);
+                if(setActive) {
+                    $scope.canvas.setActiveObject(s);
+                }
                 $scope.canvas.renderAll();
             }
 

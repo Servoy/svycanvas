@@ -73,10 +73,10 @@
 
 	"api": 
 	{
-		"addObject": {"parameters": [{"name": "object","type": "object"}]},
+		"addObject": {"parameters": [{"name": "object","type": "object"}, {"name": "setActive", "type":"boolean", "default":true, "optional":true}]},
 		"copySelectedObject": {"parameters": []},
 		"updateObject": {"parameters": [{"name": "object","type": "object"},{"name": "selectActiveItems","type": "boolean"}]},
-		"removeObject": {"parameters": [{"name": "id","type": "string"}]},
+        "removeObject": {"parameters": [{"name": "id","type": "string"}]},
         "clearCanvas":{},
 		"getSelectedObject": {"parameters": [{"name": "saveCB","type": "function"}]},
 		"setSelectedObject": {"parameters": [{"name": "ids","type": "object"}]},
