@@ -1,6 +1,7 @@
 {
 	"name": "svycanvas-Canvas",
 	"displayName": "Canvas",
+	"categoryName": "Visualization",
 	"version": 1,
 	"definition": "svycanvas/Canvas/Canvas.js",
 	"libraries": 
