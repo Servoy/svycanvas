@@ -3,6 +3,7 @@
 	"displayName": "Canvas",
 	"categoryName": "Visualization",
 	"version": 1,
+	"icon": "svycanvas/Canvas/icon.png",
 	"definition": "svycanvas/Canvas/Canvas.js",
 	"libraries": 
 	[
