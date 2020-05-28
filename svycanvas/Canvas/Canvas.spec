@@ -75,7 +75,7 @@
 
 	"api": 
 	{
-		"addObject": {"parameters": [{"name": "object","type": "object"}, {"name": "setActive", "type":"boolean", "default":true, "optional":true}]},
+		"addObject": {"parameters": [{"name": "object","type": "object"}, {"name": "setActive", "type":"boolean", "optional":true}]},
 		"copySelectedObject": {"parameters": []},
 		"updateObject": {"parameters": [{"name": "object","type": "object"},{"name": "selectActiveItems","type": "boolean"}]},
         "removeObject": {"parameters": [{"name": "id","type": "string"}]},
@@ -84,6 +84,7 @@
 		"setSelectedObject": {"parameters": [{"name": "ids","type": "object"}]},
 		"saveCanvas": {"parameters": [{"name": "saveCB","type": "function"}]},
 		"loadCanvas": {"parameters": [{"name": "data","type": "string"}]},
+		"saveAsImage": {"parameters": [{"name": "imgCB","type": "function"}]},
 		"ZoomOnPoint": {"parameters": [{"name": "x","type": "int"},{"name": "y","type": "int"},{"name": "zoom","type": "int"}]}
 	},
 

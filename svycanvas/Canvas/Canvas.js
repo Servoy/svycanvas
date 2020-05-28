@@ -315,6 +315,15 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                 });
 
             }
+            $scope.api.saveAsImage = function(cb){   
+            		var canvas = document.getElementById($scope.model.svyMarkupId);
+                	var url = canvas.toDataURL({
+                		format: 'png',
+    					quality: 1.0
+                	});
+                	url.download = 'canvas.png'
+            		$window.executeInlineScript(cb.formname, cb.script, [url]);	            	            	
+            }
             $scope.api.saveCanvas = function(cb) {
                 var obj = $scope.canvas.getActiveObject();
                 //if grouped
@@ -389,7 +398,6 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                 }
                 $scope.canvas.renderAll();
             }
-
             $scope.api.removeObject = function(idx) {
                 var o = $scope.canvas.getActiveObject();
                 //check if in a group
