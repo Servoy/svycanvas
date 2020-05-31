@@ -28,7 +28,8 @@
 		"snapToGrid": {"type": "int","values": [{"Yes": 1},{"No": 0}],"default": 0},
 		"gridSize":{"type": "int","default": 10},
 		"canvasOptions": {"type": "canvasOptions"},
-		"imagesLoader": {"type": "media[]"}
+		"imagesLoader": {"type": "media[]"},
+		"styleClass": {"type":"styleclass"}
 	},
 
 	"types": 
@@ -87,19 +88,19 @@
 
 	"api": 
 	{
-		"addObject": {"parameters": [{"name": "object","type": "object"}, {"name": "setActive", "type":"boolean", "optional":true}]},
-		"copySelectedObject": {"parameters": []},
-		"updateObject": {"parameters": [{"name": "object","type": "object"},{"name": "selectActiveItems","type": "boolean"}]},
-        "removeObject": {"parameters": [{"name": "id","type": "string"}]},
+		"addObject": {"delayUntilFormLoads": true, "parameters": [{"name": "object","type": "object"}, {"name": "setActive", "type":"boolean", "optional":true}]},
+		"copySelectedObject": {"delayUntilFormLoads": true, "parameters": []},
+		"updateObject": {"delayUntilFormLoads": true, "parameters": [{"name": "object","type": "object"},{"name": "selectActiveItems","type": "boolean"}]},
+        "removeObject": {"delayUntilFormLoads": true, "parameters": [{"name": "id","type": "string"}]},
         "clearCanvas":{},
-        "startAnimate":{},
-        "stopAnimate":{},
-		"getSelectedObject": {"parameters": [{"name": "saveCB","type": "function"}]},
-		"setSelectedObject": {"parameters": [{"name": "ids","type": "object"}]},
-		"saveCanvas": {"parameters": [{"name": "saveCB","type": "function"}]},
-		"loadCanvas": {"parameters": [{"name": "data","type": "string"}]},
-		"saveAsImage": {"parameters": [{"name": "imgCB","type": "function"}]},
-		"ZoomOnPoint": {"parameters": [{"name": "x","type": "int"},{"name": "y","type": "int"},{"name": "zoom","type": "int"}]}
+        "startAnimate":{"delayUntilFormLoads": true},
+        "stopAnimate":{"delayUntilFormLoads": true},
+		"getSelectedObject": {"delayUntilFormLoads": true, "parameters": [{"name": "saveCB","type": "function"}]},
+		"setSelectedObject": {"delayUntilFormLoads": true, "parameters": [{"name": "ids","type": "object"}]},
+		"saveCanvas": {"delayUntilFormLoads": true, "parameters": [{"name": "saveCB","type": "function"}]},
+		"loadCanvas": {"delayUntilFormLoads": true, "parameters": [{"name": "data","type": "string"}]},
+		"saveAsImage": {"delayUntilFormLoads": true, "parameters": [{"name": "imgCB","type": "function"}]},
+		"ZoomOnPoint": {"delayUntilFormLoads": true, "parameters": [{"name": "x","type": "int"},{"name": "y","type": "int"},{"name": "zoom","type": "int"}]}
 	},
 
 	"handlers": 

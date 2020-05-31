@@ -32,6 +32,9 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 								var img = new Image();
 								img.src = im[i];
 								$scope.images[imgName] = img;
+								img.onload = function() {
+									$scope.api.draw();
+								}
 							}
 						}
 					}
@@ -79,7 +82,8 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 								o[i].spriteHeight = obj.spriteHeight;
 								o[i].spriteIndex = obj.spriteIndex;
 								o[i].frameTime = obj.frameTime;
-
+								o[i].rx = obj.rx;
+								o[i].ry = obj.r;
 								if (generate) {
 									var n = clone(o[i]);
 									n.id = uuidv4();
@@ -109,6 +113,8 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 											o[i].spriteHeight = oi[j].spriteHeight;
 											o[i].spriteIndex = oi[j].spriteIndex;
 											o[i].frameTime = oi[j].frameTime;
+											o[i].rx = oi[j].rx;
+											o[i].ry = oi[j].ry;
 											if (oi[j].src) {
 												o[i].mediaName = oi[j].src.split('/')[6].split('?')[0];
 												o[i].spriteName = oi[j].src.split('/')[6].split('?')[0];
@@ -159,7 +165,9 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 							d[j].spriteWidth = o.spriteWidth == null ? null : o.spriteWidth;
 							d[j].spriteHeight = o.spriteHeight == null ? null : o.spriteHeight;
 							d[j].spriteIndex = o.spriteIndex == null ? null : o.spriteIndex;
-							d[j].frameTime = o.frameTime == null ? null : o.frameTime;
+							d[j].frameTime = o.frameTime == null ? null : o.frameTime;							
+							d[j].rx = o.rx == null ? null : o.rx;
+							d[j].ry = o.ry == null ? null : o.ry;
 						}
 					}
 				}
@@ -223,7 +231,9 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 							stroke: g.stroke || g.fill,
 							strokeWidth: g.strokeWidth || 0,
 							radius: g.radius || 0,
-							custom_data: g.custom_data
+							custom_data: g.custom_data,
+							rx: g.rx,
+							ry: g.ry
 						});
 						break;
 					case 'Triangle':
@@ -249,7 +259,9 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 							lockMovementY: !$scope.model.canvasOptions.selectable,
 							stroke: g.stroke || g.fill,
 							strokeWidth: g.strokeWidth || 0,
-							custom_data: g.custom_data
+							custom_data: g.custom_data,
+							rx: g.rx,
+							ry: g.ry
 						});
 						break;
 					case 'Image':
@@ -272,7 +284,9 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 								lockMovementX: !$scope.model.canvasOptions.selectable,
 								lockMovementY: !$scope.model.canvasOptions.selectable,
 								mediaName: g.mediaName,
-								custom_data: g.custom_data
+								custom_data: g.custom_data,
+								rx: g.rx,
+								ry: g.ry
 							});
 						break;
 					case 'Sprite':
@@ -305,7 +319,9 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 								spriteHeight: g.spriteHeight,
 								spriteIndex: g.spriteIndex,
 								frameTime: g.frameTime,
-								dirty: false
+								dirty: false,
+								rx: g.rx,
+								ry: g.ry
 							})
 						break;
 					case 'Text':
@@ -331,7 +347,9 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 								lockMovementY: !$scope.model.canvasOptions.selectable,
 								stroke: g.stroke || g.fill,
 								strokeWidth: g.strokeWidth || 0,
-								custom_data: g.custom_data
+								custom_data: g.custom_data,
+								rx: g.rx,
+								ry: g.ry
 							});
 						break;
 					default:
@@ -623,8 +641,8 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					if ($scope.canvas.getObjects().length > 1000) {
 						console.log('WARNING - over 1000 objects created. Client performance will be impacted.');
 					}
-				}
 
+				}
 				$scope.api.startAnimate = function() {
 					var render = function() {
 						var applyChanges = false;
@@ -633,19 +651,19 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 							var o = $scope.model.canvasObjects;
 							$scope.canvas.getObjects().concat().forEach(function(obj) {
 								if (obj.id != 'grid' && typeof obj.id != 'undefined') {
-//									$scope.model.canvasObjects.map(function(c) {
-//										if (c.id == obj.id) {
-//											console.log(obj.custom_data.dateChanged)
-//											console.log(c.custom_data.dateChanged)
-//											if (obj.custom_data.dateChanged != c.custom_data.dateChanged) {
-//												applyChanges = true;
-//												for (var i in c) {
-//													obj[i] = c[i]
-//												}
-//											} 
-//
-//										}
-//									});
+									//									$scope.model.canvasObjects.map(function(c) {
+									//										if (c.id == obj.id) {
+									//											console.log(obj.custom_data.dateChanged)
+									//											console.log(c.custom_data.dateChanged)
+									//											if (obj.custom_data.dateChanged != c.custom_data.dateChanged) {
+									//												applyChanges = true;
+									//												for (var i in c) {
+									//													obj[i] = c[i]
+									//												}
+									//											}
+									//
+									//										}
+									//									});
 								}
 							});
 							if (applyChanges) $scope.svyServoyapi.apply("canvasObjects");
@@ -658,7 +676,6 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					if ($scope.render) return;
 					$scope.render = setInterval(render, 50)
 				}
-
 				$scope.api.stopAnimate = function() {
 					clearInterval($scope.render);
 					$scope.render = null;
