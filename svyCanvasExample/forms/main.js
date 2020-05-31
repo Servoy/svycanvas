@@ -17,7 +17,7 @@ var snap = 1;
  *
  * @properties={typeid:35,uuid:"E84A86D6-9B93-45BE-B591-07DBEF8B48F9"}
  */
-var text = 'Some words...';
+var text = 'Some words...\n of wisdom';
 
 /**
  * @type {String}
@@ -90,8 +90,23 @@ function onAction$addObject(event) {
 		id: id, angle: 0, fontSize: 8, text: text,
 		fontFamily: 'Roboto', scaleX: 1, scaleY: 1, x: 200, y: 100, width: 50,
 		height: 50, radius: 50, fill: color, opacity: 1, objectType: shape,
-		mediaName: 'flower.png'
+		mediaName: 'flower.png', spriteName: 'sprite.png', spriteWidth: 50,
+		spriteHeight: 72, spriteIndex: 0, frameTime: 100, custom_data: { }
 	});
+}
+
+/**
+ * @properties={typeid:24,uuid:"97788AA2-480F-46FA-AB03-894AFA8BC63B"}
+ */
+function startAnimation() {
+	elements.canvas.startAnimate();
+}
+
+/**
+ * @properties={typeid:24,uuid:"7FBF1F36-9C12-421E-B29B-7F05B4C107B8"}
+ */
+function stopAnimation() {
+	elements.canvas.stopAnimate();
 }
 
 /**
@@ -119,7 +134,7 @@ function onClick(id, obj) {
  * @properties={typeid:24,uuid:"C3ED9010-8F7E-403F-A490-82D96B999683"}
  */
 function onDataChange$allowEdit(oldValue, newValue, event) {
-	elements.canvas.canvasOptions.selectable = newValue;	
+	elements.canvas.canvasOptions.selectable = newValue;
 	return true
 }
 
@@ -191,7 +206,7 @@ function selectedCB(so) {
 		so[i].radius = 25;
 		so[i].fontFamily = 'Roboto';
 	}
-	elements.canvas.updateObject(so,true);
+	elements.canvas.updateObject(so, true);
 }
 
 /**
@@ -262,7 +277,7 @@ function onAction$selectItem(event) {
 	var selection = []
 	for (var i = 0; i < o.length; i++) {
 		if (o[i])
-		selection.push(o[i].id);
+			selection.push(o[i].id);
 	}
 	elements.canvas.setSelectedObject(selection);
 }
@@ -317,9 +332,9 @@ function onDataChange(oldValue, newValue, event) {
 function onLoad(event) {
 	elements.canvas.gridSize = gridSize;
 	elements.canvas.showGrid = showGrid;
-	elements.canvas.snapToGrid = snap;		
+	elements.canvas.snapToGrid = snap;
 	//allow user to edit
-	elements.canvas.canvasOptions.selectable = editable;	
+	elements.canvas.canvasOptions.selectable = editable;
 }
 
 /**
@@ -340,8 +355,8 @@ function onAction$ZoomOnSelection(event) {
  *
  * @properties={typeid:24,uuid:"06D14A08-1038-4F40-9940-16E8D8A90142"}
  */
-function cbZoom(o){
-	elements.canvas.ZoomOnPoint(o[0].x,o[0].y,1.5)
+function cbZoom(o) {
+	elements.canvas.ZoomOnPoint(o[0].x, o[0].y, 1.5)
 }
 
 /**
@@ -354,5 +369,5 @@ function cbZoom(o){
  * @properties={typeid:24,uuid:"7098A246-5056-4E41-9372-7DDCA305015A"}
  */
 function onAction$resetZoom(event) {
-	elements.canvas.ZoomOnPoint(0,0,1)
+	elements.canvas.ZoomOnPoint(0, 0, 1)
 }

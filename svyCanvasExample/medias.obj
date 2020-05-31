@@ -8,6 +8,13 @@ uuid:"EA66B280-D6A3-49D8-8634-FF98959ED820"
 },
 {
 encapsulation:0,
+mimeType:"application/xml",
+name:"kiwi.svg",
+typeid:37,
+uuid:"A0226D81-F6FF-445C-85B1-01C9E28F58E1"
+},
+{
+encapsulation:0,
 mimeType:"text/css",
 name:"servoy_theme_properties.less",
 typeid:37,
@@ -19,5 +26,12 @@ mimeType:"text/css",
 name:"simpleCanvas.less",
 typeid:37,
 uuid:"8F46CB27-BBF6-443C-BB33-173B6268A8CC"
+},
+{
+encapsulation:0,
+mimeType:"image/png",
+name:"sprite.png",
+typeid:37,
+uuid:"A59DBE77-C861-441C-BD18-C8A1D4D27975"
 }
 ]

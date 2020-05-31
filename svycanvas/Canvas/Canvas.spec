@@ -12,6 +12,12 @@
 			"version": "2.6.0",
 			"url": "svycanvas/Canvas/fabric.min.js",
 			"mimetype": "text/javascript"
+		},
+		{
+			"name": "Sprite.class.js",
+			"version": "1.0.0",
+			"url": "svycanvas/Canvas/sprite.class.js",
+			"mimetype": "text/javascript"
 		}
 	],
 
@@ -69,7 +75,13 @@
 			"fontSize": {"type": "float"},
 			"fontFamily": {"type": "string"},
 			"angle": {"type": "float"},
-			"mediaName": {"type": "string"}			
+			"mediaName": {"type": "string"},
+			"spriteName": {"type": "string"},
+			"spriteWidth": {"type": "float"},
+			"spriteHeight": {"type": "float"},
+			"spriteIndex": {"type": "float"},
+			"frameTime": {"type": "float"},
+			"custom_data" : {"type": "object"}			
 		}
 	},
 
@@ -80,6 +92,8 @@
 		"updateObject": {"parameters": [{"name": "object","type": "object"},{"name": "selectActiveItems","type": "boolean"}]},
         "removeObject": {"parameters": [{"name": "id","type": "string"}]},
         "clearCanvas":{},
+        "startAnimate":{},
+        "stopAnimate":{},
 		"getSelectedObject": {"parameters": [{"name": "saveCB","type": "function"}]},
 		"setSelectedObject": {"parameters": [{"name": "ids","type": "object"}]},
 		"saveCanvas": {"parameters": [{"name": "saveCB","type": "function"}]},

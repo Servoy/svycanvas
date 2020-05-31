@@ -1,8 +1,9 @@
 addEmptyValue:1,
-customValues:"Circle|Circle\
-Rectangle|Rect\
-Triangle|Triangle\
-Image|Image\
+customValues:"Circle|Circle\r\
+Rectangle|Rect\r\
+Triangle|Triangle\r\
+Image|Image\r\
+Sprite|Sprite\r\
 Text|Text",
 displayValueType:12,
 name:"type",

@@ -119,7 +119,7 @@ typeid:7,
 uuid:"58C8C2FE-E127-4F1D-B4C4-CE38D3596F8E"
 },
 {
-height:632,
+height:730,
 partType:5,
 typeid:19,
 uuid:"66F1115B-137F-49E2-9E83-E90683A0DF1B"
@@ -146,6 +146,12 @@ right:"-1",
 top:"0",
 width:"75%"
 },
+formIndex:0,
+imagesLoader:[
+1073741879,
+1073741906,
+1073741896
+],
 onClick:"4808D737-EAA1-471E-8D6B-D58F29A69F63"
 },
 name:"canvas",
@@ -182,6 +188,15 @@ typeid:7,
 uuid:"C38F488E-0A06-4683-AECA-EFD70227CE95"
 },
 {
+cssPosition:"646,-1,-1,78%,20%,28",
+onActionMethodID:"7FBF1F36-9C12-421E-B29B-7F05B4C107B8",
+onDoubleClickMethodID:"-1",
+onRightClickMethodID:"-1",
+text:"Stop Animation",
+typeid:7,
+uuid:"C9E74838-E31C-47AD-83B0-84F1351389D3"
+},
+{
 cssPosition:"162,-1,-1,78%,20%,28",
 text:"Color",
 transparent:true,
@@ -205,6 +220,15 @@ onRightClickMethodID:"-1",
 text:"Select All Items",
 typeid:7,
 uuid:"D3DEB3E9-DCC7-4475-AD02-08AC5DB129D4"
+},
+{
+cssPosition:"611,-1,-1,78%,20%,28",
+onActionMethodID:"97788AA2-480F-46FA-AB03-894AFA8BC63B",
+onDoubleClickMethodID:"-1",
+onRightClickMethodID:"-1",
+text:"Start Animation",
+typeid:7,
+uuid:"EDBF48E6-BAA7-4E81-BAC7-08E36BD779FE"
 }
 ],
 name:"main",
