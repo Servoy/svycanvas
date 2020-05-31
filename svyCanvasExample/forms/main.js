@@ -24,7 +24,7 @@ var text = 'Some words...';
  *
  * @properties={typeid:35,uuid:"F2577BB8-3A47-4960-B488-A04D3DC0B493"}
  */
-var fontColor = 'white';
+var fontColor = '#ffffff';
 
 /**
  * @type {Number}
@@ -52,7 +52,7 @@ var shape = 'Rect';
  *
  * @properties={typeid:35,uuid:"B22EF27B-D737-45F6-A2C6-B56E0F1F4072"}
  */
-var color = 'black';
+var color = '#000000';
 
 /**
  * @type {String}
