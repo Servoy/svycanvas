@@ -83,7 +83,8 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 								o[i].spriteIndex = obj.spriteIndex;
 								o[i].frameTime = obj.frameTime;
 								o[i].rx = obj.rx;
-								o[i].ry = obj.r;
+								o[i].ry = obj.ry;
+								o[i].textAlign = obj.textAlign
 								if (generate) {
 									var n = clone(o[i]);
 									n.id = uuidv4();
@@ -115,6 +116,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 											o[i].frameTime = oi[j].frameTime;
 											o[i].rx = oi[j].rx;
 											o[i].ry = oi[j].ry;
+											o[i].textAlign = oi[j].textAlign
 											if (oi[j].src) {
 												o[i].mediaName = oi[j].src.split('/')[6].split('?')[0];
 												o[i].spriteName = oi[j].src.split('/')[6].split('?')[0];
@@ -165,9 +167,10 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 							d[j].spriteWidth = o.spriteWidth == null ? null : o.spriteWidth;
 							d[j].spriteHeight = o.spriteHeight == null ? null : o.spriteHeight;
 							d[j].spriteIndex = o.spriteIndex == null ? null : o.spriteIndex;
-							d[j].frameTime = o.frameTime == null ? null : o.frameTime;							
+							d[j].frameTime = o.frameTime == null ? null : o.frameTime;
 							d[j].rx = o.rx == null ? null : o.rx;
 							d[j].ry = o.ry == null ? null : o.ry;
+							d[j].textAlign == null ? 'left' : o.textAlign;
 						}
 					}
 				}
@@ -181,6 +184,9 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 				function createObject(type, g) {
 					// console.log('create object : ' + type);
 					var item;
+					if (!g.textAlign) {
+						g.textAlign = 'left';
+					}
 					switch (type) {
 					case 'Circle':
 						item = new fabric.Circle({
@@ -204,7 +210,10 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 							lockMovementY: !$scope.model.canvasOptions.selectable,
 							stroke: g.stroke || g.fill,
 							strokeWidth: g.strokeWidth || 0,
-							custom_data: g.custom_data
+							custom_data: g.custom_data,
+							rx: g.rx,
+							ry: g.ry,
+							textAlign: g.textAlign
 						});
 						break;
 					case 'Rect':
@@ -233,7 +242,8 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 							radius: g.radius || 0,
 							custom_data: g.custom_data,
 							rx: g.rx,
-							ry: g.ry
+							ry: g.ry,
+							textAlign: g.textAlign
 						});
 						break;
 					case 'Triangle':
@@ -261,7 +271,8 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 							strokeWidth: g.strokeWidth || 0,
 							custom_data: g.custom_data,
 							rx: g.rx,
-							ry: g.ry
+							ry: g.ry,
+							textAlign: g.textAlign
 						});
 						break;
 					case 'Image':
@@ -286,7 +297,8 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 								mediaName: g.mediaName,
 								custom_data: g.custom_data,
 								rx: g.rx,
-								ry: g.ry
+								ry: g.ry,
+								textAlign: g.textAlign
 							});
 						break;
 					case 'Sprite':
@@ -321,7 +333,8 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 								frameTime: g.frameTime,
 								dirty: false,
 								rx: g.rx,
-								ry: g.ry
+								ry: g.ry,
+								textAlign: g.textAlign
 							})
 						break;
 					case 'Text':
@@ -349,7 +362,8 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 								strokeWidth: g.strokeWidth || 0,
 								custom_data: g.custom_data,
 								rx: g.rx,
-								ry: g.ry
+								ry: g.ry,
+								textAlign: g.textAlign
 							});
 						break;
 					default:
@@ -871,7 +885,10 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 													spriteHeight: o[i].spriteHeight,
 													spriteIndex: o[i].spriteIndex,
 													frameTime: o[i].frameTime,
-													objectType: objectType
+													objectType: objectType,
+													rx: o[i].rx,
+													ry: o[i].ry,
+													textAlign: o[i].textAlign == null ? 'left' : o[i].textAlign
 												}
 												if (!$scope.model.canvasObjects) {
 													$scope.model.canvasObjects = [];
