@@ -17,7 +17,7 @@ var snap = 1;
  *
  * @properties={typeid:35,uuid:"E84A86D6-9B93-45BE-B591-07DBEF8B48F9"}
  */
-var text = 'Some words...\n of wisdom';
+var text = 'Some words...of wisdom';
 
 /**
  * @type {String}
@@ -72,6 +72,7 @@ var savedData = '';
  */
 function onAction$clearCanvas(event) {
 	elements.canvas.canvasObjects = null;
+	elements.canvas.clearCanvas();
 }
 
 /**
@@ -81,18 +82,43 @@ function onAction$clearCanvas(event) {
  *
  * @private
  *
- * @properties={typeid:24,uuid:"A78FA911-2544-45D9-BBC3-A1C6138F46EE"}
+ * @properties={typeid:24,uuid:"743F95D5-A512-45E4-8141-795E866724F0"}
  */
 function onAction$addObject(event) {
 	var id = application.getUUID().toString()
 	application.output('generated object with ID' + id);
-	elements.canvas.addObject({
-		id: id, angle: 0, fontSize: 8, text: text,
-		fontFamily: 'Roboto', scaleX: 1, scaleY: 1, x: 200, y: 100, width: 50,
-		height: 50, radius: 50, fill: color, opacity: 1, objectType: shape,
-		mediaName: 'flower.png', spriteName: 'sprite.png', spriteWidth: 50,
-		spriteHeight: 72, spriteIndex: 0, frameTime: 100, custom_data: { }
-	});
+	var obj = {
+		id: id, objectType: shape,
+		scaleX: 1, scaleY: 1,
+		left: 200, top: 100
+	}
+	if (shape == 'Image') {
+		obj.mediaName = 'flower.png'
+		obj.width = 0;
+		obj.height = 0;
+		obj.left = 0;
+		obj.top = 0;
+	} else if (shape == 'Sprite') {
+		obj.spriteName = 'sprite.png'
+		obj.width = 0;
+		obj.height = 0;
+		obj.spriteWidth = 50;
+		obj.spriteHeight = 72;
+		obj.spriteIndex = 0;
+		obj.frameTime = 100;
+	} else {
+		obj.width = 50;
+		obj.height = 50;
+		obj.angle = 0
+		obj.fontSize = 40;
+		obj.text = text;
+		obj.textAlign = 'center';
+		obj.fontFamily = 'Roboto';
+		obj.radius = 50;
+		obj.fill = color;
+		obj.opacity = 1;
+	}
+	elements.canvas.addObject(obj);
 }
 
 /**
@@ -293,11 +319,11 @@ function onAction$selectItem(event) {
  */
 function onAction$createRectTextBox(event) {
 	var objects = [{
-			id: application.getUUID().toString(), angle: 0, fontSize: 8, text: text, fontFamily: 'Roboto', scaleX: 1, scaleY: 1,
-			x: 200, y: 100, width: 300, height: 200, radius: 50, fill: color, opacity: 1, objectType: 'Rect'
+			id: application.getUUID().toString(), angle: 0, fontSize: 20, text: text, fontFamily: 'Roboto', scaleX: 1, scaleY: 1,
+			left: 200, top: 100, width: 300, height: 200, radius: 50, fill: color, opacity: 1, objectType: 'Rect'
 		}, {
-			id: application.getUUID().toString(), angle: 0, fontSize: 8, text: text, fontFamily: 'Roboto', scaleX: 1, scaleY: 1,
-			x: 200, y: 100, width: 50, height: 50, radius: 50, fill: 'white', opacity: 1, objectType: 'Text'
+			id: application.getUUID().toString(), angle: 0, fontSize: 30, text: text, fontFamily: 'Roboto', scaleX: 1, scaleY: 1,
+			left: 250, top: 150, width: 200, height: 50, radius: 50, fill: 'white', opacity: 1, objectType: 'Text', textAlign: 'center'
 		}]
 	elements.canvas.addObject(objects);
 }

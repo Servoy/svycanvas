@@ -8,6 +8,33 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 				svyServoyapi: "=svyServoyapi"
 			},
 			controller: function($scope, $element, $attrs, $window) {
+				var defObj = {
+					id: '',
+					angle: '',
+					fontSize: 8,
+					text: '',
+					fontFamily: 'Times New Roman',
+					scaleX: 1,
+					scaleY: 1,
+					left: 0,
+					top: 0,
+					width: 50,
+					height: 50,
+					radius: 0,
+					fill: '#000000',
+					opacity: 1,
+					mediaName: '',
+					spriteName: '',
+					spriteWidth: 50,
+					spriteHeight: 72,
+					spriteIndex: 0,
+					frameTime: 100,
+					objectType: '',
+					rx: 0,
+					ry: 0,
+					textAlign: 'left'
+				}
+
 				$scope.canvas = null;
 				$scope.objects = { };
 				$scope.images = { };
@@ -69,22 +96,12 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 						for (var i in o) {
 							if (!o[i]) continue;
 							if (o[i].id == obj.id) {
-								o[i].x = obj.left;
-								o[i].y = obj.top;
-								o[i].scaleX = obj.scaleX;
-								o[i].scaleY = obj.scaleY;
-								o[i].angle = obj.angle;
-								o[i].text = obj.text;
-								o[i].fontFamily = obj.fontFamily;
-								o[i].mediaName = obj.mediaName;
-								o[i].spriteName = obj.spriteName;
-								o[i].spriteWidth = obj.spriteWidth;
-								o[i].spriteHeight = obj.spriteHeight;
-								o[i].spriteIndex = obj.spriteIndex;
-								o[i].frameTime = obj.frameTime;
-								o[i].rx = obj.rx;
-								o[i].ry = obj.ry;
-								o[i].textAlign = obj.textAlign
+
+								for (var j in defObj) {
+									if (j != 'id')
+										o[i][j] = obj[j]
+								}
+
 								if (generate) {
 									var n = clone(o[i]);
 									n.id = uuidv4();
@@ -103,20 +120,11 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 									for (var i in o) {
 										if (!o[i]) continue;
 										if (o[i].id == oi[j].id) {
-											o[i].x = oi[j].left;
-											o[i].y = oi[j].top;
-											o[i].scaleX = oi[j].scaleX;
-											o[i].scaleY = oi[j].scaleY;
-											o[i].angle = oi[j].angle;
-											o[i].text = oi[j].text;
-											o[i].fontFamily = oi[j].fontFamily;
-											o[i].spriteWidth = oi[j].spriteWidth;
-											o[i].spriteHeight = oi[j].spriteHeight;
-											o[i].spriteIndex = oi[j].spriteIndex;
-											o[i].frameTime = oi[j].frameTime;
-											o[i].rx = oi[j].rx;
-											o[i].ry = oi[j].ry;
-											o[i].textAlign = oi[j].textAlign
+											for (var k in defObj) {
+												if (k != 'id')
+													o[i][k] = oi[j][k]
+											}
+
 											if (oi[j].src) {
 												o[i].mediaName = oi[j].src.split('/')[6].split('?')[0];
 												o[i].spriteName = oi[j].src.split('/')[6].split('?')[0];
@@ -143,34 +151,11 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					var objectType = o.type.charAt(0).toUpperCase() + o.type.slice(1);
 					for (var j in d) {
 						if (d[j] && d[j].id == o.id) {
-							d[j].angle = o.angle == null ? 0 : o.angle;
-							d[j].fontSize = o.fontSize == null ? 8 : o.fontSize;
-							d[j].text = o.text == null ? 'text' : o.text;
-							d[j].fontFamily = o.fontFamily == null ? 'Times New Roman' : o.fontFamily;
-							d[j].scaleX = o.scaleX == null ? 1 : o.scaleX;
-							d[j].scaleY = o.scaleY == null ? 1 : o.scaleY;
-							d[j].x = o.left;
-							d[j].y = o.top;
-							d[j].rx = o.rx;
-							d[j].ry = o.ry;
-							d[j].stroke = o.stroke;
-							d[j].strokeWidth = o.strokeWidth;
-							d[j].width = o.width == null ? 50 : o.width;
-							d[j].height = o.height == null ? 50 : o.height;
-							d[j].radius = o.radius == null ? 0 : o.radius;
-							d[j].fill = o.fill == null ? 'black' : o.fill;
-							d[j].opacity = o.opacity == null ? 1 : o.opacity;
-							d[j].objectType = objectType;
-							d[j].mediaName = o.mediaName == null ? '' : o.mediaName;
-							d[j].spriteName = o.spriteName == null ? null : o.spriteName;
-							d[j].spriteWidth = o.spriteWidth == null ? null : o.spriteWidth;
-							d[j].spriteWidth = o.spriteWidth == null ? null : o.spriteWidth;
-							d[j].spriteHeight = o.spriteHeight == null ? null : o.spriteHeight;
-							d[j].spriteIndex = o.spriteIndex == null ? null : o.spriteIndex;
-							d[j].frameTime = o.frameTime == null ? null : o.frameTime;
-							d[j].rx = o.rx == null ? null : o.rx;
-							d[j].ry = o.ry == null ? null : o.ry;
-							d[j].textAlign == null ? 'left' : o.textAlign;
+
+							for (var k in defObj) {
+								if (k != 'id')
+									d[j][k] = o[k] == null ? defObj[k] : o[k]
+							}
 						}
 					}
 				}
@@ -187,184 +172,37 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					if (!g.textAlign) {
 						g.textAlign = 'left';
 					}
+					var options = {
+						cornerColor: !$scope.model.canvasOptions.selectable ? 'rgba(102,153,255,0.0)' : 'rgba(102,153,255,0.5)',
+						borderColor: !$scope.model.canvasOptions.selectable ? 'rgba(102,153,255,0.0)' : 'rgba(102,153,255,0.5)',
+						hasControls: $scope.model.canvasOptions.selectable,
+						selectable: true,
+						lockMovementX: !$scope.model.canvasOptions.selectable,
+						lockMovementY: !$scope.model.canvasOptions.selectable
+					}
+					for (var k in defObj) {
+						if (typeof g[k] != 'undefined')
+							options[k] = g[k]
+					}
+					console.log(options);
 					switch (type) {
 					case 'Circle':
-						item = new fabric.Circle({
-							id: g.id,
-							fill: g.fill,
-							top: g.y,
-							left: g.x,
-							opacity: g.opacity,
-							radius: g.radius,
-							originX: 'left',
-							originY: 'top',
-							centeredRotation: true,
-							scaleX: g.scaleX,
-							scaleY: g.scaleY,
-							angle: g.angle,
-							cornerColor: !$scope.model.canvasOptions.selectable ? 'rgba(102,153,255,0.0)' : 'rgba(102,153,255,0.5)',
-							borderColor: !$scope.model.canvasOptions.selectable ? 'rgba(102,153,255,0.0)' : 'rgba(102,153,255,0.5)',
-							hasControls: $scope.model.canvasOptions.selectable,
-							selectable: true,
-							lockMovementX: !$scope.model.canvasOptions.selectable,
-							lockMovementY: !$scope.model.canvasOptions.selectable,
-							stroke: g.stroke || g.fill,
-							strokeWidth: g.strokeWidth || 0,
-							custom_data: g.custom_data,
-							rx: g.rx,
-							ry: g.ry,
-							textAlign: g.textAlign
-						});
+						item = new fabric.Circle(options);
 						break;
 					case 'Rect':
-						item = new fabric.Rect({
-							id: g.id,
-							fill: g.fill,
-							top: g.y,
-							left: g.x,
-							width: g.width,
-							height: g.height,
-							opacity: g.opacity,
-							originX: 'left',
-							originY: 'top',
-							centeredRotation: true,
-							scaleX: g.scaleX,
-							scaleY: g.scaleY,
-							angle: g.angle,
-							cornerColor: !$scope.model.canvasOptions.selectable ? 'rgba(102,153,255,0.0)' : 'rgba(102,153,255,0.5)',
-							borderColor: !$scope.model.canvasOptions.selectable ? 'rgba(102,153,255,0.0)' : 'rgba(102,153,255,0.5)',
-							hasControls: $scope.model.canvasOptions.selectable,
-							selectable: true,
-							lockMovementX: !$scope.model.canvasOptions.selectable,
-							lockMovementY: !$scope.model.canvasOptions.selectable,
-							stroke: g.stroke || g.fill,
-							strokeWidth: g.strokeWidth || 0,
-							radius: g.radius || 0,
-							custom_data: g.custom_data,
-							rx: g.rx,
-							ry: g.ry,
-							textAlign: g.textAlign
-						});
+						item = new fabric.Rect(options);
 						break;
 					case 'Triangle':
-						item = new fabric.Triangle({
-							id: g.id,
-							fill: g.fill,
-							top: g.y,
-							left: g.x,
-							width: g.width,
-							height: g.height,
-							opacity: g.opacity,
-							originX: 'left',
-							originY: 'top',
-							centeredRotation: true,
-							scaleX: g.scaleX,
-							scaleY: g.scaleY,
-							angle: g.angle,
-							cornerColor: !$scope.model.canvasOptions.selectable ? 'rgba(102,153,255,0.0)' : 'rgba(102,153,255,0.5)',
-							borderColor: !$scope.model.canvasOptions.selectable ? 'rgba(102,153,255,0.0)' : 'rgba(102,153,255,0.5)',
-							hasControls: $scope.model.canvasOptions.selectable,
-							selectable: true,
-							lockMovementX: !$scope.model.canvasOptions.selectable,
-							lockMovementY: !$scope.model.canvasOptions.selectable,
-							stroke: g.stroke || g.fill,
-							strokeWidth: g.strokeWidth || 0,
-							custom_data: g.custom_data,
-							rx: g.rx,
-							ry: g.ry,
-							textAlign: g.textAlign
-						});
+						item = new fabric.Triangle(options);
 						break;
 					case 'Image':
-						item = new fabric.Image($scope.images[g.mediaName], {
-								id: g.id,
-								fill: g.fill,
-								top: g.y,
-								left: g.x,
-								opacity: g.opacity,
-								originX: 'left',
-								originY: 'top',
-								centeredRotation: true,
-								scaleX: g.scaleX,
-								scaleY: g.scaleY,
-								angle: g.angle,
-								cornerColor: !$scope.model.canvasOptions.selectable ? 'rgba(102,153,255,0.0)' : 'rgba(102,153,255,0.5)',
-								borderColor: !$scope.model.canvasOptions.selectable ? 'rgba(102,153,255,0.0)' : 'rgba(102,153,255,0.5)',
-								hasControls: $scope.model.canvasOptions.selectable,
-								selectable: true,
-								lockMovementX: !$scope.model.canvasOptions.selectable,
-								lockMovementY: !$scope.model.canvasOptions.selectable,
-								mediaName: g.mediaName,
-								custom_data: g.custom_data,
-								rx: g.rx,
-								ry: g.ry,
-								textAlign: g.textAlign
-							});
+						item = new fabric.Image($scope.images[g.mediaName], options);
 						break;
 					case 'Sprite':
-						console.log(g)
-						item = new fabric.Sprite($scope.images[g.spriteName], {
-								fontFamily: g.fontFamily,
-								id: g.id,
-								fill: g.fill,
-								top: g.y,
-								left: g.x,
-								opacity: g.opacity,
-								radius: g.radius,
-								originX: 'left',
-								originY: 'top',
-								centeredRotation: true,
-								scaleX: g.scaleX,
-								scaleY: g.scaleY,
-								angle: g.angle,
-								cornerColor: !$scope.model.canvasOptions.selectable ? 'rgba(102,153,255,0.0)' : 'rgba(102,153,255,0.5)',
-								borderColor: !$scope.model.canvasOptions.selectable ? 'rgba(102,153,255,0.0)' : 'rgba(102,153,255,0.5)',
-								hasControls: $scope.model.canvasOptions.selectable,
-								selectable: true,
-								lockMovementX: !$scope.model.canvasOptions.selectable,
-								lockMovementY: !$scope.model.canvasOptions.selectable,
-								stroke: g.stroke || g.fill,
-								strokeWidth: g.strokeWidth || 0,
-								custom_data: g.custom_data,
-								spriteName: g.spriteName,
-								spriteWidth: g.spriteWidth,
-								spriteHeight: g.spriteHeight,
-								spriteIndex: g.spriteIndex,
-								frameTime: g.frameTime,
-								dirty: false,
-								rx: g.rx,
-								ry: g.ry,
-								textAlign: g.textAlign
-							})
+						item = new fabric.Sprite($scope.images[g.spriteName], options)
 						break;
 					case 'Text':
-						item = new fabric.IText(g.text, {
-								fontFamily: g.fontFamily,
-								id: g.id,
-								fill: g.fill,
-								top: g.y,
-								left: g.x,
-								opacity: g.opacity,
-								radius: g.radius,
-								originX: 'left',
-								originY: 'top',
-								centeredRotation: true,
-								scaleX: g.scaleX,
-								scaleY: g.scaleY,
-								angle: g.angle,
-								cornerColor: !$scope.model.canvasOptions.selectable ? 'rgba(102,153,255,0.0)' : 'rgba(102,153,255,0.5)',
-								borderColor: !$scope.model.canvasOptions.selectable ? 'rgba(102,153,255,0.0)' : 'rgba(102,153,255,0.5)',
-								hasControls: $scope.model.canvasOptions.selectable,
-								selectable: true,
-								lockMovementX: !$scope.model.canvasOptions.selectable,
-								lockMovementY: !$scope.model.canvasOptions.selectable,
-								stroke: g.stroke || g.fill,
-								strokeWidth: g.strokeWidth || 0,
-								custom_data: g.custom_data,
-								rx: g.rx,
-								ry: g.ry,
-								textAlign: g.textAlign
-							});
+						item = new fabric.Textbox(g.text, options);
 						break;
 					default:
 						break;
@@ -833,8 +671,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					$scope.canvas.on('mouse:up', function(options) {
 							var obj = $scope.canvas.getActiveObject();
 							if (!obj) return;
-							// console.log(obj.id + ' :: ' + obj.left + ',' + obj.top);
-							// console.log(obj);
+							//							 console.log(obj);
 							obj.set({
 								opacity: 1
 							});
@@ -854,51 +691,38 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 										for (var i = 0; i < o.length; i++) {
 											if (typeof o[i].id == 'undefined') continue;
 											if (o[i].id == 'grid') continue;
+
 											if (!$scope.objects[o[i].id]) {
-												if (o[i].type === "i-text") {
+												if (o[i].type === "textbox") {
 													o[i].type = "Text";
 												}
+
 												var objectType = o[i].type.charAt(0).toUpperCase() + o[i].type.slice(1);
 												var mediaName = o[i].mediaName;
-												// console.log(o[i])
+
 												if (o[i].src) {
 													mediaName = o[i].src.split('/')[6].split('?')[0];
 												}
-												var oo = {
-													id: o[i].id,
-													angle: o[i].angle == null ? 0 : o[i].angle,
-													fontSize: o[i].fontSize == null ? 8 : o[i].fontSize,
-													text: o[i].text == null ? 'text' : o[i].text,
-													fontFamily: o[i].fontFamily == null ? 'Times New Roman' : o[i].fontFamily,
-													scaleX: o[i].scaleX == null ? 1 : o[i].scaleX,
-													scaleY: o[i].scaleY == null ? 1 : o[i].scaleY,
-													x: o[i].left,
-													y: o[i].top,
-													width: o[i].width == null ? 50 : o[i].width,
-													height: o[i].height == null ? 50 : o[i].height,
-													radius: o[i].radius == null ? 0 : o[i].radius,
-													fill: o[i].fill == null ? 'black' : o[i].fill,
-													opacity: o[i].opacity == null ? 1 : o[i].opacity,
-													mediaName: mediaName,
-													spriteName: o[i].spriteName,
-													spriteWidth: o[i].spriteWidth,
-													spriteHeight: o[i].spriteHeight,
-													spriteIndex: o[i].spriteIndex,
-													frameTime: o[i].frameTime,
-													objectType: objectType,
-													rx: o[i].rx,
-													ry: o[i].ry,
-													textAlign: o[i].textAlign == null ? 'left' : o[i].textAlign
+
+												var oo = { }
+
+												for (var k in defObj) {
+													oo[k] = o[i][k] == null ? defObj[k] : o[i][k];
 												}
+
+												oo['objectType'] = objectType;
+												oo['mediaName'] = mediaName;
+
 												if (!$scope.model.canvasObjects) {
 													$scope.model.canvasObjects = [];
 												}
+												//												console.log(oo);
 												$scope.model.canvasObjects.push(oo);
 												$scope.objects[o[i].id] = oo;
 											}
 										}
 										if (o.length > 0) {
-											// console.log($scope.model.canvasObjects);
+											//											 console.log($scope.model.canvasObjects);
 											$scope.svyServoyapi.apply("canvasObjects");
 										}
 									}
@@ -921,14 +745,6 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 									e.target.hoverCursor = 'pointer';
 							}
 
-						});
-
-					$scope.canvas.on('text:changed', function(opt) {
-							var t1 = opt.target;
-							if (t1.width > t1.fixedWidth) {
-								t1.fontSize *= t1.fixedWidth / (t1.width + 1);
-								t1.width = t1.fixedWidth;
-							}
 						});
 
 				}

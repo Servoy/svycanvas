@@ -4,7 +4,7 @@ encapsulation:60,
 items:[
 {
 cssPosition:"307,-1,-1,78%,20%,28",
-onActionMethodID:"A78FA911-2544-45D9-BBC3-A1C6138F46EE",
+onActionMethodID:"743F95D5-A512-45E4-8141-795E866724F0",
 onDoubleClickMethodID:"-1",
 onRightClickMethodID:"-1",
 text:"Add Item",
@@ -148,9 +148,9 @@ width:"75%"
 },
 formIndex:0,
 imagesLoader:[
-1073741879,
-1073741906,
-1073741896
+1073741883,
+1073741884,
+1073741887
 ],
 onClick:"4808D737-EAA1-471E-8D6B-D58F29A69F63"
 },
