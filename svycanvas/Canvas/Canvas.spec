@@ -9,7 +9,7 @@
 	[
 		{
 			"name": "Fabric.js",
-			"version": "2.6.0",
+			"version": "3.6.3",
 			"url": "svycanvas/Canvas/fabric.min.js",
 			"mimetype": "text/javascript"
 		},
@@ -107,6 +107,7 @@
 	"handlers": 
 	{
 		"onClick": {"parameters": []},
+		"onLongPress": {"parameters": []},
 		"onModified": {"parameters": []}
 	}
 }

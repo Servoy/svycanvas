@@ -184,7 +184,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 						if (typeof g[k] != 'undefined')
 							options[k] = g[k]
 					}
-					console.log(options);
+					
 					switch (type) {
 					case 'Circle':
 						item = new fabric.Circle(options);
@@ -682,6 +682,23 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 								$scope.canvas.renderAll();
 							}
 						});
+					
+					$scope.canvas.on('touch:longpress', function(options) {
+						var obj = $scope.canvas.getActiveObject();
+						if (!obj) return;
+						//							 console.log(obj);
+						obj.set({
+							opacity: 1
+						});
+						if ($scope.handlers.onLongPress && !$scope.model.canvasOptions.selectable && (typeof obj.id != 'undefined')) {
+							$scope.handlers.onLongPress(obj.id, obj);
+							//when clicking don't allow overlapping
+							$scope.canvas.discardActiveObject();
+							$scope.canvas.renderAll();
+						}
+					});
+					
+					
 					$scope.canvas.on('selection:cleared', function() {
 							setTimeout(function() {
 									if (!$scope.canvas.getActiveObject()) {
