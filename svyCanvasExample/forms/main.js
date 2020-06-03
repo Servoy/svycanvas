@@ -397,3 +397,14 @@ function cbZoom(o) {
 function onAction$resetZoom(event) {
 	elements.canvas.ZoomOnPoint(0, 0, 1)
 }
+
+/**
+
+ * @private
+ *
+ * @properties={typeid:24,uuid:"BCEEEAB9-D16F-4E9F-83FA-F26487FADD8C"}
+ */
+function onLongPress(id, obj) {
+	application.output('long pressing on ' + id);
+
+}

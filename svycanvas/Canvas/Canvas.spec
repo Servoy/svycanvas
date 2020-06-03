@@ -41,7 +41,8 @@
 			"hasRotatingPoint": {"type": "int","values": [{"Yes": 1},{"No": 0}],"default": 1},
 			"renderOnAddRemove": {"type": "int","values": [{"Yes": 1},{"No": 0}],"default": 0},
 			"skipOffscreen": {"type": "int","values": [{"Yes": 1},{"No": 0}],"default": 1},
-			"ZoomOnMouseScroll": {"type": "int","values": [{"Yes": 1},{"No": 0}],"default": 0}
+			"ZoomOnMouseScroll": {"type": "int","values": [{"Yes": 1},{"No": 0}],"default": 0},
+			"animationSpeed": {"type": "float","default": 50}
 		},
 
 		"canvasObject": 

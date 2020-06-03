@@ -136,6 +136,7 @@ cssPosition:"0,-1,-1,0,75%,100%",
 json:{
 canvasOptions:{
 ZoomOnMouseScroll:1,
+animationSpeed:100,
 svyUUID:"335540C4-1CDC-449F-A34E-11B500002182"
 },
 cssPosition:{
@@ -148,11 +149,12 @@ width:"75%"
 },
 formIndex:0,
 imagesLoader:[
-1073741883,
+1073741888,
 1073741884,
 1073741887
 ],
-onClick:"4808D737-EAA1-471E-8D6B-D58F29A69F63"
+onClick:"4808D737-EAA1-471E-8D6B-D58F29A69F63",
+onLongPress:"BCEEEAB9-D16F-4E9F-83FA-F26487FADD8C"
 },
 name:"canvas",
 typeName:"svycanvas-Canvas",

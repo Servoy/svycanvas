@@ -92,7 +92,6 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 							}
 						});
 					} else {
-						var tmp = []
 						for (var i in o) {
 							if (!o[i]) continue;
 							if (o[i].id == obj.id) {
@@ -101,7 +100,6 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 									if (j != 'id')
 										o[i][j] = obj[j]
 								}
-
 								if (generate) {
 									var n = clone(o[i]);
 									n.id = uuidv4();
@@ -184,7 +182,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 						if (typeof g[k] != 'undefined')
 							options[k] = g[k]
 					}
-					
+
 					switch (type) {
 					case 'Circle':
 						item = new fabric.Circle(options);
@@ -216,23 +214,13 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 
 					return item;
 				}
-				$scope.api.copySelectedObject = function(obj, grouping) {
+				$scope.api.copySelectedObject = function() {
 					var tbc = $scope.canvas.getActiveObject()
 					$scope.canvas.getActiveObject().clone(function(cloned) {
-						cloned.spriteName = tbc.spriteName
-						cloned.spriteWidth = tbc.spriteWidth
-						cloned.spriteHeight = tbc.spriteHeight
-						cloned.spriteIndex = tbc.spriteIndex
-						cloned.frameTime = tbc.frameTime
 						_clipboard = cloned;
 						// clone again, so you can do multiple copies.
 						_clipboard.clone(function(clonedObj) {
 							$scope.canvas.discardActiveObject();
-							clonedObj.spriteName = tbc.spriteName
-							clonedObj.spriteWidth = tbc.spriteWidth
-							clonedObj.spriteHeight = tbc.spriteHeight
-							clonedObj.spriteIndex = tbc.spriteIndex
-							clonedObj.frameTime = tbc.frameTime
 							clonedObj.set({
 								left: clonedObj.left + 10,
 								top: clonedObj.top + 10,
@@ -526,7 +514,9 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					}
 
 					if ($scope.render) return;
-					$scope.render = setInterval(render, 50)
+					if ($scope.model.canvasOptions.animationSpeed == null || ($scope.model.canvasOptions.animationSpeed < 50))
+						$scope.model.canvasOptions.animationSpeed = 50;
+					$scope.render = setInterval(render, $scope.model.canvasOptions.animationSpeed)
 				}
 				$scope.api.stopAnimate = function() {
 					clearInterval($scope.render);
@@ -682,29 +672,29 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 								$scope.canvas.renderAll();
 							}
 						});
-					
+
 					$scope.canvas.on('touch:longpress', function(options) {
-						var obj = $scope.canvas.getActiveObject();
-						if (!obj) return;
-						//							 console.log(obj);
-						obj.set({
-							opacity: 1
+							var obj = $scope.canvas.getActiveObject();
+							if (!obj) return;
+							//							 console.log(obj);
+							obj.set({
+								opacity: 1
+							});
+							if ($scope.handlers.onLongPress && !$scope.model.canvasOptions.selectable && (typeof obj.id != 'undefined')) {
+								$scope.handlers.onLongPress(obj.id, obj);
+								//when clicking don't allow overlapping
+								$scope.canvas.discardActiveObject();
+								$scope.canvas.renderAll();
+							}
 						});
-						if ($scope.handlers.onLongPress && !$scope.model.canvasOptions.selectable && (typeof obj.id != 'undefined')) {
-							$scope.handlers.onLongPress(obj.id, obj);
-							//when clicking don't allow overlapping
-							$scope.canvas.discardActiveObject();
-							$scope.canvas.renderAll();
-						}
-					});
-					
-					
+
 					$scope.canvas.on('selection:cleared', function() {
 							setTimeout(function() {
 									if (!$scope.canvas.getActiveObject()) {
 										// console.log('no selection');
 										//save canvas to datamodel;
 										var o = $scope.canvas.getObjects();
+
 										for (var i = 0; i < o.length; i++) {
 											if (typeof o[i].id == 'undefined') continue;
 											if (o[i].id == 'grid') continue;
@@ -716,24 +706,24 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 
 												var objectType = o[i].type.charAt(0).toUpperCase() + o[i].type.slice(1);
 												var mediaName = o[i].mediaName;
+												var spriteName = o[i].spriteName;
 
 												if (o[i].src) {
 													mediaName = o[i].src.split('/')[6].split('?')[0];
+													spriteName = o[i].src.split('/')[6].split('?')[0];
 												}
 
 												var oo = { }
-
 												for (var k in defObj) {
 													oo[k] = o[i][k] == null ? defObj[k] : o[i][k];
 												}
 
 												oo['objectType'] = objectType;
 												oo['mediaName'] = mediaName;
-
+												oo['spriteName'] = spriteName;
 												if (!$scope.model.canvasObjects) {
 													$scope.model.canvasObjects = [];
 												}
-												//												console.log(oo);
 												$scope.model.canvasObjects.push(oo);
 												$scope.objects[o[i].id] = oo;
 											}
