@@ -90,11 +90,11 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					//					if this is a grouping
 					if (obj._objects) {
 						obj.clone(function(clone) {
-//							console.log(obj._objects[0].left)
-//							console.log(clone._objects[0].left)
-//							if (generate) {
-//								clone.set({ left: ($scope.canvas.width / 2), top: ($scope.canvas.height / 2) });
-//							}
+							//							console.log(obj._objects[0].left)
+							//							console.log(clone._objects[0].left)
+							//							if (generate) {
+							//								clone.set({ left: ($scope.canvas.width / 2), top: ($scope.canvas.height / 2) });
+							//							}
 							clone.destroy();
 							var ob = clone._objects;
 							for (var i = 0; i < ob.length; i++) {
@@ -177,7 +177,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 				}
 
 				function createObject(type, g) {
-//					 console.log('create object : ' + type);
+					//					 console.log('create object : ' + type);
 					var item;
 					if (!g.textAlign) {
 						g.textAlign = 'left';
@@ -286,14 +286,14 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					if (obj && obj._objects) {
 						for (var i in obj._objects) {
 							if (!$scope.objects[obj._objects[i].id]) {
-//								$scope.canvas.discardActiveObject();
+								//								$scope.canvas.discardActiveObject();
 								return setTimeout(function() {
 										$scope.api.saveCanvas(cb);
 									}, 250);
 							}
 						}
 					} else if (obj && !$scope.objects[obj.id]) {
-//						$scope.canvas.discardActiveObject();
+						//						$scope.canvas.discardActiveObject();
 						return setTimeout(function() {
 								$scope.api.saveCanvas(cb);
 							}, 250);
@@ -349,11 +349,13 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					} else if (objs) {
 						s.addWithUpdate(createObject(objs.objectType, objs))
 					}
-					if (setActive) {
-						$scope.canvas.setActiveObject(s);
+
+					$scope.canvas.setActiveObject(s);
+					if (!setActive) {
+						$scope.canvas.discardActiveObject();
 					}
 					$scope.canvas.renderAll();
-										
+
 					if ($scope.handlers.onModified) {
 						$scope.handlers.onModified();
 					}
@@ -516,13 +518,13 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					}
 
 				}
-				
-				$scope.api.rotate = function(angle){					
-					      var group = new fabric.Group($scope.canvas.getObjects())
-					      group.rotate(angle)
-					      $scope.canvas.centerObject(group)
-					      group.setCoords()
-					      $scope.canvas.renderAll()					    
+
+				$scope.api.rotate = function(angle) {
+					var group = new fabric.Group($scope.canvas.getObjects())
+					group.rotate(angle)
+					$scope.canvas.centerObject(group)
+					group.setCoords()
+					$scope.canvas.renderAll()
 				}
 
 				$scope.api.startAnimate = function() {
