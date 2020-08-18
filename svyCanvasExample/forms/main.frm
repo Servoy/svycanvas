@@ -162,6 +162,15 @@ typeid:47,
 uuid:"727B268F-984A-4956-A462-9FAA2A0BFD98"
 },
 {
+cssPosition:"681,-1,-1,78%,20%,28",
+onActionMethodID:"B2BABCF1-5291-484B-A7B8-D3C64C62C2D3",
+onDoubleClickMethodID:"-1",
+onRightClickMethodID:"-1",
+text:"Rotate Canvas",
+typeid:7,
+uuid:"73E841D9-1773-4D64-92ED-5FC3C2C590BC"
+},
+{
 cssPosition:"278,-1,-1,78%,20%,28",
 onActionMethodID:"798E08C8-3C4C-4E02-AE24-70F41CE0B5BB",
 onDoubleClickMethodID:"-1",

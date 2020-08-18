@@ -62,6 +62,13 @@ var color = '#000000';
 var savedData = '';
 
 /**
+ * @type {Number}
+ *
+ * @properties={typeid:35,uuid:"48EC07EE-AFE6-4E3E-868E-479E64F6FA12",variableType:4}
+ */
+var currentRotation = 0;
+
+/**
  * Perform the element default action.
  *
  * @param {JSEvent} event the event that triggered the action
@@ -407,4 +414,18 @@ function onAction$resetZoom(event) {
 function onLongPress(id, obj) {
 	application.output('long pressing on ' + id);
 
+}
+
+/**
+ * Perform the element onclick action.
+ *
+ * @param {JSEvent} event the event that triggered the action
+ *
+ * @private
+ *
+ * @properties={typeid:24,uuid:"B2BABCF1-5291-484B-A7B8-D3C64C62C2D3"}
+ */
+function onAction$rotate(event) {
+	currentRotation += 90;
+	elements.canvas.rotate(currentRotation);
 }

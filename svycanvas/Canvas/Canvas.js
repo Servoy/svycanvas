@@ -516,6 +516,14 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					}
 
 				}
+				
+				$scope.api.rotate = function(angle){					
+					      var group = new fabric.Group($scope.canvas.getObjects())
+					      group.rotate(angle)
+					      $scope.canvas.centerObject(group)
+					      group.setCoords()
+					      $scope.canvas.renderAll()					    
+				}
 
 				$scope.api.startAnimate = function() {
 					var render = function() {

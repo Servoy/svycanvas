@@ -104,7 +104,8 @@
 		"loadCanvas": {"delayUntilFormLoads": true, "parameters": [{"name": "data","type": "string"}]},
 		"saveAsImage": {"delayUntilFormLoads": true, "parameters": [{"name": "imgCB","type": "function"}]},
 		"ZoomOnPoint": {"delayUntilFormLoads": true, "parameters": [{"name": "x","type": "int"},{"name": "y","type": "int"},{"name": "zoom","type": "int"}]},
-		"bringToFront": {"delayUntilFormLoads": true, "parameters": [{"name": "id","type": "string"}]}		
+		"bringToFront": {"delayUntilFormLoads": true, "parameters": [{"name": "id","type": "string"}]},
+		"rotate": {"delayUntilFormLoads": true, "parameters": [{"name": "angle","type": "int"}]}
 	},
 
 	"handlers": 
