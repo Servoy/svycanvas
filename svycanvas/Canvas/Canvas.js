@@ -32,9 +32,11 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					objectType: '',
 					rx: 0,
 					ry: 0,
-					textAlign: 'left'
+					textAlign: 'left',
+					selectable: null
 				}
 
+				$scope.isReady = false;
 				$scope.canvas = null;
 				$scope.objects = { };
 				$scope.images = { };
@@ -59,9 +61,11 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 								var img = new Image();
 								img.src = im[i];
 								$scope.images[imgName] = img;
-								img.onload = function() {
-									$scope.api.draw();
-								}
+							}
+						}
+						if (img) {
+							img.onload = function() {
+								$scope.api.draw();
 							}
 						}
 					}
@@ -76,34 +80,35 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					return copy;
 				}
 
-				function cloneAndSave(obj, generate) {
+				function cloneAndSave(obj) {
+					function upperCaseFirstLetter(string) {
+						return string.charAt(0).toUpperCase() + string.slice(1);
+					}
+
 					var o = $scope.model.canvasObjects;
 					if (!obj) return;
-					//if this is a grouping
+					//					if this is a grouping
 					if (obj._objects) {
 						obj.clone(function(clone) {
-							if (generate) {
-								clone.set({ left: ($scope.canvas.width / 2), top: ($scope.canvas.height / 2) });
-							}
+//							console.log(obj._objects[0].left)
+//							console.log(clone._objects[0].left)
+//							if (generate) {
+//								clone.set({ left: ($scope.canvas.width / 2), top: ($scope.canvas.height / 2) });
+//							}
 							clone.destroy();
 							var ob = clone._objects;
 							for (var i = 0; i < ob.length; i++) {
-								cloneAndSave(ob[i], generate);
+								cloneAndSave(ob[i]);
 							}
 						});
 					} else {
 						for (var i in o) {
 							if (!o[i]) continue;
 							if (o[i].id == obj.id) {
-
 								for (var j in defObj) {
 									if (j != 'id')
 										o[i][j] = obj[j]
-								}
-								if (generate) {
-									var n = clone(o[i]);
-									n.id = uuidv4();
-									$scope.model.canvasObjects.push(n);
+									//console.log('updating ' + j + ' of ' + o[i][j] + ' to ' + obj[j])
 								}
 							}
 						}
@@ -121,6 +126,13 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 											for (var k in defObj) {
 												if (k != 'id')
 													o[i][k] = oi[j][k]
+											}
+
+											if (typeof oi[j].objectType == 'undefined') {
+												o[i].objectType = upperCaseFirstLetter(oi[j].type);
+												if (o[i].objectType === "Textbox") {
+													o[i].objectType = "Text";
+												}
 											}
 
 											if (oi[j].src) {
@@ -165,7 +177,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 				}
 
 				function createObject(type, g) {
-					// console.log('create object : ' + type);
+//					 console.log('create object : ' + type);
 					var item;
 					if (!g.textAlign) {
 						g.textAlign = 'left';
@@ -174,7 +186,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 						cornerColor: !$scope.model.canvasOptions.selectable ? 'rgba(102,153,255,0.0)' : 'rgba(102,153,255,0.5)',
 						borderColor: !$scope.model.canvasOptions.selectable ? 'rgba(102,153,255,0.0)' : 'rgba(102,153,255,0.5)',
 						hasControls: $scope.model.canvasOptions.selectable,
-						selectable: true,
+						selectable: typeof g.selectable == 'undefined' ? true : g.selectable,
 						lockMovementX: !$scope.model.canvasOptions.selectable,
 						lockMovementY: !$scope.model.canvasOptions.selectable
 					}
@@ -213,6 +225,16 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					}
 
 					return item;
+				}
+
+				$scope.api.bringToFront = function(idx) {
+					var o = $scope.canvas._objects;
+					for (var i = 0; i < o.length; i++) {
+						if (o[i].id == idx) {
+							o[i].bringToFront();
+						}
+					}
+					$scope.canvas.renderAll();
 				}
 				$scope.api.copySelectedObject = function() {
 					var tbc = $scope.canvas.getActiveObject()
@@ -264,14 +286,14 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					if (obj && obj._objects) {
 						for (var i in obj._objects) {
 							if (!$scope.objects[obj._objects[i].id]) {
-								$scope.canvas.discardActiveObject();
+//								$scope.canvas.discardActiveObject();
 								return setTimeout(function() {
 										$scope.api.saveCanvas(cb);
 									}, 250);
 							}
 						}
 					} else if (obj && !$scope.objects[obj.id]) {
-						$scope.canvas.discardActiveObject();
+//						$scope.canvas.discardActiveObject();
 						return setTimeout(function() {
 								$scope.api.saveCanvas(cb);
 							}, 250);
@@ -331,6 +353,10 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 						$scope.canvas.setActiveObject(s);
 					}
 					$scope.canvas.renderAll();
+										
+					if ($scope.handlers.onModified) {
+						$scope.handlers.onModified();
+					}
 				}
 				$scope.api.removeObject = function(idx) {
 					var o = $scope.canvas.getActiveObject();
@@ -367,7 +393,8 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					$scope.canvas.renderAll();
 				}
 				$scope.api.clearCanvas = function() {
-					$scope.canvas.clear();
+					if ($scope.canvas)
+						$scope.canvas.clear();
 					$scope.api.draw();
 				}
 				$scope.api.setSelectedObject = function(ids) {
@@ -436,7 +463,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					if (!$scope.model.canvasOptions) {
 						$scope.model.canvasOptions = { };
 					}
-
+					$scope.model.canvasOptions['preserveObjectStacking'] = true;
 					$scope.canvas = new fabric.Canvas($scope.model.svyMarkupId, $scope.model.canvasOptions);
 					fabric.Object.prototype.transparentCorners = false;
 					$scope.canvas.selection = $scope.model.canvasOptions.selectable;
@@ -472,6 +499,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					for (var j in g) {
 						$scope.objNum++;
 						if (!g[j]) continue;
+						//						console.log(g[j].id + ' : ' + g[j].objectType);
 						//create an fabric item
 						var type = g[j].objectType;
 						$scope.objects[g[j].id] = createObject(type, g[j]);
@@ -482,7 +510,13 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 						console.log('WARNING - over 1000 objects created. Client performance will be impacted.');
 					}
 
+					if (!$scope.isReady) {
+						if ($scope.handlers.onReady) $scope.handlers.onReady();
+						$scope.isReady = true;
+					}
+
 				}
+
 				$scope.api.startAnimate = function() {
 					var render = function() {
 						var applyChanges = false;
@@ -661,10 +695,6 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					$scope.canvas.on('mouse:up', function(options) {
 							var obj = $scope.canvas.getActiveObject();
 							if (!obj) return;
-							//							 console.log(obj);
-							obj.set({
-								opacity: 1
-							});
 							if ($scope.handlers.onClick && !$scope.model.canvasOptions.selectable && (typeof obj.id != 'undefined')) {
 								$scope.handlers.onClick(obj.id, obj);
 								//when clicking don't allow overlapping
@@ -676,10 +706,6 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					$scope.canvas.on('touch:longpress', function(options) {
 							var obj = $scope.canvas.getActiveObject();
 							if (!obj) return;
-							//							 console.log(obj);
-							obj.set({
-								opacity: 1
-							});
 							if ($scope.handlers.onLongPress && !$scope.model.canvasOptions.selectable && (typeof obj.id != 'undefined')) {
 								$scope.handlers.onLongPress(obj.id, obj);
 								//when clicking don't allow overlapping
@@ -757,7 +783,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 				}
 				window.addEventListener("resize", $scope.api.draw);
 				setTimeout(loadImg, 0);
-				setTimeout($scope.api.draw, 250);
+				setTimeout($scope.api.draw, 0);
 				// if the model are updated re-draw the chart
 				$scope.$watchCollection('model.imagesLoader', function(newValue, oldValue) {
 						loadImg();

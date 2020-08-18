@@ -42,7 +42,7 @@
 			"renderOnAddRemove": {"type": "int","values": [{"Yes": 1},{"No": 0}],"default": 0},
 			"skipOffscreen": {"type": "int","values": [{"Yes": 1},{"No": 0}],"default": 1},
 			"ZoomOnMouseScroll": {"type": "int","values": [{"Yes": 1},{"No": 0}],"default": 0},
-			"animationSpeed": {"type": "float","default": 50}
+			"animationSpeed": {"type": "float","default": 50}			
 		},
 
 		"canvasObject": 
@@ -84,6 +84,7 @@
 			"spriteHeight": {"type": "float"},
 			"spriteIndex": {"type": "float"},
 			"frameTime": {"type": "float"},
+			"selectable" : {"type": "boolean"},
 			"custom_data" : {"type": "object"}			
 		}
 	},
@@ -93,8 +94,8 @@
 		"addObject": {"delayUntilFormLoads": true, "parameters": [{"name": "object","type": "object"}, {"name": "setActive", "type":"boolean", "optional":true}]},
 		"copySelectedObject": {"delayUntilFormLoads": true, "parameters": []},
 		"updateObject": {"delayUntilFormLoads": true, "parameters": [{"name": "object","type": "object"},{"name": "selectActiveItems","type": "boolean"}]},
-        "removeObject": {"delayUntilFormLoads": true, "parameters": [{"name": "id","type": "string"}]},
-        "clearCanvas":{},
+        "removeObject": {"delayUntilFormLoads": true, "parameters": [{"name": "id","type": "string"}]},        
+        "clearCanvas":{"delayUntilFormLoads": true},
         "startAnimate":{"delayUntilFormLoads": true},
         "stopAnimate":{"delayUntilFormLoads": true},
 		"getSelectedObject": {"delayUntilFormLoads": true, "parameters": [{"name": "saveCB","type": "function"}]},
@@ -102,13 +103,15 @@
 		"saveCanvas": {"delayUntilFormLoads": true, "parameters": [{"name": "saveCB","type": "function"}]},
 		"loadCanvas": {"delayUntilFormLoads": true, "parameters": [{"name": "data","type": "string"}]},
 		"saveAsImage": {"delayUntilFormLoads": true, "parameters": [{"name": "imgCB","type": "function"}]},
-		"ZoomOnPoint": {"delayUntilFormLoads": true, "parameters": [{"name": "x","type": "int"},{"name": "y","type": "int"},{"name": "zoom","type": "int"}]}
+		"ZoomOnPoint": {"delayUntilFormLoads": true, "parameters": [{"name": "x","type": "int"},{"name": "y","type": "int"},{"name": "zoom","type": "int"}]},
+		"bringToFront": {"delayUntilFormLoads": true, "parameters": [{"name": "id","type": "string"}]}		
 	},
 
 	"handlers": 
 	{
 		"onClick": {"parameters": []},
 		"onLongPress": {"parameters": []},
-		"onModified": {"parameters": []}
+		"onModified": {"parameters": []},
+		"onReady": {"parameters": []}
 	}
 }
