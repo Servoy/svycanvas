@@ -194,7 +194,7 @@ cssPosition:"509,-1,-1,78%,20%,28",
 onActionMethodID:"57E1377B-DB48-4482-B5E1-0F1FD9F0B136",
 onDoubleClickMethodID:"-1",
 onRightClickMethodID:"-1",
-text:"Create Rect-Box",
+text:"Create Grouped Item",
 typeid:7,
 uuid:"C38F488E-0A06-4683-AECA-EFD70227CE95"
 },

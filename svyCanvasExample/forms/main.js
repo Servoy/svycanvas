@@ -125,7 +125,7 @@ function onAction$addObject(event) {
 		obj.fill = color;
 		obj.opacity = 1;
 	}
-	elements.canvas.addObject(obj,true);
+	elements.canvas.addObject(obj, true);
 }
 
 /**
@@ -325,14 +325,18 @@ function onAction$selectItem(event) {
  * @properties={typeid:24,uuid:"57E1377B-DB48-4482-B5E1-0F1FD9F0B136"}
  */
 function onAction$createRectTextBox(event) {
-	var objects = [{
-			id: application.getUUID().toString(), angle: 0, fontSize: 20, text: text, fontFamily: 'Roboto', scaleX: 1, scaleY: 1,
+	var groupedObject = {
+		id: application.getUUID().toString(), objectType: 'Group',
+		objects: [{
+			angle: 0, fontSize: 20, text: '', fontFamily: 'Roboto', scaleX: 1, scaleY: 1,
 			left: 200, top: 100, width: 300, height: 200, radius: 50, fill: color, opacity: 1, objectType: 'Rect'
 		}, {
-			id: application.getUUID().toString(), angle: 0, fontSize: 30, text: text, fontFamily: 'Roboto', scaleX: 1, scaleY: 1,
+			angle: 0, fontSize: 30, text: text, fontFamily: 'Roboto', scaleX: 1, scaleY: 1,
 			left: 250, top: 150, width: 200, height: 50, radius: 50, fill: 'white', opacity: 1, objectType: 'Text', textAlign: 'center'
 		}]
-	elements.canvas.addObject(objects);
+	}
+
+	elements.canvas.addObject(groupedObject);
 }
 
 /**

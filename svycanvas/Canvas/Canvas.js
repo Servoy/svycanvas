@@ -33,7 +33,8 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					rx: 0,
 					ry: 0,
 					textAlign: 'left',
-					selectable: null
+					selectable: null,
+					objects: null
 				}
 
 				$scope.isReady = false;
@@ -86,9 +87,10 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					}
 
 					var o = $scope.model.canvasObjects;
+
 					if (!obj) return;
 					//					if this is a grouping
-					if (obj._objects) {
+					if (obj._objects && obj.objectType != 'Group') {
 						obj.clone(function(clone) {
 							//							console.log(obj._objects[0].left)
 							//							console.log(clone._objects[0].left)
@@ -102,13 +104,15 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 							}
 						});
 					} else {
+						//						console.log(o)
+						//						console.log(obj)
 						for (var i in o) {
 							if (!o[i]) continue;
 							if (o[i].id == obj.id) {
 								for (var j in defObj) {
 									if (j != 'id')
 										o[i][j] = obj[j]
-									//console.log('updating ' + j + ' of ' + o[i][j] + ' to ' + obj[j])
+									//									console.log('updating ' + j + ' of ' + o[i][j] + ' to ' + obj[j])
 								}
 							}
 						}
@@ -118,9 +122,10 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 						obj.clone(function(clone) {
 								var oi = clone._objects;
 								if (!oi) return;
+
 								clone.destroy();
-								for (var j = 0; j < oi.length; j++) {
-									for (var i in o) {
+								for (j = 0; j < oi.length; j++) {
+									for (i in o) {
 										if (!o[i]) continue;
 										if (o[i].id == oi[j].id) {
 											for (var k in defObj) {
@@ -129,6 +134,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 											}
 
 											if (typeof oi[j].objectType == 'undefined') {
+
 												o[i].objectType = upperCaseFirstLetter(oi[j].type);
 												if (o[i].objectType === "Textbox") {
 													o[i].objectType = "Text";
@@ -142,7 +148,10 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 
 										}
 									}
+
 								}
+								//								console.log(obj)
+								//								console.log(o[i])
 								$scope.svyServoyapi.apply("canvasObjects");
 							}, ['id']);
 					} catch (e) {
@@ -176,8 +185,9 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 						})
 				}
 
-				function createObject(type, g) {
-					//					 console.log('create object : ' + type);
+				function createObject(type, g, noAddToCanvas) {
+					//					console.log('create object : ' + type);
+					//					console.log(g.objects)
 					var item;
 					if (!g.textAlign) {
 						g.textAlign = 'left';
@@ -196,6 +206,15 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					}
 
 					switch (type) {
+					case 'Group':
+						var groupedItems = []
+						if (g && g.objects) {
+							for (var i = 0; i < g.objects.length; i++) {
+								groupedItems.push(createObject(g.objects[i].objectType, g.objects[i], true));
+							}
+							item = new fabric.Group(groupedItems, options);
+						}
+						break;
 					case 'Circle':
 						item = new fabric.Circle(options);
 						break;
@@ -217,7 +236,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					default:
 						break;
 					}
-					if (item) {
+					if (item && !noAddToCanvas) {
 						$scope.canvas.add(item);
 						if (type == 'Sprite') {
 							item.play();
@@ -237,18 +256,18 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					$scope.canvas.renderAll();
 				}
 				$scope.api.copySelectedObject = function() {
-					var tbc = $scope.canvas.getActiveObject()
 					$scope.canvas.getActiveObject().clone(function(cloned) {
 						_clipboard = cloned;
 						// clone again, so you can do multiple copies.
 						_clipboard.clone(function(clonedObj) {
-							$scope.canvas.discardActiveObject();
+							//							$scope.canvas.discardActiveObject();
 							clonedObj.set({
 								left: clonedObj.left + 10,
 								top: clonedObj.top + 10,
 								id: uuidv4(),
 								evented: true
 							});
+
 							if (clonedObj.type === 'activeSelection') {
 								// active selection needs a reference to the canvas.
 								clonedObj.canvas = $scope.canvas;
@@ -286,17 +305,17 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					if (obj && obj._objects) {
 						for (var i in obj._objects) {
 							if (!$scope.objects[obj._objects[i].id]) {
-								//								$scope.canvas.discardActiveObject();
-								return setTimeout(function() {
-										$scope.api.saveCanvas(cb);
-									}, 250);
+								$scope.canvas.discardActiveObject();
+								//								return setTimeout(function() {
+								$scope.api.saveCanvas(cb);
+								//									}, 250);
 							}
 						}
 					} else if (obj && !$scope.objects[obj.id]) {
-						//						$scope.canvas.discardActiveObject();
-						return setTimeout(function() {
-								$scope.api.saveCanvas(cb);
-							}, 250);
+						$scope.canvas.discardActiveObject();
+						//						return setTimeout(function() {
+						$scope.api.saveCanvas(cb);
+						//							}, 250);
 					}
 					$window.executeInlineScript(cb.formname, cb.script, [JSON.stringify($scope.model.canvasObjects)]);
 				}
@@ -308,6 +327,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 				}
 				$scope.api.updateObject = function(obj, setItemActive) {
 					if (obj) {
+						//						console.log(obj)
 						var sel = [];
 						var ob = $scope.model.canvasObjects;
 						if (!ob) return;
@@ -351,6 +371,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					}
 
 					$scope.canvas.setActiveObject(s);
+
 					if (!setActive) {
 						$scope.canvas.discardActiveObject();
 					}
@@ -359,7 +380,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					if ($scope.handlers.onModified) {
 						$scope.handlers.onModified();
 					}
-				}
+				}				
 				$scope.api.removeObject = function(idx) {
 					var o = $scope.canvas.getActiveObject();
 					//check if in a group
@@ -414,7 +435,6 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 				}
 				$scope.api.getSelectedObject = function(cb, sel) {
 					if (sel) {
-						// console.log(sel);
 						var co = $scope.model.canvasObjects;
 						var os = [];
 						for (var i in co) {
@@ -430,7 +450,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					var ao = $scope.canvas.getActiveObject();
 					if (!ao) return;
 					var ob = ao._objects;
-					if (ob && ob.length > 0) {
+					if (ao.objectType != 'Group' && ob && ob.length > 0) {
 						var grp = []
 						for (var j = 0; j < ob.length; j++) {
 							if (!ob[j]) continue;
@@ -442,6 +462,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 							}, 250);
 					}
 					$scope.canvas.discardActiveObject();
+
 					return setTimeout(function() {
 							$scope.api.getSelectedObject(cb, [ao.id])
 						}, 250);
@@ -496,12 +517,13 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 
 					$scope.canvas.setWidth(gridWidth);
 					$scope.canvas.setHeight(gridHeight);
-					var g = $scope.model.canvasObjects;
 
+					var g = $scope.model.canvasObjects;
 					for (var j in g) {
 						$scope.objNum++;
 						if (!g[j]) continue;
 						//						console.log(g[j].id + ' : ' + g[j].objectType);
+						//						console.log(g[j]);
 						//create an fabric item
 						var type = g[j].objectType;
 						$scope.objects[g[j].id] = createObject(type, g[j]);
@@ -518,7 +540,6 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					}
 
 				}
-
 				$scope.api.rotate = function(angle) {
 					var group = new fabric.Group($scope.canvas.getObjects())
 					group.rotate(angle)
@@ -526,7 +547,6 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					group.setCoords()
 					$scope.canvas.renderAll()
 				}
-
 				$scope.api.startAnimate = function() {
 					var render = function() {
 						var applyChanges = false;
@@ -682,6 +702,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 							obj.set({
 								opacity: 0.3
 							});
+
 							// if ($scope.handlers.onMove) {
 							//     $scope.handlers.onMove(obj.id, obj.left, obj.top);
 							// }
@@ -705,6 +726,8 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					$scope.canvas.on('mouse:up', function(options) {
 							var obj = $scope.canvas.getActiveObject();
 							if (!obj) return;
+							var o = $scope.model.canvasObjects;
+
 							if ($scope.handlers.onClick && !$scope.model.canvasOptions.selectable && (typeof obj.id != 'undefined')) {
 								$scope.handlers.onClick(obj.id, obj);
 								//when clicking don't allow overlapping
@@ -712,7 +735,6 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 								$scope.canvas.renderAll();
 							}
 						});
-
 					$scope.canvas.on('touch:longpress', function(options) {
 							var obj = $scope.canvas.getActiveObject();
 							if (!obj) return;
@@ -723,53 +745,74 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 								$scope.canvas.renderAll();
 							}
 						});
-
 					$scope.canvas.on('selection:cleared', function() {
-							setTimeout(function() {
-									if (!$scope.canvas.getActiveObject()) {
-										// console.log('no selection');
-										//save canvas to datamodel;
-										var o = $scope.canvas.getObjects();
+							//							setTimeout(function() {
+							if (!$scope.canvas.getActiveObject()) {
+								//										 console.log('no selection');
+								//save canvas to datamodel;
+								var o = $scope.canvas.getObjects();
+								function addToModel(obj) {
+									
+									if (obj.type === "textbox") {
+										obj.type = "Text";
+									}
 
-										for (var i = 0; i < o.length; i++) {
-											if (typeof o[i].id == 'undefined') continue;
-											if (o[i].id == 'grid') continue;
+									var objectType = obj.type.charAt(0).toUpperCase() + obj.type.slice(1);
+									var mediaName = obj.mediaName;
+									var spriteName = obj.spriteName;
 
-											if (!$scope.objects[o[i].id]) {
-												if (o[i].type === "textbox") {
-													o[i].type = "Text";
-												}
+									if (obj.src) {
+										mediaName = obj.src.split('/')[6].split('?')[0];
+										spriteName = obj.src.split('/')[6].split('?')[0];
+									}
 
-												var objectType = o[i].type.charAt(0).toUpperCase() + o[i].type.slice(1);
-												var mediaName = o[i].mediaName;
-												var spriteName = o[i].spriteName;
+									var co = { };
+									for (var l in defObj) {
+										co[l] = obj[l] == null ? defObj[l] : obj[l];
+									}
 
-												if (o[i].src) {
-													mediaName = o[i].src.split('/')[6].split('?')[0];
-													spriteName = o[i].src.split('/')[6].split('?')[0];
-												}
+									co['objectType'] = objectType;
+									co['mediaName'] = mediaName;
+									co['spriteName'] = spriteName;
 
-												var oo = { }
-												for (var k in defObj) {
-													oo[k] = o[i][k] == null ? defObj[k] : o[i][k];
-												}
+									//check if type is group and add objects
+									if (co['objectType'] == 'Group') {
+//										console.log('new group')
+//										//	console.log(co)
+//										//	console.log(obj)
+//										if (!co['objects']) {
+											co['objects'] = []
+//										}
 
-												oo['objectType'] = objectType;
-												oo['mediaName'] = mediaName;
-												oo['spriteName'] = spriteName;
-												if (!$scope.model.canvasObjects) {
-													$scope.model.canvasObjects = [];
-												}
-												$scope.model.canvasObjects.push(oo);
-												$scope.objects[o[i].id] = oo;
-											}
-										}
-										if (o.length > 0) {
-											//											 console.log($scope.model.canvasObjects);
-											$scope.svyServoyapi.apply("canvasObjects");
+										for (var n = 0; n < obj._objects.length; n++) {
+											co['objects'].push(addToModel(obj._objects[n]));
 										}
 									}
-								}, 0);
+//									console.log(co);
+									return co;
+								}
+								for (var i = 0; i < o.length; i++) {
+									if (typeof o[i].id == 'undefined') continue;
+									if (o[i].id == 'grid') continue;
+
+									if (!$scope.objects[o[i].id]) {
+
+										var oo = addToModel(o[i])
+
+										if (!$scope.model.canvasObjects) {
+											$scope.model.canvasObjects = [];
+										}
+
+										$scope.model.canvasObjects.push(oo);
+										$scope.objects[o[i].id] = oo;
+									}
+								}
+								if (o.length > 0) {
+									//											 console.log($scope.model.canvasObjects);
+									$scope.svyServoyapi.apply("canvasObjects");
+								}
+							}
+							//								}, 0);
 						});
 					$scope.canvas.on('object:modified', function() {
 							if ($scope.handlers.onModified) {
