@@ -4,7 +4,7 @@ Canvas component for Servoy NG-Client
 Getting started
 -------------
 
-Get the latest version from the [releases](https://github.com/Servoy/svycanvas/releases). Download and import the [svycanvasExample.servoy](https://github.com/Servoy/svycanvas/releases) example solution or check out source directly from github.
+Get the latest version from the [releases](https://github.com/Servoy/svycanvas/releases).
 
 Documentation
 -------------
