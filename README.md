@@ -1,2 +1,2 @@
 # svycanvas
-Simple Canvas Component
+Canvas component for Servoy NG-Client
