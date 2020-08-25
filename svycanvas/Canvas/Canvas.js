@@ -46,7 +46,6 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 				$scope.zoom = null;
 				$scope.zoomX = null;
 				$scope.zoomY = null;
-				$scope.cloneGroupReselect = [];
 				if (!$scope.model.canvasObjects) {
 					$scope.model.canvasObjects = [];
 				}
@@ -96,81 +95,46 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 						return string.charAt(0).toUpperCase() + string.slice(1);
 					}
 
-					var o = $scope.model.canvasObjects;
-
 					if (!obj) return;
-					var foundGroup = false;
-					//check if this is a grouping of a group
-					if (obj._objects && typeof obj.objectType == 'undefined' && obj._objects.length > 0) {
+
+					//check if grouped
+					if (obj._objects && obj._objects.length > 0) {
 						for (var i = 0; i < obj._objects.length; i++) {
-							if (obj._objects[i].objectType == 'Group') {
-								$scope.canvas.discardActiveObject();
-								$scope.cloneGroupReselect.push(obj._objects[i].id);
-								cloneAndSave(obj._objects[i]);
-								foundGroup = true;
-							}
+							cloneAndSave(obj._objects[i])
 						}
 					}
 
-					if (foundGroup) return;
+					//else if single item
+					//					if (obj.id) {
+					//						console.log('ID:' + obj.id)
+					//					}
 
-					//if this is a grouping
-					if (obj._objects && obj.objectType != 'Group' && obj.type != 'group') {
-						obj.clone(function(clone) {
-							clone.destroy();
-							var ob = clone._objects;
-							for (var i = 0; i < ob.length; i++) {
-								cloneAndSave(ob[i]);
-							}
-						});
-					} else {
+					try {
+						var o = $scope.model.canvasObjects;
 
-						//						console.log('ID:' + obj.id + ', type:  ' + obj.type + ' | ' + obj.objectType + ' left: ' + obj.left)
-
-						for (var i in o) {
+						for (i in o) {
 							if (!o[i]) continue;
 							if (o[i].id == obj.id) {
-								for (var j in defObj) {
-									if (j != 'id')
-										o[i][j] = obj[j]
+								for (var k in defObj) {
+									if (k != 'id')
+										o[i][k] = obj[k]
 								}
+
+								if (typeof obj.objectType == 'undefined') {
+									o[i].objectType = upperCaseFirstLetter(obj.type);
+									if (o[i].objectType === "Textbox") {
+										o[i].objectType = "Text";
+									}
+								}
+
+								if (obj.src) {
+									o[i].mediaName = obj.src.split('/')[6].split('?')[0];
+									o[i].spriteName = obj.src.split('/')[6].split('?')[0];
+								}
+
 							}
 						}
 						$scope.svyServoyapi.apply("canvasObjects");
-					}
-
-					try {
-						obj.clone(function(clone) {
-								var oi = clone._objects;
-								if (!oi) return;
-
-								clone.destroy();
-								for (j = 0; j < oi.length; j++) {
-									for (i in o) {
-										if (!o[i]) continue;
-										if (o[i].id == oi[j].id) {
-											for (var k in defObj) {
-												if (k != 'id')
-													o[i][k] = oi[j][k]
-											}
-
-											if (typeof oi[j].objectType == 'undefined') {
-												o[i].objectType = upperCaseFirstLetter(oi[j].type);
-												if (o[i].objectType === "Textbox") {
-													o[i].objectType = "Text";
-												}
-											}
-
-											if (oi[j].src) {
-												o[i].mediaName = oi[j].src.split('/')[6].split('?')[0];
-												o[i].spriteName = oi[j].src.split('/')[6].split('?')[0];
-											}
-
-										}
-									}
-								}
-								$scope.svyServoyapi.apply("canvasObjects");
-							}, ['id']);
 					} catch (e) {
 					}
 				}
@@ -351,11 +315,11 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 							}
 						}
 						$scope.svyServoyapi.apply("canvasObjects");
-						
+
 						if ($scope.handlers.onModified) {
 							$scope.handlers.onModified();
 						}
-						
+
 						drawTimeout();
 						if (setItemActive) {
 							setTimeout(function() {
@@ -538,14 +502,14 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 						$scope.canvas.zoomToPoint({ x: $scope.zoomX, y: $scope.zoomY }, $scope.zoom);
 
 					//TODO : set scale based on targetScale options
-//					if ($scope.model.canvasOptions.targetScaleW && $scope.model.canvasOptions.targetScaleH) {
-//						var scaleW = gridWidth / $scope.model.canvasOptions.targetScaleW;
-//						var scaleH = gridHeight / $scope.model.canvasOptions.targetScaleH;
-//
-//						$scope.canvas.setZoom(scaleW / scaleH);
-//						$scope.canvas.setWidth(gridWidth * $scope.canvas.getZoom());
-//						$scope.canvas.setHeight(gridHeight * $scope.canvas.getZoom());
-//					}
+					//					if ($scope.model.canvasOptions.targetScaleW && $scope.model.canvasOptions.targetScaleH) {
+					//						var scaleW = gridWidth / $scope.model.canvasOptions.targetScaleW;
+					//						var scaleH = gridHeight / $scope.model.canvasOptions.targetScaleH;
+					//
+					//						$scope.canvas.setZoom(scaleW / scaleH);
+					//						$scope.canvas.setWidth(gridWidth * $scope.canvas.getZoom());
+					//						$scope.canvas.setHeight(gridHeight * $scope.canvas.getZoom());
+					//					}
 
 					//draw grid
 					if ($scope.model.showGrid) {
@@ -868,13 +832,39 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 							obj.set({
 								opacity: 1
 							});
-							cloneAndSave(obj);
-							setTimeout(function() {
-									if ($scope.cloneGroupReselect.length > 0) {
-										$scope.api.setSelectedObject($scope.cloneGroupReselect)
-										$scope.cloneGroupReselect = [];
+							var sel = []
+
+							function selectHelper(o) {
+								if (o) {
+
+									if (o._objects && o._objects.length > 0) {
+										for (var i = 0; i < o._objects.length; i++) {
+											selectHelper(o._objects[i])
+										}
 									}
-								}, 150)
+
+									if (o.objects && o.objects.length > 0) {
+										for (i = 0; i < o.objects.length; i++) {
+											selectHelper(o.objects[i])
+										}
+									}
+
+									if (o.id) {
+										sel.push(o.id)
+									}
+
+								}
+							}
+
+							$scope.canvas.discardActiveObject();
+							selectHelper(obj);
+							cloneAndSave(obj);
+
+							//reselect objects
+							setTimeout(function() {
+									if (sel.length > 0)
+										$scope.api.setSelectedObject(sel)
+								}, 0)
 						});
 					$scope.canvas.on('mouse:over', function(e) {
 							if (!$scope.model.canvasOptions.selectable) {
