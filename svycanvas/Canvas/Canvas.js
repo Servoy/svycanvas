@@ -537,15 +537,15 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					if ($scope.zoom)
 						$scope.canvas.zoomToPoint({ x: $scope.zoomX, y: $scope.zoomY }, $scope.zoom);
 
-					//set scale based on targetScale options
-					if ($scope.model.canvasOptions.targetScaleW && $scope.model.canvasOptions.targetScaleH) {
-						var scaleW = gridWidth / $scope.model.canvasOptions.targetScaleW;
-						var scaleH = gridHeight / $scope.model.canvasOptions.targetScaleH;
-
-						$scope.canvas.setZoom(scaleW / scaleH);
-						$scope.canvas.setWidth(gridWidth * $scope.canvas.getZoom());
-						$scope.canvas.setHeight(gridHeight * $scope.canvas.getZoom());
-					}
+					//TODO : set scale based on targetScale options
+//					if ($scope.model.canvasOptions.targetScaleW && $scope.model.canvasOptions.targetScaleH) {
+//						var scaleW = gridWidth / $scope.model.canvasOptions.targetScaleW;
+//						var scaleH = gridHeight / $scope.model.canvasOptions.targetScaleH;
+//
+//						$scope.canvas.setZoom(scaleW / scaleH);
+//						$scope.canvas.setWidth(gridWidth * $scope.canvas.getZoom());
+//						$scope.canvas.setHeight(gridHeight * $scope.canvas.getZoom());
+//					}
 
 					//draw grid
 					if ($scope.model.showGrid) {
