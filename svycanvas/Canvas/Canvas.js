@@ -305,12 +305,12 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 							_clipboard.id = uuidv4();
 							$scope.reselect.push(_clipboard.id)
 							$scope.canvas.setActiveObject(clonedObj);
-							$scope.canvas.requestRenderAll();							
+							$scope.canvas.requestRenderAll();
 							$scope.canvas.discardActiveObject();
 							setTimeout(function() {
-								$scope.api.setSelectedObject($scope.reselect)
-							}, 250)
-							
+									$scope.api.setSelectedObject($scope.reselect)
+								}, 250)
+
 						});
 					});
 
@@ -335,7 +335,6 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 				}
 				$scope.api.updateObject = function(obj, setItemActive) {
 					if (obj) {
-						//						console.log(obj)
 						var sel = [];
 						var ob = $scope.model.canvasObjects;
 						if (!ob) return;
@@ -352,9 +351,17 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 							}
 						}
 						$scope.svyServoyapi.apply("canvasObjects");
+						
+						if ($scope.handlers.onModified) {
+							$scope.handlers.onModified();
+						}
+						
 						drawTimeout();
-						if (setItemActive)
-							$scope.api.setSelectedObject(sel);
+						if (setItemActive) {
+							setTimeout(function() {
+									$scope.api.setSelectedObject(sel);
+								}, 250)
+						}
 					}
 				}
 				$scope.api.loadCanvas = function(data) {
@@ -450,6 +457,23 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					}
 				}
 				$scope.api.getSelectedObject = function(cb, sel) {
+
+					function selectHelper(ob) {
+						if (ob._objects && ob.objectType != 'Group') {
+							for (var i = 0; i < ob._objects.length; i++) {
+								selectHelper(ob._objects[i]);
+							}
+						} else {
+							sel.push(ob.id);
+						}
+					}
+
+					if (!sel) {
+						sel = []
+						var ao = $scope.canvas.getActiveObject();
+						selectHelper(ao);
+					}
+
 					if (sel) {
 						var co = $scope.model.canvasObjects;
 						var os = [];
