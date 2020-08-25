@@ -360,7 +360,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 						$scope.canvas.discardActiveObject();
 						setTimeout(function() {
 								$scope.api.setSelectedObject($scope.reselect)
-							}, 250)
+							}, 50)
 					}
 					$scope.canvas.renderAll();
 
@@ -408,6 +408,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					drawTimeout();
 				}
 				$scope.api.setSelectedObject = function(ids) {
+					$scope.canvas.discardActiveObject();
 					var o = $scope.canvas.getObjects();
 					if (ids && ids.length > 0) {
 						var s = new fabric.ActiveSelection([], {
