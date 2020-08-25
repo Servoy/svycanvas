@@ -42,6 +42,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 				$scope.canvas = null;
 				$scope.objects = { };
 				$scope.images = { };
+				$scope.reselect = [];
 				$scope.zoom = null;
 				$scope.zoomX = null;
 				$scope.zoomY = null;
@@ -276,7 +277,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 						_clipboard = cloned;
 						// clone again, so you can do multiple copies.
 						_clipboard.clone(function(clonedObj) {
-							//							$scope.canvas.discardActiveObject();
+							$scope.reselect = []
 							clonedObj.set({
 								left: clonedObj.left + 10,
 								top: clonedObj.top + 10,
@@ -289,19 +290,27 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 								clonedObj.canvas = $scope.canvas;
 								clonedObj.forEachObject(function(obj) {
 									obj.id = uuidv4();
+									$scope.reselect.push(obj.id)
 									// obj.transparentCorners = true;
 									$scope.canvas.add(obj);
 								});
 								// this should solve the unselectability
 								clonedObj.setCoords();
 							} else {
+								$scope.reselect.push(clonedObj.id)
 								$scope.canvas.add(clonedObj);
 							}
 							_clipboard.top += 10;
 							_clipboard.left += 10;
 							_clipboard.id = uuidv4();
+							$scope.reselect.push(_clipboard.id)
 							$scope.canvas.setActiveObject(clonedObj);
-							$scope.canvas.requestRenderAll();
+							$scope.canvas.requestRenderAll();							
+							$scope.canvas.discardActiveObject();
+							setTimeout(function() {
+								$scope.api.setSelectedObject($scope.reselect)
+							}, 250)
+							
 						});
 					});
 
@@ -316,19 +325,6 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					$window.executeInlineScript(cb.formname, cb.script, [url]);
 				}
 				$scope.api.saveCanvas = function(cb) {
-					var obj = $scope.canvas.getActiveObject();
-					//if grouped
-					if (obj && obj._objects) {
-						for (var i in obj._objects) {
-							if (!$scope.objects[obj._objects[i].id]) {
-								$scope.canvas.discardActiveObject();
-								$scope.api.saveCanvas(cb);
-							}
-						}
-					} else if (obj && !$scope.objects[obj.id]) {
-						$scope.canvas.discardActiveObject();
-						$scope.api.saveCanvas(cb);
-					}
 					$window.executeInlineScript(cb.formname, cb.script, [JSON.stringify($scope.model.canvasObjects)]);
 				}
 				$scope.api.ZoomOnPoint = function(x, y, zoom) {
@@ -371,14 +367,17 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					if (setActive != false) {
 						setActive = true;
 					}
+					$scope.reselect = []
 					var s = new fabric.ActiveSelection([], {
 								canvas: $scope.canvas
 							});
 					if (objs && objs.length > 0) {
 						for (var i = 0; i < objs.length; i++) {
+							$scope.reselect.push(objs[i].id)
 							s.addWithUpdate(createObject(objs[i].objectType, objs[i]))
 						}
 					} else if (objs) {
+						$scope.reselect.push(objs.id)
 						s.addWithUpdate(createObject(objs.objectType, objs))
 					}
 
@@ -386,6 +385,11 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 
 					if (!setActive) {
 						$scope.canvas.discardActiveObject();
+					} else {
+						$scope.canvas.discardActiveObject();
+						setTimeout(function() {
+								$scope.api.setSelectedObject($scope.reselect)
+							}, 250)
 					}
 					$scope.canvas.renderAll();
 
