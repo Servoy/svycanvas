@@ -37,6 +37,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					objects: null
 				}
 
+				$scope.isDrawing = false;
 				$scope.isReady = false;
 				$scope.canvas = null;
 				$scope.objects = { };
@@ -44,6 +45,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 				$scope.zoom = null;
 				$scope.zoomX = null;
 				$scope.zoomY = null;
+				$scope.cloneGroupReselect = [];
 				if (!$scope.model.canvasObjects) {
 					$scope.model.canvasObjects = [];
 				}
@@ -51,6 +53,13 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 				window.cancelRequestAnimFrame = (function() {
 					return window.cancelAnimationFrame || window.webkitCancelRequestAnimationFrame || window.mozCancelRequestAnimationFrame || window.oCancelRequestAnimationFrame || window.msCancelRequestAnimationFrame || clearTimeout
 				})();
+
+				function drawTimeout(delay) {
+					if (!delay) delay = 0;
+					if ($scope.isDrawing) return;
+					$scope.isDrawing = true;
+					setTimeout($scope.api.draw, delay);
+				}
 
 				function loadImg() {
 					if ($scope.model.imagesLoader && $scope.model.imagesLoader.length > 0) {
@@ -66,7 +75,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 						}
 						if (img) {
 							img.onload = function() {
-								$scope.api.draw();
+								drawTimeout();
 							}
 						}
 					}
@@ -89,14 +98,24 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					var o = $scope.model.canvasObjects;
 
 					if (!obj) return;
-					//					if this is a grouping
-					if (obj._objects && obj.objectType != 'Group') {
+					var foundGroup = false;
+					//check if this is a grouping of a group
+					if (obj._objects && typeof obj.objectType == 'undefined' && obj._objects.length > 0) {
+						for (var i = 0; i < obj._objects.length; i++) {
+							if (obj._objects[i].objectType == 'Group') {
+								$scope.canvas.discardActiveObject();
+								$scope.cloneGroupReselect.push(obj._objects[i].id);
+								cloneAndSave(obj._objects[i]);
+								foundGroup = true;
+							}
+						}
+					}
+
+					if (foundGroup) return;
+
+					//if this is a grouping
+					if (obj._objects && obj.objectType != 'Group' && obj.type != 'group') {
 						obj.clone(function(clone) {
-							//							console.log(obj._objects[0].left)
-							//							console.log(clone._objects[0].left)
-							//							if (generate) {
-							//								clone.set({ left: ($scope.canvas.width / 2), top: ($scope.canvas.height / 2) });
-							//							}
 							clone.destroy();
 							var ob = clone._objects;
 							for (var i = 0; i < ob.length; i++) {
@@ -104,20 +123,21 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 							}
 						});
 					} else {
-						//						console.log(o)
-						//						console.log(obj)
+
+						//						console.log('ID:' + obj.id + ', type:  ' + obj.type + ' | ' + obj.objectType + ' left: ' + obj.left)
+
 						for (var i in o) {
 							if (!o[i]) continue;
 							if (o[i].id == obj.id) {
 								for (var j in defObj) {
 									if (j != 'id')
 										o[i][j] = obj[j]
-									//									console.log('updating ' + j + ' of ' + o[i][j] + ' to ' + obj[j])
 								}
 							}
 						}
 						$scope.svyServoyapi.apply("canvasObjects");
 					}
+
 					try {
 						obj.clone(function(clone) {
 								var oi = clone._objects;
@@ -134,7 +154,6 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 											}
 
 											if (typeof oi[j].objectType == 'undefined') {
-
 												o[i].objectType = upperCaseFirstLetter(oi[j].type);
 												if (o[i].objectType === "Textbox") {
 													o[i].objectType = "Text";
@@ -148,10 +167,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 
 										}
 									}
-
 								}
-								//								console.log(obj)
-								//								console.log(o[i])
 								$scope.svyServoyapi.apply("canvasObjects");
 							}, ['id']);
 					} catch (e) {
@@ -306,16 +322,12 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 						for (var i in obj._objects) {
 							if (!$scope.objects[obj._objects[i].id]) {
 								$scope.canvas.discardActiveObject();
-								//								return setTimeout(function() {
 								$scope.api.saveCanvas(cb);
-								//									}, 250);
 							}
 						}
 					} else if (obj && !$scope.objects[obj.id]) {
 						$scope.canvas.discardActiveObject();
-						//						return setTimeout(function() {
 						$scope.api.saveCanvas(cb);
-						//							}, 250);
 					}
 					$window.executeInlineScript(cb.formname, cb.script, [JSON.stringify($scope.model.canvasObjects)]);
 				}
@@ -323,7 +335,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					$scope.zoomX = x;
 					$scope.zoomX = y;
 					$scope.zoom = zoom;
-					$scope.api.draw();
+					drawTimeout();
 				}
 				$scope.api.updateObject = function(obj, setItemActive) {
 					if (obj) {
@@ -344,7 +356,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 							}
 						}
 						$scope.svyServoyapi.apply("canvasObjects");
-						$scope.api.draw();
+						drawTimeout();
 						if (setItemActive)
 							$scope.api.setSelectedObject(sel);
 					}
@@ -380,7 +392,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					if ($scope.handlers.onModified) {
 						$scope.handlers.onModified();
 					}
-				}				
+				}
 				$scope.api.removeObject = function(idx) {
 					var o = $scope.canvas.getActiveObject();
 					//check if in a group
@@ -418,7 +430,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 				$scope.api.clearCanvas = function() {
 					if ($scope.canvas)
 						$scope.canvas.clear();
-					$scope.api.draw();
+					drawTimeout();
 				}
 				$scope.api.setSelectedObject = function(ids) {
 					var o = $scope.canvas.getObjects();
@@ -497,6 +509,16 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					if ($scope.zoom)
 						$scope.canvas.zoomToPoint({ x: $scope.zoomX, y: $scope.zoomY }, $scope.zoom);
 
+					//set scale based on targetScale options
+					if ($scope.model.canvasOptions.targetScaleW && $scope.model.canvasOptions.targetScaleH) {
+						var scaleW = gridWidth / $scope.model.canvasOptions.targetScaleW;
+						var scaleH = gridHeight / $scope.model.canvasOptions.targetScaleH;
+
+						$scope.canvas.setZoom(scaleW / scaleH);
+						$scope.canvas.setWidth(gridWidth * $scope.canvas.getZoom());
+						$scope.canvas.setHeight(gridHeight * $scope.canvas.getZoom());
+					}
+
 					//draw grid
 					if ($scope.model.showGrid) {
 						// create grid
@@ -528,6 +550,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 						var type = g[j].objectType;
 						$scope.objects[g[j].id] = createObject(type, g[j]);
 					}
+
 					setupEvents();
 					// console.log($scope.canvas.getObjects().length);
 					if ($scope.canvas.getObjects().length > 1000) {
@@ -538,7 +561,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 						if ($scope.handlers.onReady) $scope.handlers.onReady();
 						$scope.isReady = true;
 					}
-
+					$scope.isDrawing = false;
 				}
 				$scope.api.rotate = function(angle) {
 					var group = new fabric.Group($scope.canvas.getObjects())
@@ -706,6 +729,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 							// if ($scope.handlers.onMove) {
 							//     $scope.handlers.onMove(obj.id, obj.left, obj.top);
 							// }
+
 							$scope.canvas.renderAll();
 						});
 					$scope.canvas.on('mouse:wheel', function(opt) {
@@ -719,7 +743,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 							$scope.zoomX = opt.e.offsetX;
 							$scope.zoomX = opt.e.offsetY;
 							$scope.zoom = zoom;
-							$scope.api.draw();
+							drawTimeout();
 							opt.e.preventDefault();
 							opt.e.stopPropagation();
 						});
@@ -746,13 +770,10 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 							}
 						});
 					$scope.canvas.on('selection:cleared', function() {
-							//							setTimeout(function() {
 							if (!$scope.canvas.getActiveObject()) {
-								//										 console.log('no selection');
 								//save canvas to datamodel;
 								var o = $scope.canvas.getObjects();
 								function addToModel(obj) {
-									
 									if (obj.type === "textbox") {
 										obj.type = "Text";
 									}
@@ -777,18 +798,16 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 
 									//check if type is group and add objects
 									if (co['objectType'] == 'Group') {
-//										console.log('new group')
-//										//	console.log(co)
-//										//	console.log(obj)
-//										if (!co['objects']) {
-											co['objects'] = []
-//										}
+										//	console.log('new group')
+										//	console.log(co)
+										//	console.log(obj)
+										co['objects'] = [];
 
 										for (var n = 0; n < obj._objects.length; n++) {
 											co['objects'].push(addToModel(obj._objects[n]));
 										}
 									}
-//									console.log(co);
+									//console.log(co);
 									return co;
 								}
 								for (var i = 0; i < o.length; i++) {
@@ -808,11 +827,9 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 									}
 								}
 								if (o.length > 0) {
-									//											 console.log($scope.model.canvasObjects);
 									$scope.svyServoyapi.apply("canvasObjects");
 								}
 							}
-							//								}, 0);
 						});
 					$scope.canvas.on('object:modified', function() {
 							if ($scope.handlers.onModified) {
@@ -824,6 +841,12 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 								opacity: 1
 							});
 							cloneAndSave(obj);
+							setTimeout(function() {
+									if ($scope.cloneGroupReselect.length > 0) {
+										$scope.api.setSelectedObject($scope.cloneGroupReselect)
+										$scope.cloneGroupReselect = [];
+									}
+								}, 150)
 						});
 					$scope.canvas.on('mouse:over', function(e) {
 							if (!$scope.model.canvasOptions.selectable) {
@@ -834,24 +857,24 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 						});
 
 				}
-				window.addEventListener("resize", $scope.api.draw);
+				window.addEventListener("resize", drawTimeout);
 				setTimeout(loadImg, 0);
-				setTimeout($scope.api.draw, 0);
+				drawTimeout();
 				// if the model are updated re-draw the chart
 				$scope.$watchCollection('model.imagesLoader', function(newValue, oldValue) {
 						loadImg();
 					});
 				$scope.$watchCollection('model.showGrid', function(newValue, oldValue) {
-						$scope.api.draw();
+						drawTimeout();
 					});
 				$scope.$watchCollection('model.gridSize', function(newValue, oldValue) {
-						$scope.api.draw();
+						drawTimeout();
 					});
 				$scope.$watchCollection('model.canvasOptions', function(newValue, oldValue) {
-						$scope.api.draw();
+						drawTimeout();
 					});
 				$scope.$watchCollection('model.canvasObjects', function(newValue, oldValue) {
-						$scope.api.draw();
+						drawTimeout();
 					});
 			},
 			templateUrl: 'svycanvas/Canvas/Canvas.html'
