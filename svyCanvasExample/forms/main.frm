@@ -101,6 +101,15 @@ typeid:4,
 uuid:"40F6D94A-FC62-48F3-BED7-083F72B997A4"
 },
 {
+cssPosition:"715,-1,-1,78%,20%,28",
+onActionMethodID:"FF5FFDF5-90AF-43C6-984C-5B91EBE84D74",
+onDoubleClickMethodID:"-1",
+onRightClickMethodID:"-1",
+text:"Drag and Drop ",
+typeid:7,
+uuid:"4D4E628C-3D5F-4B61-A613-B2F2EF869B8E"
+},
+{
 cssPosition:"365,-1,-1,78%,20%,28",
 onActionMethodID:"7AE8970D-D9F0-4C4F-BA13-0777FD24A69E",
 onDoubleClickMethodID:"-1",
@@ -119,7 +128,7 @@ typeid:7,
 uuid:"58C8C2FE-E127-4F1D-B4C4-CE38D3596F8E"
 },
 {
-height:730,
+height:756,
 partType:5,
 typeid:19,
 uuid:"66F1115B-137F-49E2-9E83-E90683A0DF1B"
@@ -154,7 +163,8 @@ imagesLoader:[
 1073741887
 ],
 onClick:"4808D737-EAA1-471E-8D6B-D58F29A69F63",
-onLongPress:"BCEEEAB9-D16F-4E9F-83FA-F26487FADD8C"
+onLongPress:"BCEEEAB9-D16F-4E9F-83FA-F26487FADD8C",
+onModified:"D8540DF2-A64C-43F2-8C74-9AB99EC33645"
 },
 name:"canvas",
 typeName:"svycanvas-Canvas",

@@ -433,3 +433,68 @@ function onAction$rotate(event) {
 	currentRotation += 90;
 	elements.canvas.rotate(currentRotation);
 }
+
+/**
+
+ * @private
+ *
+ * @properties={typeid:24,uuid:"D8540DF2-A64C-43F2-8C74-9AB99EC33645"}
+ */
+function onModified() {
+	elements.canvas.getSelectedObject(objInfo)
+}
+
+/**
+ * TODO generated, please specify type and doc for the params
+ * @param objs
+ *
+ * @properties={typeid:24,uuid:"B65DD271-D7EA-41CF-9007-BA05DE550346"}
+ */
+function objInfo(objs){
+	//possible target locations for moving the object
+	var targets = []
+	targets.push({top:200,left:450})
+	
+	/** @type {{top:Number,left:Number}} */
+	
+	var d = objs[0];
+	application.output(d.top +',' + d.left)
+	
+	for (var i = 0; i < targets.length; i++) {
+		if (targets[i].top == d.top && targets[i].left == d.left){
+			//move was successful
+			plugins.dialogs.showInfoDialog('INFO','Move successful')
+			return;
+		}
+	}
+	
+	//move was successful
+	onAction$dragdrop(null)
+	plugins.dialogs.showInfoDialog('INFO','Move Failed')	
+	
+}
+
+/**
+ * Perform the element onclick action.
+ *
+ * @param {JSEvent} event the event that triggered the action
+ *
+ * @private
+ *
+ * @properties={typeid:24,uuid:"FF5FFDF5-90AF-43C6-984C-5B91EBE84D74"}
+ */
+function onAction$dragdrop(event) {
+	var preset = [
+	{ "id": "Source", "angle": 0, "fontSize": 40, "text": "Some words...of wisdom", "fontFamily": "Roboto", "scaleX": 2.9411764705882346, "scaleY": 2.9411764705882346, "left": 100.00000000000001, "top": 200, "width": 50, "height": 50, "radius": 50, "fill": "#000000", "opacity": 1, "spriteWidth": 50, "spriteHeight": 72, "spriteIndex": 0, "frameTime": 100, "objectType": "Rect", "rx": 0, "ry": 0, "textAlign": "center", "selectable": false, "objects": null }, 
+	
+	{ "id": "Source_text", "angle": 0, "fontSize": 40, "text": "Source", "fontFamily": "Roboto", "scaleX": 0.8518303152059465, "scaleY": 1, "left": 100.00000000000003, "top": 150, "width": 176.09140849106146, "height": 45.199999999999996, "radius": 50, "fill": "#000000", "opacity": 1, "spriteWidth": 50, "spriteHeight": 72, "spriteIndex": 0, "frameTime": 100, "objectType": "Text", "rx": 0, "ry": 0, "textAlign": "center", "selectable": false, "objects": null },
+	
+	{ "id": "Target", "angle": 0, "fontSize": 8, "text": "", "fontFamily": "Times New Roman", "scaleX": 2.94, "scaleY": 2.94, "left": 450, "top": 200.00000000000003, "width": 50, "height": 50, "radius": 0, "fill": "#000000", "opacity": 1, "spriteWidth": 50, "spriteHeight": 72, "spriteIndex": 0, "frameTime": 100, "objectType": "Rect", "rx": 0, "ry": 0, "textAlign": "left", "selectable": false, "objects": null },
+	
+	{ "id": "Target_label", "angle": 0, "fontSize": 40, "text": "Target", "fontFamily": "Roboto", "scaleX": 0.85, "scaleY": 1, "left": 450, "top": 150, "width": 176.09, "height": 45.199999999999996, "radius": 0, "fill": "#000000", "opacity": 1, "spriteWidth": 50, "spriteHeight": 72, "spriteIndex": 0, "frameTime": 100, "objectType": "Text", "rx": 0, "ry": 0, "textAlign": "center", "selectable": false, "objects": null }, 
+	
+	{"id":"moveable_object","angle":0,"fontSize":40,"scaleX":1.5,"scaleY":1.5,"left":100,"top":200,"width":100,"height":100,"radius":50,"fill":"#FF0000","opacity":1,"spriteWidth":50,"spriteHeight":72,"spriteIndex":0,"frameTime":100,"objectType":"Circle","rx":0,"ry":0,"textAlign":"center","selectable":true}
+	]
+	
+	elements.canvas.loadCanvas(JSON.stringify(preset))
+}
