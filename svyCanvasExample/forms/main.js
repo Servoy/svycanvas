@@ -468,7 +468,8 @@ function objInfo(objs){
 		}
 	}
 	
-	//move was successful
+	//move was unsuccessful
+	//so reset position of elements
 	onAction$dragdrop(null)
 	plugins.dialogs.showInfoDialog('INFO','Move Failed')	
 	
