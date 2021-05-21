@@ -149,8 +149,40 @@ function stopAnimation() {
  * @properties={typeid:24,uuid:"4808D737-EAA1-471E-8D6B-D58F29A69F63"}
  */
 function onClick(id, obj) {
+	if (id == 'moveable_object') {
+		//setup drag and drop
+		//allow selection of an item
+		elements.canvas.canvasOptions.selectable = 1;
+
+		//allow selection of just selected item
+		var d = new Date()
+		d.setMilliseconds(d.getMilliseconds() + 0)
+		plugins.scheduler.addJob('disableSelection', d, selectItem, [id])
+
+		return;
+	}
+
 	application.output('selected itemID: ' + id);
 	plugins.dialogs.showInfoDialog('INFO', 'Selected Item #' + id);
+}
+
+/**
+ * TODO generated, please specify type and doc for the params
+ *
+ * @properties={typeid:24,uuid:"C77A9C77-4EC6-4F6C-B434-E76DA10D0AA7"}
+ */
+function selectItem(id) {
+	var ob = elements.canvas.canvasObjects;
+	var select = []
+	for (var i = 0; i < ob.length; i++) {
+		if (ob[i].id != id) {
+			//disable selection for non-matching
+			ob[i].selectable = false;
+		} else {
+			select.push(ob[i].id)
+		}
+	}
+	elements.canvas.setSelectedObject(select)
 }
 
 /**
@@ -450,29 +482,39 @@ function onModified() {
  *
  * @properties={typeid:24,uuid:"B65DD271-D7EA-41CF-9007-BA05DE550346"}
  */
-function objInfo(objs){
+function objInfo(objs) {
 	//possible target locations for moving the object
 	var targets = []
-	targets.push({top:200,left:450})
-	
+	targets.push({ top: 200, left: 450 }, { top: 200, left: 100 })
+
 	/** @type {{top:Number,left:Number}} */
-	
+
 	var d = objs[0];
-	application.output(d.top +',' + d.left)
-	
+	if (d.id != 'moveable_object') return;
+	application.output(d.top + ',' + d.left);
+
 	for (var i = 0; i < targets.length; i++) {
-		if (targets[i].top == d.top && targets[i].left == d.left){
+		//if we move back to source, don't do anything.
+		if (d.top == 200 && d.left == 100) {
+			onAction$dragdrop(null)
+			elements.canvas.canvasOptions.selectable = 0;
+			return;
+		}
+
+		if (targets[i].top == d.top && targets[i].left == d.left) {
 			//move was successful
-			plugins.dialogs.showInfoDialog('INFO','Move successful')
+			plugins.dialogs.showInfoDialog('INFO', 'Move successful');
+			elements.canvas.canvasOptions.selectable = 0;
 			return;
 		}
 	}
-	
+
 	//move was unsuccessful
 	//so reset position of elements
 	onAction$dragdrop(null)
-	plugins.dialogs.showInfoDialog('INFO','Move Failed')	
-	
+	plugins.dialogs.showInfoDialog('INFO', 'Move Failed')
+	elements.canvas.canvasOptions.selectable = 0;
+
 }
 
 /**
@@ -485,17 +527,7 @@ function objInfo(objs){
  * @properties={typeid:24,uuid:"FF5FFDF5-90AF-43C6-984C-5B91EBE84D74"}
  */
 function onAction$dragdrop(event) {
-	var preset = [
-	{ "id": "Source", "angle": 0, "fontSize": 40, "text": "Some words...of wisdom", "fontFamily": "Roboto", "scaleX": 2.9411764705882346, "scaleY": 2.9411764705882346, "left": 100.00000000000001, "top": 200, "width": 50, "height": 50, "radius": 50, "fill": "#000000", "opacity": 1, "spriteWidth": 50, "spriteHeight": 72, "spriteIndex": 0, "frameTime": 100, "objectType": "Rect", "rx": 0, "ry": 0, "textAlign": "center", "selectable": false, "objects": null }, 
-	
-	{ "id": "Source_text", "angle": 0, "fontSize": 40, "text": "Source", "fontFamily": "Roboto", "scaleX": 0.8518303152059465, "scaleY": 1, "left": 100.00000000000003, "top": 150, "width": 176.09140849106146, "height": 45.199999999999996, "radius": 50, "fill": "#000000", "opacity": 1, "spriteWidth": 50, "spriteHeight": 72, "spriteIndex": 0, "frameTime": 100, "objectType": "Text", "rx": 0, "ry": 0, "textAlign": "center", "selectable": false, "objects": null },
-	
-	{ "id": "Target", "angle": 0, "fontSize": 8, "text": "", "fontFamily": "Times New Roman", "scaleX": 2.94, "scaleY": 2.94, "left": 450, "top": 200.00000000000003, "width": 50, "height": 50, "radius": 0, "fill": "#000000", "opacity": 1, "spriteWidth": 50, "spriteHeight": 72, "spriteIndex": 0, "frameTime": 100, "objectType": "Rect", "rx": 0, "ry": 0, "textAlign": "left", "selectable": false, "objects": null },
-	
-	{ "id": "Target_label", "angle": 0, "fontSize": 40, "text": "Target", "fontFamily": "Roboto", "scaleX": 0.85, "scaleY": 1, "left": 450, "top": 150, "width": 176.09, "height": 45.199999999999996, "radius": 0, "fill": "#000000", "opacity": 1, "spriteWidth": 50, "spriteHeight": 72, "spriteIndex": 0, "frameTime": 100, "objectType": "Text", "rx": 0, "ry": 0, "textAlign": "center", "selectable": false, "objects": null }, 
-	
-	{"id":"moveable_object","angle":0,"fontSize":40,"scaleX":1.5,"scaleY":1.5,"left":100,"top":200,"width":100,"height":100,"radius":50,"fill":"#FF0000","opacity":1,"spriteWidth":50,"spriteHeight":72,"spriteIndex":0,"frameTime":100,"objectType":"Circle","rx":0,"ry":0,"textAlign":"center","selectable":true}
-	]
-	
+	var preset = [{ "id": "Source", "angle": 0, "fontSize": 40, "text": "Some words...of wisdom", "fontFamily": "Roboto", "scaleX": 2.9411764705882346, "scaleY": 2.9411764705882346, "left": 100.00000000000001, "top": 200, "width": 50, "height": 50, "radius": 50, "fill": "#000000", "opacity": 1, "spriteWidth": 50, "spriteHeight": 72, "spriteIndex": 0, "frameTime": 100, "objectType": "Rect", "rx": 0, "ry": 0, "textAlign": "center", "selectable": true, "objects": null }, { "id": "Source_text", "angle": 0, "fontSize": 40, "text": "Source", "fontFamily": "Roboto", "scaleX": 0.8518303152059465, "scaleY": 1, "left": 100.00000000000003, "top": 150, "width": 176.09140849106146, "height": 45.199999999999996, "radius": 50, "fill": "#000000", "opacity": 1, "spriteWidth": 50, "spriteHeight": 72, "spriteIndex": 0, "frameTime": 100, "objectType": "Text", "rx": 0, "ry": 0, "textAlign": "center", "selectable": true, "objects": null }, { "id": "Target", "angle": 0, "fontSize": 8, "text": "", "fontFamily": "Times New Roman", "scaleX": 2.94, "scaleY": 2.94, "left": 450, "top": 200.00000000000003, "width": 50, "height": 50, "radius": 0, "fill": "#000000", "opacity": 1, "spriteWidth": 50, "spriteHeight": 72, "spriteIndex": 0, "frameTime": 100, "objectType": "Rect", "rx": 0, "ry": 0, "textAlign": "left", "selectable": true, "objects": null }, { "id": "Target_label", "angle": 0, "fontSize": 40, "text": "Target", "fontFamily": "Roboto", "scaleX": 0.85, "scaleY": 1, "left": 450, "top": 150, "width": 176.09, "height": 45.199999999999996, "radius": 0, "fill": "#000000", "opacity": 1, "spriteWidth": 50, "spriteHeight": 72, "spriteIndex": 0, "frameTime": 100, "objectType": "Text", "rx": 0, "ry": 0, "textAlign": "center", "selectable": true, "objects": null }, { "id": "moveable_object", "angle": 0, "fontSize": 40, "scaleX": 1.5, "scaleY": 1.5, "left": 100, "top": 200, "width": 100, "height": 100, "radius": 50, "fill": "#FF0000", "opacity": 1, "spriteWidth": 50, "spriteHeight": 72, "spriteIndex": 0, "frameTime": 100, "objectType": "Circle", "rx": 0, "ry": 0, "textAlign": "center", "selectable": true }]
+
 	elements.canvas.loadCanvas(JSON.stringify(preset))
 }
