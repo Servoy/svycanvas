@@ -503,7 +503,7 @@ function objInfo(objs) {
 
 		if (targets[i].top == d.top && targets[i].left == d.left) {
 			//move was successful
-			plugins.dialogs.showInfoDialog('INFO', 'Move successful');
+			plugins.dialogs.showInfoDialog('INFO', 'Move successful');			
 			elements.canvas.canvasOptions.selectable = 0;
 			return;
 		}
@@ -530,4 +530,5 @@ function onAction$dragdrop(event) {
 	var preset = [{ "id": "Source", "angle": 0, "fontSize": 40, "text": "Some words...of wisdom", "fontFamily": "Roboto", "scaleX": 2.9411764705882346, "scaleY": 2.9411764705882346, "left": 100.00000000000001, "top": 200, "width": 50, "height": 50, "radius": 50, "fill": "#000000", "opacity": 1, "spriteWidth": 50, "spriteHeight": 72, "spriteIndex": 0, "frameTime": 100, "objectType": "Rect", "rx": 0, "ry": 0, "textAlign": "center", "selectable": true, "objects": null }, { "id": "Source_text", "angle": 0, "fontSize": 40, "text": "Source", "fontFamily": "Roboto", "scaleX": 0.8518303152059465, "scaleY": 1, "left": 100.00000000000003, "top": 150, "width": 176.09140849106146, "height": 45.199999999999996, "radius": 50, "fill": "#000000", "opacity": 1, "spriteWidth": 50, "spriteHeight": 72, "spriteIndex": 0, "frameTime": 100, "objectType": "Text", "rx": 0, "ry": 0, "textAlign": "center", "selectable": true, "objects": null }, { "id": "Target", "angle": 0, "fontSize": 8, "text": "", "fontFamily": "Times New Roman", "scaleX": 2.94, "scaleY": 2.94, "left": 450, "top": 200.00000000000003, "width": 50, "height": 50, "radius": 0, "fill": "#000000", "opacity": 1, "spriteWidth": 50, "spriteHeight": 72, "spriteIndex": 0, "frameTime": 100, "objectType": "Rect", "rx": 0, "ry": 0, "textAlign": "left", "selectable": true, "objects": null }, { "id": "Target_label", "angle": 0, "fontSize": 40, "text": "Target", "fontFamily": "Roboto", "scaleX": 0.85, "scaleY": 1, "left": 450, "top": 150, "width": 176.09, "height": 45.199999999999996, "radius": 0, "fill": "#000000", "opacity": 1, "spriteWidth": 50, "spriteHeight": 72, "spriteIndex": 0, "frameTime": 100, "objectType": "Text", "rx": 0, "ry": 0, "textAlign": "center", "selectable": true, "objects": null }, { "id": "moveable_object", "angle": 0, "fontSize": 40, "scaleX": 1.5, "scaleY": 1.5, "left": 100, "top": 200, "width": 100, "height": 100, "radius": 50, "fill": "#FF0000", "opacity": 1, "spriteWidth": 50, "spriteHeight": 72, "spriteIndex": 0, "frameTime": 100, "objectType": "Circle", "rx": 0, "ry": 0, "textAlign": "center", "selectable": true }]
 
 	elements.canvas.loadCanvas(JSON.stringify(preset))
+	elements.canvas.canvasOptions.selectable = 0;
 }

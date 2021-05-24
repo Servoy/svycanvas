@@ -716,13 +716,14 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 							var obj = $scope.canvas.getActiveObject();
 							if (!obj) return;
 							obj.set({
+								hasControls:0,
 								opacity: 0.3
 							});
 
 							// if ($scope.handlers.onMove) {
 							//     $scope.handlers.onMove(obj.id, obj.left, obj.top);
 							// }
-
+							
 							$scope.canvas.renderAll();
 						});
 					$scope.canvas.on('mouse:wheel', function(opt) {
@@ -743,6 +744,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					$scope.canvas.on('mouse:up', function(options) {
 							var obj = $scope.canvas.getActiveObject();
 							if (!obj) return;
+							
 							var o = $scope.model.canvasObjects;
 
 							if ($scope.handlers.onClick && !$scope.model.canvasOptions.selectable && (typeof obj.id != 'undefined')) {
@@ -831,6 +833,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 							var obj = $scope.canvas.getActiveObject();
 							if (!obj) return;
 							obj.set({
+								hasControls: $scope.model.canvasOptions.selectable,
 								opacity: 1
 							});
 							var sel = []
