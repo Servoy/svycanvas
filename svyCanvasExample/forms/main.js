@@ -1,6 +1,13 @@
 /**
  * @type {Number}
  *
+ * @properties={typeid:35,uuid:"5B151F30-E744-4BE1-B324-390AD8B0AF68",variableType:8}
+ */
+var zoom = null;
+
+/**
+ * @type {Number}
+ *
  * @properties={typeid:35,uuid:"4CBC99AB-31CC-45A6-AA54-B9618A3402CD",variableType:8}
  */
 var gridSize = 50;
@@ -94,17 +101,22 @@ function onAction$clearCanvas(event) {
 function onAction$addObject(event) {
 	var id = application.getUUID().toString()
 	application.output('generated object with ID' + id);
-	var obj = {
-		id: id, objectType: shape,
-		scaleX: 1, scaleY: 1,
-		left: 200, top: 100
-	}
+	var obj = elements.canvas.createObject(id, shape);
+	
+	obj.scaleX = 1;
+	obj.scaleY = 1;
+	obj.left = 200;
+	obj.top = 100;
+	
 	if (shape == 'Image') {
-		obj.mediaName = 'flower.png'
+		elements.canvas.imagesLoader = ['3100_Bochum_2020.png'];
+		obj.mediaName = '3100_Bochum_2020.png';
+//		obj.mediaName = 'flower.png';
 		obj.width = 0;
 		obj.height = 0;
 		obj.left = 0;
 		obj.top = 0;
+		obj.selectable = false;
 	} else if (shape == 'Sprite') {
 		obj.spriteName = 'sprite.png'
 		obj.width = 0;
@@ -113,6 +125,12 @@ function onAction$addObject(event) {
 		obj.spriteHeight = 72;
 		obj.spriteIndex = 0;
 		obj.frameTime = 100;
+	} else if (shape == 'Text') {
+		obj.width = 50;
+		obj.height = 50;
+		obj.text = 'Foo';
+		obj.textAlign = 'center';
+		obj.fontFamily = 'Roboto';
 	} else {
 		obj.width = 50;
 		obj.height = 50;
@@ -125,6 +143,7 @@ function onAction$addObject(event) {
 		obj.fill = color;
 		obj.opacity = 1;
 	}
+
 	elements.canvas.addObject(obj, true);
 }
 
@@ -284,17 +303,8 @@ function selectedCB(so) {
  * @properties={typeid:24,uuid:"88EB32CA-0C89-469E-A2FE-30E18BD7A9B2"}
  */
 function onAction$loadPreset(event) {
-	elements.canvas.loadCanvas(savedData);
+	elements.canvas.restoreCanvasState(savedData);
 
-}
-
-/**
- * @param {String} data
- * @properties={typeid:24,uuid:"F9FAECE9-584D-4A13-A2E9-C8E21DEBA29C"}
- */
-function saveCB(data) {
-	savedData = data;
-	application.output(savedData);
 }
 
 /**
@@ -307,7 +317,8 @@ function saveCB(data) {
  * @properties={typeid:24,uuid:"D8DB9D54-B58C-456E-BB93-6119BE0D8B8B"}
  */
 function onAction$savePreset(event) {
-	elements.canvas.saveCanvas(saveCB);
+	savedData = elements.canvas.getCanvasState();
+	application.output(savedData);
 }
 
 /**
@@ -425,7 +436,7 @@ function onAction$ZoomOnSelection(event) {
  * @properties={typeid:24,uuid:"06D14A08-1038-4F40-9940-16E8D8A90142"}
  */
 function cbZoom(o) {
-	elements.canvas.ZoomOnPoint(o[0].x, o[0].y, 1.5)
+	elements.canvas.zoomToPoint(o[0].left, o[0].top, 1.5)
 }
 
 /**
@@ -438,7 +449,7 @@ function cbZoom(o) {
  * @properties={typeid:24,uuid:"7098A246-5056-4E41-9372-7DDCA305015A"}
  */
 function onAction$resetZoom(event) {
-	elements.canvas.ZoomOnPoint(0, 0, 1)
+	elements.canvas.zoomToPoint(0, 0, 1)
 }
 
 /**
@@ -467,12 +478,17 @@ function onAction$rotate(event) {
 }
 
 /**
-
+ * @param {Array<CustomType<svycanvas-Canvas.canvasObject>>} objects
+ * 
  * @private
  *
  * @properties={typeid:24,uuid:"D8540DF2-A64C-43F2-8C74-9AB99EC33645"}
  */
-function onModified() {
+function onModified(objects) {
+	var objIds = objects.map(function getId(item) {
+		return item.id;
+	})
+	application.output('Objects modified: ' + objIds.join('\n'))
 	elements.canvas.getSelectedObject(objInfo)
 }
 
@@ -527,8 +543,71 @@ function objInfo(objs) {
  * @properties={typeid:24,uuid:"FF5FFDF5-90AF-43C6-984C-5B91EBE84D74"}
  */
 function onAction$dragdrop(event) {
-	var preset = [{ "id": "Source", "angle": 0, "fontSize": 40, "text": "Some words...of wisdom", "fontFamily": "Roboto", "scaleX": 2.9411764705882346, "scaleY": 2.9411764705882346, "left": 100.00000000000001, "top": 200, "width": 50, "height": 50, "radius": 50, "fill": "#000000", "opacity": 1, "spriteWidth": 50, "spriteHeight": 72, "spriteIndex": 0, "frameTime": 100, "objectType": "Rect", "rx": 0, "ry": 0, "textAlign": "center", "selectable": true, "objects": null }, { "id": "Source_text", "angle": 0, "fontSize": 40, "text": "Source", "fontFamily": "Roboto", "scaleX": 0.8518303152059465, "scaleY": 1, "left": 100.00000000000003, "top": 150, "width": 176.09140849106146, "height": 45.199999999999996, "radius": 50, "fill": "#000000", "opacity": 1, "spriteWidth": 50, "spriteHeight": 72, "spriteIndex": 0, "frameTime": 100, "objectType": "Text", "rx": 0, "ry": 0, "textAlign": "center", "selectable": true, "objects": null }, { "id": "Target", "angle": 0, "fontSize": 8, "text": "", "fontFamily": "Times New Roman", "scaleX": 2.94, "scaleY": 2.94, "left": 450, "top": 200.00000000000003, "width": 50, "height": 50, "radius": 0, "fill": "#000000", "opacity": 1, "spriteWidth": 50, "spriteHeight": 72, "spriteIndex": 0, "frameTime": 100, "objectType": "Rect", "rx": 0, "ry": 0, "textAlign": "left", "selectable": true, "objects": null }, { "id": "Target_label", "angle": 0, "fontSize": 40, "text": "Target", "fontFamily": "Roboto", "scaleX": 0.85, "scaleY": 1, "left": 450, "top": 150, "width": 176.09, "height": 45.199999999999996, "radius": 0, "fill": "#000000", "opacity": 1, "spriteWidth": 50, "spriteHeight": 72, "spriteIndex": 0, "frameTime": 100, "objectType": "Text", "rx": 0, "ry": 0, "textAlign": "center", "selectable": true, "objects": null }, { "id": "moveable_object", "angle": 0, "fontSize": 40, "scaleX": 1.5, "scaleY": 1.5, "left": 100, "top": 200, "width": 100, "height": 100, "radius": 50, "fill": "#FF0000", "opacity": 1, "spriteWidth": 50, "spriteHeight": 72, "spriteIndex": 0, "frameTime": 100, "objectType": "Circle", "rx": 0, "ry": 0, "textAlign": "center", "selectable": true }]
+	var preset = [
+		{ "id": "Source", "angle": 0, "fontSize": 40, "text": "Some words...of wisdom", "fontFamily": "Roboto", "scaleX": 2.9411764705882346, "scaleY": 2.9411764705882346, "left": 100.00000000000001, "top": 200, "width": 50, "height": 50, "radius": 50, "fill": "#000000", "opacity": 1, "spriteWidth": 50, "spriteHeight": 72, "spriteIndex": 0, "frameTime": 100, "objectType": "Rect", "rx": 0, "ry": 0, "textAlign": "center", "selectable": true, "objects": null }, 
+		{ "id": "Source_text", "angle": 0, "fontSize": 40, "text": "Source", "fontFamily": "Roboto", "scaleX": 0.8518303152059465, "scaleY": 1, "left": 100.00000000000003, "top": 150, "width": 176.09140849106146, "height": 45.199999999999996, "radius": 50, "fill": "#000000", "opacity": 1, "spriteWidth": 50, "spriteHeight": 72, "spriteIndex": 0, "frameTime": 100, "objectType": "Text", "rx": 0, "ry": 0, "textAlign": "center", "selectable": true, "objects": null }, 
+		{ "id": "Target", "angle": 0, "fontSize": 8, "text": "", "fontFamily": "Times New Roman", "scaleX": 2.94, "scaleY": 2.94, "left": 450, "top": 200.00000000000003, "width": 50, "height": 50, "radius": 0, "fill": "#000000", "opacity": 1, "spriteWidth": 50, "spriteHeight": 72, "spriteIndex": 0, "frameTime": 100, "objectType": "Rect", "rx": 0, "ry": 0, "textAlign": "left", "selectable": true, "objects": null }, 
+		{ "id": "Target_label", "angle": 0, "fontSize": 40, "text": "Target", "fontFamily": "Roboto", "scaleX": 0.85, "scaleY": 1, "left": 450, "top": 150, "width": 176.09, "height": 45.199999999999996, "radius": 0, "fill": "#000000", "opacity": 1, "spriteWidth": 50, "spriteHeight": 72, "spriteIndex": 0, "frameTime": 100, "objectType": "Text", "rx": 0, "ry": 0, "textAlign": "center", "selectable": true, "objects": null }, 
+		{ "id": "moveable_object", "angle": 0, "fontSize": 40, "scaleX": 1.5, "scaleY": 1.5, "left": 100, "top": 200, "width": 100, "height": 100, "radius": 50, "fill": "#FF0000", "opacity": 1, "spriteWidth": 50, "spriteHeight": 72, "spriteIndex": 0, "frameTime": 100, "objectType": "Circle", "rx": 0, "ry": 0, "textAlign": "center", "selectable": true }
+	]
 
-	elements.canvas.loadCanvas(JSON.stringify(preset))
+	elements.canvas.restoreCanvasState(JSON.stringify(preset));
 	elements.canvas.canvasOptions.selectable = 0;
+}
+
+/**
+ * @properties={typeid:24,uuid:"103CAB60-4E1D-45D3-887B-276FFCEA2BE7"}
+ */
+function saveAsImage() {
+	elements.canvas.saveAsImage(saveAsImageCallback)
+}
+
+/**
+ * TODO generated, please specify type and doc for the params
+ * @param url
+ *
+ * @properties={typeid:24,uuid:"D5974A14-9233-4B20-A255-67EE0CA1C66F"}
+ */
+function saveAsImageCallback(url) {
+	application.output(url);
+}
+
+/**
+ * @properties={typeid:24,uuid:"B4EEA9F0-E4C3-4299-8741-62A35617DC78"}
+ */
+function getImage() {
+	application.output(elements.canvas.getImageUrl())
+}
+
+/**
+ * @param {JSEvent} event
+ * @param {string} objectId
+ * @param {CustomType<svycanvas-Canvas.canvasObject>} object
+ *
+ * @private
+ *
+ * @properties={typeid:24,uuid:"E05161E0-1DEF-42CF-99A9-EE47732689E2"}
+ */
+function onRightClick(event, objectId, object) {
+	application.output(objectId);	
+	var popup = plugins.window.createPopupMenu();
+	popup.addMenuItem('Hello');
+	popup.addMenuItem('World');
+	popup.addMenuItem('Foo');
+	popup.addMenuItem('Bar');
+	popup.show(event.getX() + 1, event.getY());
+}
+
+/**
+ * @param {JSEvent} event
+ * @param {string} objectId
+ * @param {CustomType<svycanvas-Canvas.canvasObject>} object
+ *
+ * @private
+ *
+ * @properties={typeid:24,uuid:"924092A0-6339-4131-BD3E-EFBF58EBE24A"}
+ */
+function onDoubleClick(event, objectId, object) {
+	application.output(event);
+	application.output(objectId);
 }

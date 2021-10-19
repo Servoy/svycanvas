@@ -5,6 +5,7 @@
 	"version": 1,
 	"icon": "svycanvas/Canvas/icon.png",
 	"definition": "svycanvas/Canvas/Canvas.js",
+	"serverscript": "svycanvas/Canvas/Canvas_server.js",
 	"libraries": 
 	[
 		{
@@ -23,26 +24,27 @@
 
 	"model": 
 	{
-		"canvasObjects": {"type": "canvasObject[]","pushToServer": "allow"},
-		"showGrid": {"type": "int","values": [{"Yes": 1},{"No": 0}],"default": 0},
-		"snapToGrid": {"type": "int","values": [{"Yes": 1},{"No": 0}],"default": 0},
-		"gridSize":{"type": "int","default": 10},
-		"canvasOptions": {"type": "canvasOptions"},
-		"imagesLoader": {"type": "media[]"},
-		"styleClass": {"type":"styleclass"}
+		"canvasObjects": 				{ "type": "canvasObject[]", "pushToServer": "allow" },
+		"showGrid": 					{ "type": "int", "values": [{"Yes": 1},{"No": 0}], "default": 0 },
+		"snapToGrid": 					{ "type": "int", "values": [{"Yes": 1},{"No": 0}], "default": 0 },
+		"gridSize":						{ "type": "int", "default": 10 },
+		"canvasOptions": 				{ "type": "canvasOptions" },
+		"imagesLoader": 				{ "type": "media[]" },
+		"styleClass": 					{ "type": "styleclass" }
 	},
 
 	"types": 
 	{
 		"canvasOptions": 
 		{
-			"selectable": {"type": "int","values": [{"Yes": 1},{"No": 0}],"default": 1},
-			"skipTargetFind": {"type": "int","values": [{"Yes": 1},{"No": 0}],"default": 0},
-			"hasRotatingPoint": {"type": "int","values": [{"Yes": 1},{"No": 0}],"default": 1},
-			"renderOnAddRemove": {"type": "int","values": [{"Yes": 1},{"No": 0}],"default": 0},
-			"skipOffscreen": {"type": "int","values": [{"Yes": 1},{"No": 0}],"default": 1},
-			"ZoomOnMouseScroll": {"type": "int","values": [{"Yes": 1},{"No": 0}],"default": 0},
-			"animationSpeed": {"type": "float","default": 50}		
+			"selectable": 				{"type": "int", "values": [{"Yes": 1}, {"No": 0}], "default": 1 },
+			"skipTargetFind": 			{"type": "int", "values": [{"Yes": 1}, {"No": 0}], "default": 0 },
+			"hasRotatingPoint": 		{"type": "int", "values": [{"Yes": 1}, {"No": 0}], "default": 1 },
+			"renderOnAddRemove": 		{"type": "int", "values": [{"Yes": 1}, {"No": 0}], "default": 0 },
+			"skipOffscreen": 			{"type": "int", "values": [{"Yes": 1}, {"No": 0}], "default": 1 },
+			"ZoomOnMouseScroll": 		{"type": "int", "deprecated": "Use zoomOnMouseScroll instead", "values": [{"Yes": 1}, {"No": 0}], "default": 0 },
+			"zoomOnMouseScroll": 		{"type": "int", "values": [{"Yes": 1}, {"No": 0}], "default": 0 },
+			"animationSpeed": 			{"type": "float", "default": 50 }		
 		},
 
 		"canvasObject": 
@@ -93,28 +95,152 @@
 
 	"api": 
 	{
-		"addObject": {"delayUntilFormLoads": true, "parameters": [{"name": "object","type": "object"}, {"name": "setActive", "type":"boolean", "optional":true}]},		
+		"createObject": {
+			"returns": "canvasObject",
+			"parameters": [
+				{"name": "id","type": "string"}, 
+				{"name": "type","type": "string"}
+			]
+		},		
+		"addObject": {
+			"delayUntilFormLoads": true, 
+			"parameters": [
+				{"name": "object", "type": "object"}, 
+				{"name": "setActive", "type":"boolean", "optional":true}
+			]
+		},		
 		"copySelectedObject": {"delayUntilFormLoads": true, "parameters": []},
-		"updateObject": {"delayUntilFormLoads": true, "parameters": [{"name": "object","type": "object"},{"name": "selectActiveItems","type": "boolean"}]},
-        "removeObject": {"delayUntilFormLoads": true, "parameters": [{"name": "id","type": "string"}]},        
-        "clearCanvas":{"delayUntilFormLoads": true},
-        "startAnimate":{"delayUntilFormLoads": true},
-        "stopAnimate":{"delayUntilFormLoads": true},
-		"getSelectedObject": {"delayUntilFormLoads": true, "parameters": [{"name": "saveCB","type": "function"}]},
-		"setSelectedObject": {"delayUntilFormLoads": true, "parameters": [{"name": "ids","type": "object"}]},
-		"saveCanvas": {"delayUntilFormLoads": true, "parameters": [{"name": "saveCB","type": "function"}]},
-		"loadCanvas": {"delayUntilFormLoads": true, "parameters": [{"name": "data","type": "string"}]},
-		"saveAsImage": {"delayUntilFormLoads": true, "parameters": [{"name": "imgCB","type": "function"}]},
-		"ZoomOnPoint": {"delayUntilFormLoads": true, "parameters": [{"name": "x","type": "int"},{"name": "y","type": "int"},{"name": "zoom","type": "int"}]},
-		"bringToFront": {"delayUntilFormLoads": true, "parameters": [{"name": "id","type": "string"}]},
-		"rotate": {"delayUntilFormLoads": true, "parameters": [{"name": "angle","type": "int"}]}
+		"updateObject": {"delayUntilFormLoads": true, "parameters": [{"name": "object", "type": "object"}, {"name": "selectActiveItems", "type": "boolean"}]},
+        "removeObject": {
+        	"delayUntilFormLoads": true, 
+        	"parameters": [
+        		{"name": "id", "type": "string", "optional": true}
+        	]
+        },
+        "clearCanvas": {
+        	"delayUntilFormLoads": true
+        },
+        "startAnimate": {
+        	"delayUntilFormLoads": true
+        },
+        "stopAnimate": {
+        	"delayUntilFormLoads": true
+        },
+		"getSelectedObject": {
+			"delayUntilFormLoads": true, 
+			"parameters": [
+				{"name": "callbackMethod","type": "function"}
+		]},
+		"setSelectedObject": {
+			"delayUntilFormLoads": true, 
+			"parameters": [
+				{"name": "ids", "type": "object"}
+			]
+		},
+		"saveCanvas": {
+			"delayUntilFormLoads": true, 
+			"deprecated": "use getCanvasState instead",
+			"parameters": [
+				{"name": "saveCB","type": "function"}
+			]
+		},
+		"loadCanvas": {
+			"delayUntilFormLoads": true, 
+			"deprecated": "use restoreCanvasState instead",
+			"parameters": [
+				{"name": "canvasJson", "type": "string"}
+			]
+		},
+		"getCanvasState": {
+			"delayUntilFormLoads": true, 
+			"returns": "string"
+		},
+		"restoreCanvasState": {
+			"delayUntilFormLoads": true, 
+			"parameters": [
+				{"name": "canvasJson", "type": "string"}
+			]
+		},
+		"saveAsImage": {
+			"delayUntilFormLoads": true, 
+			"parameters": [
+				{"name": "imgCB","type": "function"}
+			]
+		},
+		"getImageUrl": {
+			"delayUntilFormLoads": true,
+			"returns": "string"
+		},
+		"ZoomOnPoint": {
+			"delayUntilFormLoads": true, 
+			"deprecated": "Please use zoomToPoint instead",
+			"parameters": [
+				{"name": "x","type": "int"},
+				{"name": "y","type": "int"},
+				{"name": "zoom","type": "int"}
+			]
+		},
+		"zoomToPoint": {
+			"delayUntilFormLoads": true, 
+			"parameters": [
+				{"name": "x","type": "int"},
+				{"name": "y","type": "int"},
+				{"name": "zoom","type": "int"}
+			]
+		},
+		"zoom": {
+			"delayUntilFormLoads": true, 
+			"parameters": [
+				{"name": "zoom","type": "int"}
+			]
+		},
+		"bringToFront": {
+			"delayUntilFormLoads": true, 
+			"parameters": [
+				{"name": "objectId","type": "string"}
+			]
+		},
+		"rotate": {
+			"delayUntilFormLoads": true, 
+			"parameters": [
+				{"name": "angle","type": "int"}
+			]
+		}
 	},
 
 	"handlers": 
 	{
-		"onClick": {"parameters": []},
-		"onLongPress": {"parameters": []},
-		"onModified": {"parameters": []},
+		"onClick": { 
+			"parameters": [ 
+				{"name": "objectId", "type": "string"}, 
+				{"name": "object", "type": "canvasObject"} 
+			]
+		},
+		"onRightClick": { 
+			"parameters": [ 
+				{"name": "event", "type": "JSEvent"}, 
+				{"name": "objectId", "type": "string"}, 
+				{"name": "object", "type": "canvasObject"} 
+			]
+		},
+		"onDoubleClick": { 
+			"parameters": [ 
+				{"name": "event", "type": "JSEvent"}, 
+				{"name": "objectId", "type": "string"}, 
+				{"name": "object", "type": "canvasObject"} 
+			]
+		},
+		"onLongPress": { 
+			"parameters": [ 
+				{"name": "objectId", "type": "string"}, 
+				{"name": "object", "type": "canvasObject"} 
+			]
+		},
+		"onModified": {
+			"parameters": [ 
+				{"name": "objectsModified", "type": "canvasObject[]"} 
+			]
+		},
 		"onReady": {"parameters": []}
 	}
 }
