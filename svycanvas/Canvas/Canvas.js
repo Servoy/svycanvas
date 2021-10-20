@@ -373,6 +373,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					$scope.zoomY = y;
 					$scope.zoom = zoom;
 					$scope.canvas.zoomToPoint({ x: y, y: y }, zoom);
+					$scope.canvas.renderAll();
 				}				
 				
 				/**
