@@ -16,6 +16,8 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					fontFamily: 'Times New Roman',
 					scaleX: 1,
 					scaleY: 1,
+					zoomX: 1,
+					zoomY: 1,
 					left: 0,
 					top: 0,
 					width: 50,
@@ -107,17 +109,34 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					return null;
 				}
 				
-				function getObjectsFromEvent(evt) {
+				function updateModelObject(canvasObj, modelObj) {
+					for (var k in modelObj) {
+						if (k != 'id') {
+							modelObj[k] = canvasObj[k] == null ? modelObj[k] : canvasObj[k];
+						}
+					}
+				}
+				
+				function getObjectsFromEvent(evt, update) {
 					var result = [];
+					var modelObj;
 					if (evt && evt.target && evt.target._objects) {
 						for (var i = 0; i < evt.target._objects.length; i++) {
 							var obj = evt.target._objects[i];
 							if (obj.id) {
-								result.push(getObjectById(obj.id))
+								modelObj = getObjectById(obj.id);
+								if (update) {
+									updateModelObject(obj, modelObj);
+								}
+								result.push(modelObj);
 							}
 						}
 					} else if (evt && evt.target && evt.target.id) {
-						result.push(getObjectById(evt.target.id))
+						modelObj = getObjectById(evt.target.id);
+						if (update) {
+							updateModelObject(evt.target, modelObj);
+						}
+						result.push(modelObj)
 					}
 					return result;
 				}				
@@ -177,10 +196,9 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					// console.log('update ' + o.id);
 					// console.log(o.left + ' , ' + o.top)
 					var d = $scope.model.canvasObjects;
-					if (o[i].type === "i-text") {
-						o[i].type = "Text";
+					if (o.type === "i-text") {
+						o.type = "Text";
 					}
-					var objectType = o.type.charAt(0).toUpperCase() + o.type.slice(1);
 					for (var j in d) {
 						if (d[j] && d[j].id == o.id) {
 
@@ -915,7 +933,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 							evt.stopPropagation();
 							var obj = $scope.canvas.getActiveObject();
 							if (!obj) {
-								obj = getObjectsFromEvent(opt);
+								obj = getObjectsFromEvent(opt, false);
 								if (obj) {
 									obj = obj[0];
 								}
@@ -979,7 +997,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 							var evt = opt.e;
 							var obj = $scope.canvas.getActiveObject();
 							if (!obj) {
-								obj = getObjectsFromEvent(opt);
+								obj = getObjectsFromEvent(opt, false);
 								if (obj) {
 									obj = obj[0];
 								}
@@ -1067,8 +1085,9 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 						});
 					
 					$scope.canvas.on('object:modified', function(evt) {
+							var objsModified = getObjectsFromEvent(evt, true);
 							if ($scope.handlers.onModified) {
-								$scope.handlers.onModified(getObjectsFromEvent(evt));
+								$scope.handlers.onModified(objsModified);
 							}
 							var obj = $scope.canvas.getActiveObject();
 							if (!obj) return;

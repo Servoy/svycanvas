@@ -77,6 +77,8 @@
 			"id": {"type": "string"},
 			"scaleX": {"type": "float"},
 			"scaleY": {"type": "float"},
+			"zoomX": {"type": "float"},
+			"zoomY": {"type": "float"},
 			"text": {"type": "string","default": "Text"},
 			"textAlign": {"type": "string","default": "left"},			
 			"fontSize": {"type": "float"},
