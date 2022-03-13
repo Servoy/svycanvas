@@ -109,14 +109,13 @@ function onAction$addObject(event) {
 	obj.top = 100;
 	
 	if (shape == 'Image') {
-		elements.canvas.imagesLoader = ['3100_Bochum_2020.png'];
-		obj.mediaName = '3100_Bochum_2020.png';
-//		obj.mediaName = 'flower.png';
+		elements.canvas.imagesLoader = ['flower.png'];
+		obj.mediaName = 'flower.png';
 		obj.width = 0;
 		obj.height = 0;
 		obj.left = 0;
 		obj.top = 0;
-		obj.selectable = false;
+		obj.selectable = true;
 	} else if (shape == 'Sprite') {
 		obj.spriteName = 'sprite.png'
 		obj.width = 0;
