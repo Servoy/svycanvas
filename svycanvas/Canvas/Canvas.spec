@@ -87,6 +87,8 @@
 			"spriteIndex": {"type": "float"},
 			"frameTime": {"type": "float"},
 			"selectable" : {"type": "boolean"},
+			"state" : {"type": "object"},
+			"stateHolder" : {"type": "object"},
 			"custom_data" : {"type": "object"}			
 		}
 	},
