@@ -3,6 +3,9 @@ Bundle-SymbolicName: svycanvas
 Bundle-Name: Canvas
 Bundle-Version: 1.0.4
 Package-Type: Web-Component
+NPM-PackageName: svycanvas
+NG2-Module: svycanvasModule
+Entry-Point: dist
 
 Name: Canvas/Canvas.spec
 Web-Component: True
