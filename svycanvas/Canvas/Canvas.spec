@@ -75,7 +75,7 @@
 			"rx": {"type": "float","pushToServer": "allow"},
 			"ry": {"type": "float","pushToServer": "allow"},
 			"stroke": {"type": "color","pushToServer": "allow"},
-			"strokeWidth": {"type": "color","pushToServer": "allow"},
+			"strokeWidth": {"type": "float","pushToServer": "allow"},
 			"points": {"type": "object","pushToServer": "allow"},
 			"id": {"type": "string","pushToServer": "allow"},
 			"scaleX": {"type": "float","pushToServer": "allow"},
@@ -97,7 +97,7 @@
 			"selectable" : {"type": "boolean","pushToServer": "allow"},
 			"state" : {"type": "object","pushToServer": "allow"},
 			"stateHolder" : {"type": "object","pushToServer": "allow"},
-			"custom_data" : {"type": "object","pushToServer": "allow"}			
+			"custom_data" : {"type": "object","pushToServer": "allow"}
 		}
 	},
 

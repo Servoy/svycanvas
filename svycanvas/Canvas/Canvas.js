@@ -10,7 +10,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
         controller: function($scope, $element, $attrs, $window) {
             var defObj = {
                 id: '',
-                angle: '',
+                angle: 0,
                 fontSize: 8,
                 text: '',
                 fontFamily: 'Times New Roman',
@@ -24,8 +24,8 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                 fill: '#000000',
                 opacity: 1,
                 mediaName: '',
-                stroke:'',
-                strokeWidth:1,
+                stroke: '',
+                strokeWidth: 1,
                 spriteName: '',
                 spriteWidth: 50,
                 spriteHeight: 72,
@@ -39,7 +39,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                 textAlign: 'left',
                 selectable: null,
                 objects: null,
-                points:null
+                points: null
             }
 
             $scope.isDrawing = false;
@@ -184,7 +184,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                     selectable: typeof g.selectable == 'undefined' ? true : g.selectable,
                     lockMovementX: !$scope.model.canvasOptions.selectable,
                     lockMovementY: !$scope.model.canvasOptions.selectable
-                }                
+                }
                 for (var k in defObj) {
                     if (typeof g[k] != 'undefined')
                         options[k] = g[k]
@@ -196,7 +196,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                         if (g && g.objects) {
                             for (var i = 0; i < g.objects.length; i++) {
                                 groupedItems.push(createObject(g.objects[i].objectType, g.objects[i], true));
-                            }
+                            }                            
                             item = new fabric.Group(groupedItems, options);
                         }
                         break;
@@ -213,8 +213,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                         item = new fabric.Ellipse(options);
                         break;
                     case 'Polygon':
-                    	console.log(g.points);
-                        item = new fabric.Polygon(g.points,options);
+                        item = new fabric.Polygon(g.points, options);
                         break;
                     case 'Image':
                         item = new fabric.Image($scope.images[g.mediaName], options);
@@ -234,7 +233,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                         item.play();
                     }
                 }
-
+                console.log(options)
                 return item;
             }
 
