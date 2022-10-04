@@ -384,7 +384,6 @@ function onAction$createRectTextBox(event) {
 	elements.canvas.addObject(groupedObject);
 }
 
-
 /**
  * Handle changed data, return false if the value should not be accepted. In NGClient you can return also a (i18n) string, instead of false, which will be shown as a tooltip.
  *
@@ -558,15 +557,12 @@ function onAction$Mirror() {
  * @properties={typeid:24,uuid:"2A77A2B0-0E25-4A6E-8273-1250362437F8"}
  */
 function selectedCBMirror(so) {
-	if (!so[0].flipX) {
-		so[0].flipX = 1
-	} else {
-		so[0].flipX = 0
+	for (var i = 0; i < so.length; i++) {
+		if (!so[i].flipX) {
+			so[i].flipX = 1
+		} else {
+			so[i].flipX = 0
+		}
 	}
-	//	if (!so[0].flipY) {
-	//		so[0].flipY = 1
-	//	} else {
-	//		so[0].flipY = 0
-	//	}
 	elements.canvas.updateObject(so, true);
 }
