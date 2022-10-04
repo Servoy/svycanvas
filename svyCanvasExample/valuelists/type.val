@@ -2,6 +2,8 @@ addEmptyValue:1,
 customValues:"Circle|Circle\r\
 Rectangle|Rect\r\
 Triangle|Triangle\r\
+Ellipse|Ellipse\r\
+Polygon|Polygon\r\
 Image|Image\r\
 Sprite|Sprite\r\
 Text|Text",

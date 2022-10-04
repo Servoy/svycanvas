@@ -113,6 +113,19 @@ function onAction$addObject(event) {
 		obj.spriteHeight = 72;
 		obj.spriteIndex = 0;
 		obj.frameTime = 100;
+	} else if (shape == 'Ellipse') {
+		obj.stroke = color;
+		obj.strokeWidth = 3;
+		obj.fill = '';
+		obj.rx = 100;
+		obj.ry = 50;
+	} else if (shape == 'Polygon') {
+		obj.points = [{ x: 0, y: 100 }, { x: 100, y: 0 }, { x: 0, y: 0 }]
+		obj.stroke = color;
+		obj.strokeWidth = 3;
+		obj.strokeLineJoin = 'bevil'
+		obj.fill = '';
+		obj.angle = 270
 	} else {
 		obj.width = 50;
 		obj.height = 50;
@@ -371,6 +384,7 @@ function onAction$createRectTextBox(event) {
 	elements.canvas.addObject(groupedObject);
 }
 
+
 /**
  * Handle changed data, return false if the value should not be accepted. In NGClient you can return also a (i18n) string, instead of false, which will be shown as a tooltip.
  *
@@ -503,7 +517,7 @@ function objInfo(objs) {
 
 		if (targets[i].top == d.top && targets[i].left == d.left) {
 			//move was successful
-			plugins.dialogs.showInfoDialog('INFO', 'Move successful');			
+			plugins.dialogs.showInfoDialog('INFO', 'Move successful');
 			elements.canvas.canvasOptions.selectable = 0;
 			return;
 		}
@@ -531,4 +545,28 @@ function onAction$dragdrop(event) {
 
 	elements.canvas.loadCanvas(JSON.stringify(preset))
 	elements.canvas.canvasOptions.selectable = 0;
+}
+
+/**
+ * @properties={typeid:24,uuid:"45221D84-03ED-4419-A229-8A890BAFEB9A"}
+ */
+function onAction$Mirror() {
+	elements.canvas.getSelectedObject(selectedCBMirror);
+}
+
+/**
+ * @properties={typeid:24,uuid:"2A77A2B0-0E25-4A6E-8273-1250362437F8"}
+ */
+function selectedCBMirror(so) {
+	if (!so[0].flipX) {
+		so[0].flipX = 1
+	} else {
+		so[0].flipX = 0
+	}
+	//	if (!so[0].flipY) {
+	//		so[0].flipY = 1
+	//	} else {
+	//		so[0].flipY = 0
+	//	}
+	elements.canvas.updateObject(so, true);
 }

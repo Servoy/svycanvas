@@ -128,7 +128,7 @@ typeid:7,
 uuid:"58C8C2FE-E127-4F1D-B4C4-CE38D3596F8E"
 },
 {
-height:756,
+height:792,
 partType:5,
 typeid:19,
 uuid:"66F1115B-137F-49E2-9E83-E90683A0DF1B"
@@ -250,11 +250,21 @@ onRightClickMethodID:"-1",
 text:"Start Animation",
 typeid:7,
 uuid:"EDBF48E6-BAA7-4E81-BAC7-08E36BD779FE"
+},
+{
+cssPosition:"750,-1,-1,78%,20%,28",
+onActionMethodID:"45221D84-03ED-4419-A229-8A890BAFEB9A",
+onDoubleClickMethodID:"-1",
+onRightClickMethodID:"-1",
+text:"Mirror",
+typeid:7,
+uuid:"F36F8B5A-6E5C-4907-AFD4-A7D0B5513D61"
 }
 ],
 name:"main",
 navigatorID:"-1",
 onLoadMethodID:"7E76F231-22EF-423A-8926-9366E55E0030",
 showInMenu:true,
+size:"640,756",
 typeid:3,
 uuid:"A57C06CE-9B4F-415F-B419-F119AE363366"
