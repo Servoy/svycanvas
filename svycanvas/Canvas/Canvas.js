@@ -232,8 +232,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                     if (type == 'Sprite') {
                         item.play();
                     }
-                }
-                console.log(options)
+                }                
                 return item;
             }
 
@@ -348,6 +347,11 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                 if (setActive != false) {
                     setActive = true;
                 }
+
+                if (!$scope.model.canvasOptions.selectable) {
+                	setActive = false;
+                }
+
                 $scope.reselect = []
                 var s = new fabric.ActiveSelection([], {
                     canvas: $scope.canvas
