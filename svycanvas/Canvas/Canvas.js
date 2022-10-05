@@ -39,7 +39,8 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                 textAlign: 'left',
                 selectable: null,
                 objects: null,
-                points: null
+                points: null,
+                path: ''
             }
 
             $scope.isDrawing = false;
@@ -110,9 +111,9 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                 }
 
                 //else if single item
-                //					if (obj.id) {
-                //						console.log('ID:' + obj.id)
-                //					}
+                // if (obj.id) {
+                // 	console.log('ID:' + obj.id)
+                // }
 
                 try {
                     var o = $scope.model.canvasObjects;
@@ -171,8 +172,8 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
             }
 
             function createObject(type, g, noAddToCanvas) {
-                //					console.log('create object : ' + type);
-                //					console.log(g.objects)
+                // console.log('create object : ' + type);
+                // console.log(g.objects)
                 var item;
                 if (!g.textAlign) {
                     g.textAlign = 'left';
@@ -189,14 +190,14 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                     if (typeof g[k] != 'undefined')
                         options[k] = g[k]
                 }
-
-                switch (type) {
+                // console.log('type : ' + type);
+                switch (type) {                	
                     case 'Group':
                         var groupedItems = []
                         if (g && g.objects) {
                             for (var i = 0; i < g.objects.length; i++) {
                                 groupedItems.push(createObject(g.objects[i].objectType, g.objects[i], true));
-                            }                            
+                            }
                             item = new fabric.Group(groupedItems, options);
                         }
                         break;
@@ -215,6 +216,12 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                     case 'Polygon':
                         item = new fabric.Polygon(g.points, options);
                         break;
+                    case 'Path':                    	
+                        item = new fabric.Path(g.path, options);
+                        break;
+                    case 'Line':            
+                        item = new fabric.Line(g.path, options);
+                        break;
                     case 'Image':
                         item = new fabric.Image($scope.images[g.mediaName], options);
                         break;
@@ -228,11 +235,12 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                         break;
                 }
                 if (item && !noAddToCanvas) {
+
                     $scope.canvas.add(item);
                     if (type == 'Sprite') {
                         item.play();
                     }
-                }                
+                }
                 return item;
             }
 
@@ -349,7 +357,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                 }
 
                 if (!$scope.model.canvasOptions.selectable) {
-                	setActive = false;
+                    setActive = false;
                 }
 
                 $scope.reselect = []
@@ -551,8 +559,8 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                 for (var j in g) {
                     $scope.objNum++;
                     if (!g[j]) continue;
-                    //						console.log(g[j].id + ' : ' + g[j].objectType);
-                    //						console.log(g[j]);
+                    console.log(g[j].id + ' : ' + g[j].objectType);
+                    console.log(g[j]);
                     //create an fabric item
                     var type = g[j].objectType;
                     $scope.objects[g[j].id] = createObject(type, g[j]);

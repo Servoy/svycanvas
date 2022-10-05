@@ -57,6 +57,8 @@
 							{"Triangle": "Triangle"},
 							{"Ellipse": "Ellipse"},
 							{"Polygon": "Polygon"},
+							{"Path": "Path"},
+							{"Line": "Line"},
 							{"Image": "Image"},
 							{"Text": "Text"},
 							{"Group": "Group"}							
@@ -76,6 +78,7 @@
 			"ry": {"type": "float","pushToServer": "allow"},
 			"stroke": {"type": "color","pushToServer": "allow"},
 			"strokeWidth": {"type": "float","pushToServer": "allow"},
+			"path": {"type": "object","pushToServer": "allow"},
 			"points": {"type": "object","pushToServer": "allow"},
 			"id": {"type": "string","pushToServer": "allow"},
 			"scaleX": {"type": "float","pushToServer": "allow"},
