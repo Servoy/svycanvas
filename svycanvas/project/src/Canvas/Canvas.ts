@@ -51,7 +51,7 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
         super.svyOnInit();
         this.defObj = {
             id: '',
-            angle: '',
+            angle: 0,
             fontSize: 8,
             text: '',
             fontFamily: 'Times New Roman',
@@ -65,6 +65,8 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
             fill: '#000000',
             opacity: 1,
             mediaName: '',
+            stroke: '',
+            strokeWidth: 1,
             spriteName: '',
             spriteWidth: 50,
             spriteHeight: 72,
@@ -73,9 +75,13 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
             objectType: '',
             rx: 0,
             ry: 0,
+            flipX: 0,
+            flipY: 0,
             textAlign: 'left',
             selectable: null,
-            objects: null
+            objects: null,
+            points: null,
+            path: ''
         }
         this.svyMarkupId = this.servoyApi.getMarkupId();
         this.isDrawing = false;
@@ -88,9 +94,9 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
         this.zoomX = null;
         this.zoomY = null;
 
-        if (!this.canvasObjects) {
-            this.canvasObjects = [];
-        }
+        // if (!this.canvasObjects) {
+        //     this.canvasObjects = [];
+        // }
 
         window.cancelRequestAnimFrame = (function() {
             return window.cancelAnimationFrame || window.webkitCancelRequestAnimationFrame || window.mozCancelRequestAnimationFrame || window.oCancelRequestAnimationFrame || window.msCancelRequestAnimationFrame || clearTimeout
@@ -110,18 +116,18 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
         //     console.log(this.canvasObjects[0])
         //     this.servoyApi.apply('canvasObjects[0].id',this.canvasObjects[0].id);
         // }
-        if (changes.imagesLoader && changes.imagesLoader.currentValue && !changes.imagesLoader.previousValue)
+        if (changes.imagesLoader && changes.imagesLoader.currentValue && !changes.imagesLoader.previousValue) {
             this.loadImg();
+        }
         this.drawTimeout();
     }
-
-    //START
 
     drawTimeout(delay ? : number) {
         if (!delay) delay = 0;
         if (this.isDrawing) return;
         this.isDrawing = true;
-        setTimeout(this.draw.bind(this), delay);
+        if (this.draw)
+            setTimeout(this.draw.bind(this), delay);
     }
 
     loadImg() {
@@ -167,20 +173,16 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
             }
         }
 
-        //else if single item
-        //                  if (obj.id) {
-        //                      console.log('ID:' + obj.id)
-        //                  }
-
         try {
             var o = this.canvasObjects;
-
+            var ct = -1;
             for (var i in o) {
                 if (!o[i]) continue;
+                ct++;
                 if (o[i].id == obj.id) {
                     for (var k in this.defObj) {
                         if (k != 'id')
-                            o[i][k] = obj[k]
+                            o[i][k] = obj[k];
                     }
 
                     if (typeof obj.objectType == 'undefined') {
@@ -195,9 +197,13 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
                         o[i].spriteName = obj.src.split('/')[6].split('?')[0];
                     }
 
+                    // delete o[i]['state'];                                        
                 }
             }
-            this.servoyApi.apply("canvasObjects");
+            // console.log('cloneandsave:')
+            // console.log(o);                     
+            // this.canvasObjectsChange.emit(o);
+            this.servoyApi.apply("canvasObjects", o);
         } catch (e) {}
     }
 
@@ -266,6 +272,18 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
                 break;
             case 'Triangle':
                 item = new fabric.Triangle(options);
+                break;
+            case 'Ellipse':
+                item = new fabric.Ellipse(options);
+                break;
+            case 'Polygon':
+                item = new fabric.Polygon(g.points, options);
+                break;
+            case 'Path':
+                item = new fabric.Path(g.path, options);
+                break;
+            case 'Line':
+                item = new fabric.Line(g.path, options);
                 break;
             case 'Image':
                 item = new fabric.Image(this.images[g.mediaName], options);
@@ -394,9 +412,14 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
         }
     }
     loadCanvas(data) {
-        // console.log(data);
         if (!data || (data.length < 1)) return;
-        this.canvasObjects = JSON.parse(data);
+        // this.canvasObjects = JSON.parse(data);        
+        console.log(this.canvasObjects);
+
+        var d = JSON.parse(data);
+        for (var i = 0; i < d.length; i++) {
+            this.canvasObjects.push(d[i]);
+        }
         this.servoyApi.apply("canvasObjects");
         this.drawTimeout();
     }
@@ -576,6 +599,7 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
         // if (!this.canvasOptions) {
         //     this.canvasOptions = {};
         // }
+
         this.canvasOptions['preserveObjectStacking'] = true;
         this.canvas = new fabric.Canvas(this.svyMarkupId, this.canvasOptions);
         fabric.Object.prototype.transparentCorners = false;
@@ -901,15 +925,16 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
                         if (!this.canvasObjects) {
                             this.canvasObjects = [];
                         }
-
                         this.canvasObjects.push(oo);
                         this.objects[o[i].id] = oo;
                     }
                 }
                 if (o.length > 0) {
-                    console.log(this.canvasObjects)
+                    // console.log(this.canvasObjects)
+                    // console.log(this.objects)
                     // this.canvasObjectsChange.emit(this.canvasObjects)
-                    this.servoyApi.apply("canvasObjects", this.canvasObjects);
+                    // if (this.canvasObjects.stateHolder)
+                    // this.servoyApi.apply("canvasObjects");
                 }
             }
         }.bind(this));
@@ -964,25 +989,6 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
             }
         }.bind(this));
     }
-
-    // if the model are updated re-draw the chart
-    // this.$watchCollection('model.imagesLoader', function(newValue, oldValue) {
-    //     loadImg();
-    // });
-    // this.$watchCollection('model.showGrid', function(newValue, oldValue) {
-    //     drawTimeout();
-    // });
-    // this.$watchCollection('model.gridSize', function(newValue, oldValue) {
-    //     drawTimeout();
-    // });
-    // this.$watchCollection('model.canvasOptions', function(newValue, oldValue) {
-    //     drawTimeout();
-    // });
-    // this.$watchCollection('model.canvasObjects', function(newValue, oldValue) {
-    //     drawTimeout();
-    // });
-
-    //END
 
 }
 
