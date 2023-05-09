@@ -4,6 +4,7 @@ Rectangle|Rect\r\
 Triangle|Triangle\r\
 Ellipse|Ellipse\r\
 Polygon|Polygon\r\
+Path|Path\r\
 Image|Image\r\
 Sprite|Sprite\r\
 Text|Text",
