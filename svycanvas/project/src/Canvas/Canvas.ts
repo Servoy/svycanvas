@@ -397,7 +397,7 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
                     }
                 }
             }
-            // this.servoyApi.apply("canvasObjects");
+            
             this.canvasObjectsChange.emit(this.canvasObjects);
 
             if (this.onModified) {
@@ -414,14 +414,14 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
     }
     loadCanvas(data) {
         if (!data || (data.length < 1)) return;
-        // this.canvasObjects = JSON.parse(data);        
+        this.canvasObjects = JSON.parse(data);        
         console.log(this.canvasObjects);
 
         var d = JSON.parse(data);
         for (var i = 0; i < d.length; i++) {
             this.canvasObjects.push(d[i]);
         }
-        this.servoyApi.apply("canvasObjects");
+        this.canvasObjectsChange.emit(this.canvasObjects);
         this.drawTimeout();
     }
     addObject(objs, setActive) {
@@ -484,7 +484,7 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
                 this.canvas.remove(ob[j]);
             }
 
-            this.servoyApi.apply("canvasObjects");
+            this.canvasObjectsChange.emit(this.canvasObjects);
         }
         this.canvas.remove(o);
         if (o._objects) {
@@ -696,7 +696,7 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
                         //                                  });
                     }
                 });
-                if (applyChanges) this.servoyApi.apply("canvasObjects");
+                if (applyChanges) this.canvasObjectsChange.emit(this.canvasObjects);
                 this.canvas.renderAll();
             } catch (e) {}
 
@@ -931,11 +931,7 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
                     }
                 }
                 if (o.length > 0) {
-                    // console.log(this.canvasObjects)
-                    // console.log(this.objects)
-                    // this.canvasObjectsChange.emit(this.canvasObjects)
-                    // if (this.canvasObjects.stateHolder)
-                    // this.servoyApi.apply("canvasObjects");
+                    this.canvasObjectsChange.emit(this.canvasObjects);
                 }
             }
         }.bind(this));
