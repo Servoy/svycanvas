@@ -94,9 +94,9 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
         this.zoomX = null;
         this.zoomY = null;
 
-        // if (!this.canvasObjects) {
-        //     this.canvasObjects = [];
-        // }
+        if (!this.canvasObjects) {
+            this.canvasObjects = [];
+        }
 
         window.cancelRequestAnimFrame = (function() {
             return window.cancelAnimationFrame || window.webkitCancelRequestAnimationFrame || window.mozCancelRequestAnimationFrame || window.oCancelRequestAnimationFrame || window.msCancelRequestAnimationFrame || clearTimeout
@@ -408,7 +408,7 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
     loadCanvas(data) {
         if (!data || (data.length < 1)) return;
         this.canvasObjects = JSON.parse(data);        
-        console.log(this.canvasObjects);
+        // console.log(this.canvasObjects);
 
         var d = JSON.parse(data);
         for (var i = 0; i < d.length; i++) {
