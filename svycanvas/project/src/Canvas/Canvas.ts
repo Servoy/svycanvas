@@ -397,7 +397,8 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
                     }
                 }
             }
-            this.servoyApi.apply("canvasObjects");
+            // this.servoyApi.apply("canvasObjects");
+            this.canvasObjectsChange.emit(this.canvasObjects);
 
             if (this.onModified) {
                 this.onModified();
