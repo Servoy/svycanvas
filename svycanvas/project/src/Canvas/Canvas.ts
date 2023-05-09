@@ -109,13 +109,7 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
 
     svyOnChanges(changes: SimpleChanges) {
         super.svyOnChanges(changes);
-        // console.log('changes:');
-        // console.log(changes.canvasObjects);
-        // if (this.canvasObjects[0]) {
-        //     this.canvasObjects[0].id = 'test2';
-        //     console.log(this.canvasObjects[0])
-        //     this.servoyApi.apply('canvasObjects[0].id',this.canvasObjects[0].id);
-        // }
+
         if (changes.imagesLoader && changes.imagesLoader.currentValue && !changes.imagesLoader.previousValue) {
             this.loadImg();
         }
@@ -202,8 +196,7 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
             }
             // console.log('cloneandsave:')
             // console.log(o);                     
-            // this.canvasObjectsChange.emit(o);
-            this.servoyApi.apply("canvasObjects", o);
+            this.canvasObjectsChange.emit(o);
         } catch (e) {}
     }
 
