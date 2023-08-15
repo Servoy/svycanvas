@@ -1,16 +1,95 @@
 import { Component, Input, SimpleChanges, Renderer2, ChangeDetectorRef, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
-import { ServoyBaseComponent, ServoyPublicService, BaseCustomObject } from '@servoy/public';
-import './lib/fabric.min';
-import './lib/sprite.class';
-declare let window: any;
-declare let fabric: any;
+import { ServoyBaseComponent, ServoyPublicService, WindowRefService } from '@servoy/public';
+import { fabric } from 'fabric';
+
+(fabric as any).Sprite = fabric.util.createClass(fabric.Image, {
+
+  type: 'sprite',
+
+  spriteWidth: 50,
+  spriteHeight: 72,
+  spriteIndex: 0,
+  frameTime: 100,
+
+  initialize: function(element, options) {
+    options || (options = { });
+
+    options.width = this.spriteWidth;
+    options.height = this.spriteHeight;
+
+    this.callSuper('initialize', element, options);
+
+    this.createTmpCanvas();
+    this.createSpriteImages();
+  },
+
+  createTmpCanvas: function() {
+    this.tmpCanvasEl = fabric.util.createCanvasElement();
+    this.tmpCanvasEl.width = this.spriteWidth || this.width;
+    this.tmpCanvasEl.height = this.spriteHeight || this.height;
+  },
+
+  createSpriteImages: function() {
+    this.spriteImages = [ ];
+
+    var steps = this._element.width / this.spriteWidth;
+    for (var i = 0; i < steps; i++) {
+      this.createSpriteImage(i);
+    }
+  },
+
+  createSpriteImage: function(i) {
+    var tmpCtx = this.tmpCanvasEl.getContext('2d');
+    tmpCtx.clearRect(0, 0, this.tmpCanvasEl.width, this.tmpCanvasEl.height);
+    tmpCtx.drawImage(this._element, -i * this.spriteWidth, 0);
+
+    var dataURL = this.tmpCanvasEl.toDataURL('image/png');
+    var tmpImg = fabric.util.createImage();
+
+    tmpImg.src = dataURL;
+
+    this.spriteImages.push(tmpImg);
+  },
+
+  _render: function(ctx) {
+    ctx.drawImage(
+      this.spriteImages[this.spriteIndex],
+      -this.width / 2,
+      -this.height / 2
+    );
+  },
+
+  play: function() {
+    var _this = this;
+    this.animInterval = setInterval(function() {
+
+      _this.onPlay && _this.onPlay();
+      _this.dirty = true;
+      _this.spriteIndex++;
+      if (_this.spriteIndex === _this.spriteImages.length) {
+        _this.spriteIndex = 0;
+      }
+    }, this.frameTime);
+  },
+
+  stop: function() {
+    clearInterval(this.animInterval);
+  }
+});
+
+(fabric as any).Sprite.fromURL = function(url, callback, imgOptions) {
+  fabric.util.loadImage(url, function(img) {
+    callback(new (fabric as any).Sprite(img, imgOptions));
+  });
+};
+
+(fabric as any).Sprite.async = true;
 
 @Component({
     selector: 'svycanvas-Canvas',
     templateUrl: './Canvas.html',
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-
 export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
     //model
     @Input() canvasObjects: Array < canvasObject > ;
@@ -43,8 +122,10 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
     @Input() onModified: (e ? : Event, data ? : any) => void;
     @Input() onReady: (e ? : Event, data ? : any) => void;
 
-    constructor(protected readonly renderer: Renderer2, protected cdRef: ChangeDetectorRef, private servoyService: ServoyPublicService) {
+    constructor(protected readonly renderer: Renderer2, protected cdRef: ChangeDetectorRef, private servoyService: ServoyPublicService, private window: WindowRefService) {
         super(renderer, cdRef);
+        
+        fabric.util.createClass
     }
 
     svyOnInit() {
@@ -98,11 +179,13 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
             this.canvasObjects = [];
         }
 
-        window.cancelRequestAnimFrame = (function() {
-            return window.cancelAnimationFrame || window.webkitCancelRequestAnimationFrame || window.mozCancelRequestAnimationFrame || window.oCancelRequestAnimationFrame || window.msCancelRequestAnimationFrame || clearTimeout
+        this.window.nativeWindow['cancelRequestAnimFrame'] = (function() {
+            return window.cancelAnimationFrame || this.window.nativeWindow.webkitCancelRequestAnimationFrame || 
+            this.window.nativeWindow.mozCancelRequestAnimationFrame || this.window.nativeWindow.oCancelRequestAnimationFrame || 
+            this.window.nativeWindow.msCancelRequestAnimationFrame || clearTimeout
         })();
 
-        window.addEventListener("resize", this.drawTimeout);
+        window.addEventListener("resize", () => this.drawTimeout());
         setTimeout(this.loadImg, 0);
         this.drawTimeout();
     }
@@ -230,14 +313,14 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
     createObject(type, g, noAddToCanvas ? : boolean) {
         //                  console.log('create object : ' + type);
         //                  console.log(g.objects)
-        var item;
+        let item;
         if (!g.textAlign) {
             g.textAlign = 'left';
         }
-        var options = {
+        const options: fabric.IGroupOptions = {
             cornerColor: !this.canvasOptions.selectable ? 'rgba(102,153,255,0.0)' : 'rgba(102,153,255,0.5)',
             borderColor: !this.canvasOptions.selectable ? 'rgba(102,153,255,0.0)' : 'rgba(102,153,255,0.5)',
-            hasControls: this.canvasOptions.selectable,
+            hasControls: this.canvasOptions.selectable ? true: false,
             selectable: typeof g.selectable == 'undefined' ? true : g.selectable,
             lockMovementX: !this.canvasOptions.selectable,
             lockMovementY: !this.canvasOptions.selectable
@@ -249,7 +332,7 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
 
         switch (type) {
             case 'Group':
-                var groupedItems = []
+                const groupedItems = []
                 if (g && g.objects) {
                     for (var i = 0; i < g.objects.length; i++) {
                         groupedItems.push(this.createObject(g.objects[i].objectType, g.objects[i], true));
@@ -282,7 +365,9 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
                 item = new fabric.Image(this.images[g.mediaName], options);
                 break;
             case 'Sprite':
-                item = new fabric.Sprite(this.images[g.spriteName], options)
+                if (this.images[g.spriteName])
+                    item = new (fabric as any).Sprite(this.images[g.spriteName], options)
+                else console.log('no image was found for creating a Sprite under name: ' + g.spriteName);
                 break;
             case 'Text':
                 item = new fabric.Textbox(g.text, options);
@@ -555,7 +640,7 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
             }
         }
         var ao = this.canvas.getActiveObject();
-        if (!ao) return;
+        if (!ao) return null;
         var ob = ao._objects;
         if (ao.objectType != 'Group' && ob && ob.length > 0) {
             var grp = []
@@ -621,12 +706,12 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
             var gridSize = (gridWidth > gridHeight) ? gridWidth : gridHeight
             for (var i = 0; i < (gridSize / this.grid); i++) {
                 this.canvas.add(new fabric.Line([i * this.grid, 0, i * this.grid, gridSize], {
-                    id: 'grid',
+//                    id: 'grid',
                     stroke: '#ccc',
                     selectable: false
                 }));
                 this.canvas.add(new fabric.Line([0, i * this.grid, gridSize, i * this.grid], {
-                    id: 'grid',
+//                    id: 'grid',
                     stroke: '#ccc',
                     selectable: false
                 }));
@@ -982,17 +1067,17 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
 
 }
 
-export class canvasOptions {
+export class canvasOptions implements fabric.ICanvasOptions{
     public selectable: number;
-    public skipTargetFind: number;
+    public skipTargetFind: boolean;
     public hasRotatingPoint: number;
-    public renderOnAddRemove: number;
-    public skipOffscreen: number;
+    public renderOnAddRemove: boolean;
+    public skipOffscreen: boolean;
     public ZoomOnMouseScroll: number;
     public animationSpeed: number;
 }
 
-export class canvasObject {
+export class canvasObject  {
     public objectType: String;
     public objects: Object;
     public fill: String;

@@ -1,9 +1,9 @@
 Manifest-Version: 1.0
 Bundle-SymbolicName: svycanvas
 Bundle-Name: Canvas
-Bundle-Version: 1.0.5
+Bundle-Version: 2023.6.0
 Package-Type: Web-Component
-NPM-PackageName: svycanvas
+NPM-PackageName: @servoy/svycanvas
 NG2-Module: svycanvasModule
 Entry-Point: dist
 
