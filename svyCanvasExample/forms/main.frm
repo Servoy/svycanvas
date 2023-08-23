@@ -128,7 +128,7 @@ typeid:7,
 uuid:"58C8C2FE-E127-4F1D-B4C4-CE38D3596F8E"
 },
 {
-height:792,
+height:869,
 partType:5,
 typeid:19,
 uuid:"66F1115B-137F-49E2-9E83-E90683A0DF1B"
@@ -179,6 +179,15 @@ onRightClickMethodID:"-1",
 text:"Rotate Canvas",
 typeid:7,
 uuid:"73E841D9-1773-4D64-92ED-5FC3C2C590BC"
+},
+{
+cssPosition:"785,-1,-1,78%,20%,28",
+onActionMethodID:"3CFB170E-6EB9-4249-9535-04E104C91698",
+onDoubleClickMethodID:"-1",
+onRightClickMethodID:"-1",
+text:"Save Image",
+typeid:7,
+uuid:"8A23519D-13CD-4F56-BCE4-7FF36F315311"
 },
 {
 cssPosition:"278,-1,-1,78%,20%,28",
@@ -232,6 +241,15 @@ onRightClickMethodID:"-1",
 text:"Update Item",
 typeid:7,
 uuid:"CE422670-1F1B-4AD0-9E52-6AA3B19A7255"
+},
+{
+cssPosition:"820,-1,-1,78%,20%,28",
+onActionMethodID:"99E67A10-27B9-4408-8CCE-AE1AA614105B",
+onDoubleClickMethodID:"-1",
+onRightClickMethodID:"-1",
+text:"Print Image",
+typeid:7,
+uuid:"CE4AC816-017D-414A-9895-8876F6112EAD"
 },
 {
 cssPosition:"479,-1,-1,78%,20%,28",

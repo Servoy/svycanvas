@@ -300,7 +300,7 @@ function selectedCB(so) {
  *
  * @properties={typeid:24,uuid:"88EB32CA-0C89-469E-A2FE-30E18BD7A9B2"}
  */
-function onAction$loadPreset(event) {
+function onAction$loadPreset(event) {	
 	elements.canvas.loadCanvas(savedData);
 
 }
@@ -626,4 +626,39 @@ function selectedCBMirror(so) {
 		}
 	}
 	elements.canvas.updateObject(so, true);
+}
+
+/**
+ * Perform the element onclick action.
+ *
+ * @param {JSEvent} event the event that triggered the action
+ *
+ * @private
+ *
+ * @properties={typeid:24,uuid:"3CFB170E-6EB9-4249-9535-04E104C91698"}
+ */
+function onAction$saveImage(event) {
+	elements.canvas.saveAsImage(imgCB)
+}
+
+/**
+ * TODO generated, please specify type and doc for the params
+ * @param data
+ *
+ * @properties={typeid:24,uuid:"A1B902A5-FA2C-4AC8-B2F1-F60E88F91555"}
+ */
+function imgCB(data) {
+	application.output(data);
+}
+/**
+ * Perform the element onclick action.
+ *
+ * @param {JSEvent} event the event that triggered the action
+ *
+ * @private
+ *
+ * @properties={typeid:24,uuid:"99E67A10-27B9-4408-8CCE-AE1AA614105B"}
+ */
+function onAction$printCanvas(event) {
+	elements.canvas.printCanvas();
 }
