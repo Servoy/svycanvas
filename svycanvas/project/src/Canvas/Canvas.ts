@@ -442,7 +442,7 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
             format: 'png',
             quality: 1.0
         });
-        url.download = 'canvas.png'
+        //url.download = 'canvas.png'
         if (cb) {
             this.servoyService.executeInlineScript(cb.formname, cb.script, [url]);
         }
@@ -451,6 +451,26 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
         if (cb) {
             this.servoyService.executeInlineScript(cb.formname, cb.script, [JSON.stringify(this.canvasObjects)]);
         }
+    }
+    printCanvas() {
+	    var dataUrl = this.canvas.toDataURL(); //attempt to save base64 string to server using this var  
+	    var windowContent = '<!DOCTYPE html>';
+	    windowContent += '<html>'	    
+	    windowContent += '<body>'
+	    windowContent += '<head><style> @page { size: auto;  margin: 0mm; }</style> <title> </title></head>'
+	    windowContent += '<img src="' + dataUrl + '">';
+	    windowContent += '</body>';
+	    windowContent += '</html>';
+	    var printWin = window.open();
+	    printWin.document.open();
+	    printWin.document.write(windowContent);
+	    printWin.document.close();
+	    printWin.focus();
+	    printWin.print();
+	    setTimeout(function(){
+		printWin.close();	
+		},1000)
+                
     }
     ZoomOnPoint(x, y, zoom) {
         this.zoomX = x;
@@ -492,13 +512,7 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
     }
     loadCanvas(data) {
         if (!data || (data.length < 1)) return;
-        this.canvasObjects = JSON.parse(data);        
-        // console.log(this.canvasObjects);
-
-        var d = JSON.parse(data);
-        for (var i = 0; i < d.length; i++) {
-            this.canvasObjects.push(d[i]);
-        }
+        this.canvasObjects = JSON.parse(data);      
         this.canvasObjectsChange.emit(this.canvasObjects);
         this.drawTimeout();
     }
