@@ -98,6 +98,7 @@
 			"flipX" : {"type": "boolean","pushToServer": "allow"},
 			"flipY" : {"type": "boolean","pushToServer": "allow"},
 			"selectable" : {"type": "boolean","pushToServer": "allow"},
+			"rotatable" : {"type": "boolean","pushToServer": "allow"},		
 			"state" : {"type": "object","pushToServer": "allow"},
 			"stateHolder" : {"type": "object","pushToServer": "allow"},
 			"custom_data" : {"type": "object","pushToServer": "allow"}

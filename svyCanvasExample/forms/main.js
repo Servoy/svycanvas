@@ -97,7 +97,8 @@ function onAction$addObject(event) {
 	var obj = {
 		id: id, objectType: shape,
 		scaleX: 1, scaleY: 1,
-		left: 200, top: 100
+		left: 200, top: 100,
+		rotatable: true
 	}
 	if (shape == 'Image') {
 		obj.mediaName = 'flower.png'
@@ -378,10 +379,10 @@ function onAction$createRectTextBox(event) {
 		id: application.getUUID().toString(), objectType: 'Group',
 		objects: [{
 			angle: 0, fontSize: 20, text: '', fontFamily: 'Roboto', scaleX: 1, scaleY: 1,
-			left: 200, top: 100, width: 300, height: 200, radius: 50, fill: color, opacity: 1, objectType: 'Rect'
+			left: 200, top: 100, width: 300, height: 200, radius: 50, fill: color, opacity: 1, objectType: 'Rect'			
 		}, {
 			angle: 0, fontSize: 30, text: text, fontFamily: 'Roboto', scaleX: 1, scaleY: 1,
-			left: 250, top: 150, width: 200, height: 50, radius: 50, fill: 'white', opacity: 1, objectType: 'Text', textAlign: 'center'
+			left: 250, top: 150, width: 200, height: 50, radius: 50, fill: 'white', opacity: 1, objectType: 'Text', textAlign: 'center'			
 		}]
 	}
 
@@ -661,4 +662,14 @@ function imgCB(data) {
  */
 function onAction$printCanvas(event) {
 	elements.canvas.printCanvas();
+}
+
+/**
+
+ * @private
+ *
+ * @properties={typeid:24,uuid:"947554FA-48AF-494D-A6CA-74AD0C56C55A"}
+ */
+function onReady() {
+
 }

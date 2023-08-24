@@ -160,6 +160,7 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
             flipY: 0,
             textAlign: 'left',
             selectable: null,
+            rotatable: null,            
             objects: null,
             points: null,
             path: ''
@@ -268,17 +269,15 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
                             o[i].objectType = "Text";
                         }
                     }
-
+                    
                     if (obj.src) {
                         o[i].mediaName = obj.src.split('/')[6].split('?')[0];
                         o[i].spriteName = obj.src.split('/')[6].split('?')[0];
                     }
-
-                    // delete o[i]['state'];                                        
+                    
                 }
             }
-            // console.log('cloneandsave:')
-            // console.log(o);                     
+                           
             this.canvasObjectsChange.emit(o);
         } catch (e) {}
     }
@@ -367,7 +366,7 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
             case 'Sprite':
                 if (this.images[g.spriteName])
                     item = new (fabric as any).Sprite(this.images[g.spriteName], options)
-                else console.log('no image was found for creating a Sprite under name: ' + g.spriteName);
+                //else console.log('no image was found for creating a Sprite under name: ' + g.spriteName);
                 break;
             case 'Text':
                 item = new fabric.Textbox(g.text, options);
@@ -375,7 +374,8 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
             default:
                 break;
         }
-        if (item && !noAddToCanvas) {
+       
+        if (item && !noAddToCanvas) {			
             this.canvas.add(item);
             if (type == 'Sprite') {
                 item.play();
@@ -424,7 +424,7 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
                 _clipboard.top += 10;
                 _clipboard.left += 10;
                 _clipboard.id = this.uuidv4();
-                this.reselect.push(_clipboard.id)
+                this.reselect.push(_clipboard.id)                
                 this.canvas.setActiveObject(clonedObj);
                 this.canvas.requestRenderAll();
                 this.canvas.discardActiveObject();
@@ -491,7 +491,7 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
                         sel.push(ob[j].id);
                         for (var k in obj[i]) {
                             ob[j][k] = obj[i][k];
-                        }
+                        }                        
                     }
                 }
             }
@@ -600,10 +600,6 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
             }
         }
 
-        // console.log('setSelectedObject:')
-        // console.log(ids)
-        // console.log(o)
-        // console.log(this.objects)
 
         if (ids && ids.length > 0) {
             var s = new fabric.ActiveSelection([], {
@@ -611,11 +607,19 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
             });
 
             for (i = 0; i < ids.length; i++) {
-                if (allObjects[ids[i]] && allObjects[ids[i]]._set)
-                    s.addWithUpdate(allObjects[ids[i]])
-            }
-            this.canvas.setActiveObject(s);
-            this.canvas.renderAll();
+                if (allObjects[ids[i]] && allObjects[ids[i]]._set){				
+		   			s.addWithUpdate(allObjects[ids[i]])
+				}			                    
+            }                        
+            this.canvas.setActiveObject(s);       
+            if (s._objects[0] && !s._objects[0].rotatable) {
+				s.setControlVisible('mtr',false);	
+			} else {
+				s.setControlVisible('mtr',true);
+			}
+                 
+            this.canvas.renderAll();                                    
+        
         }
     }
     getSelectedObject(cb, sel) {
@@ -654,7 +658,7 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
             }
         }
         var ao = this.canvas.getActiveObject();
-        if (!ao) return null;
+        if (!ao) return null;        
         var ob = ao._objects;
         if (ao.objectType != 'Group' && ob && ob.length > 0) {
             var grp = []
@@ -943,10 +947,9 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
             opt.e.stopPropagation();
         }.bind(this));
         this.canvas.on('mouse:up', function(options) {
-            var obj = this.canvas.getActiveObject();
+            var obj = this.canvas.getActiveObject();        
             if (!obj) return;
-
-            var o = this.canvasObjects;
+            var o = this.canvasObjects;            
 
             if (this.onClick && !this.canvasOptions.selectable && (typeof obj.id != 'undefined')) {
                 this.onClick(obj.id, obj);
@@ -957,7 +960,8 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
         }.bind(this));
         this.canvas.on('touch:longpress', function(options) {
             var obj = this.canvas.getActiveObject();
-            if (!obj) return;
+            if (!obj) return;                        
+           
             if (this.onLongPress && !this.canvasOptions.selectable && (typeof obj.id != 'undefined')) {
                 this.onLongPress(obj.id, obj);
                 //when clicking don't allow overlapping
@@ -1003,8 +1007,7 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
                         for (var n = 0; n < obj._objects.length; n++) {
                             co['objects'].push(addToModel.call(this, obj._objects[n]));
                         }
-                    }
-                    //console.log(co);
+                    }                    
                     return co;
                 }
                 for (var i = 0; i < o.length; i++) {
@@ -1036,7 +1039,7 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
             obj.set({
                 hasControls: this.canvasOptions.selectable,
                 opacity: 1
-            });
+            });             
             var sel = []
 
             function selectHelper(o) {
@@ -1057,10 +1060,9 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
                     if (o.id) {
                         sel.push(o.id)
                     }
-
+										
                 }
-            }
-
+            }						
             this.canvas.discardActiveObject();
             selectHelper(obj);
             this.cloneAndSave(obj);
@@ -1075,8 +1077,15 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
             if (!this.canvasOptions.selectable) {
                 if (e.target)
                     e.target.hoverCursor = 'pointer';
-            }
+            }           
         }.bind(this));
+        this.canvas.on('mouse:down', function(e) {
+           var obj = this.canvas.getActiveObject();
+           if (!obj) return;
+           if (!obj['rotatable']) {
+			   obj.setControlVisible('mtr',false);
+		   } 
+        }.bind(this));       
     }
 
 }
@@ -1119,6 +1128,7 @@ export class canvasObject  {
     public spriteIndex: number;
     public frameTime: number;
     public selectable: Boolean;
+    public rotatable: Boolean;    
     public custom_data: object;
     public state: any;
 }
