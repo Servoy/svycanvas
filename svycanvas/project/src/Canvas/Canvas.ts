@@ -612,8 +612,8 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
 				}			                    
             }                        
             this.canvas.setActiveObject(s);       
-            if (s._objects[0] && s._objects[0].ctrl) {				
-				var ctr = s._objects[0].ctrl;
+            if (s._objects[0] && s._objects[0]['ctrl']) {				
+				var ctr = s._objects[0]['ctrl'];
 				for(var j in ctr) {
 					s.setControlVisible(j,ctr[j]);	
 				}									
