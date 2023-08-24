@@ -160,7 +160,7 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
             flipY: 0,
             textAlign: 'left',
             selectable: null,
-            rotatable: null,            
+            ctrl: null,            
             objects: null,
             points: null,
             path: ''
@@ -612,11 +612,12 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
 				}			                    
             }                        
             this.canvas.setActiveObject(s);       
-            if (s._objects[0] && !s._objects[0].rotatable) {
-				s.setControlVisible('mtr',false);	
-			} else {
-				s.setControlVisible('mtr',true);
-			}
+            if (s._objects[0] && s._objects[0].ctrl) {				
+				var ctr = s._objects[0].ctrl;
+				for(var j in ctr) {
+					s.setControlVisible(j,ctr[j]);	
+				}									
+			}			
                  
             this.canvas.renderAll();                                    
         
@@ -1081,10 +1082,15 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
         }.bind(this));
         this.canvas.on('mouse:down', function(e) {
            var obj = this.canvas.getActiveObject();
-           if (!obj) return;
-           if (!obj['rotatable']) {
-			   obj.setControlVisible('mtr',false);
-		   } 
+           if (!obj) return;           
+		   
+		   if (obj.ctrl) {				
+				var ctr = obj.ctrl;
+				for(var j in ctr) {
+					obj.setControlVisible(j,ctr[j]);	
+				}									
+			}
+		   
         }.bind(this));       
     }
 
@@ -1128,7 +1134,7 @@ export class canvasObject  {
     public spriteIndex: number;
     public frameTime: number;
     public selectable: Boolean;
-    public rotatable: Boolean;    
+    public ctrl: Object;    
     public custom_data: object;
     public state: any;
 }

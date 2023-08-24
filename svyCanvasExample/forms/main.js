@@ -98,7 +98,7 @@ function onAction$addObject(event) {
 		id: id, objectType: shape,
 		scaleX: 1, scaleY: 1,
 		left: 200, top: 100,
-		rotatable: true
+		ctrl:{ mtr : false}
 	}
 	if (shape == 'Image') {
 		obj.mediaName = 'flower.png'
