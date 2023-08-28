@@ -660,8 +660,8 @@ function imgCB(data) {
  *
  * @properties={typeid:24,uuid:"99E67A10-27B9-4408-8CCE-AE1AA614105B"}
  */
-function onAction$printCanvas(event) {
-	elements.canvas.printCanvas();
+function onAction$printCanvas(event) {	
+	elements.canvas.printCanvas(2550);	
 }
 
 /**
