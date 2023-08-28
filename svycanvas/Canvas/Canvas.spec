@@ -118,7 +118,7 @@
 		"setSelectedObject": {"delayUntilFormLoads": true, "parameters": [{"name": "ids","type": "object"}]},
 		"saveCanvas": {"delayUntilFormLoads": true, "parameters": [{"name": "saveCB","type": "function"}]},
 		"loadCanvas": {"delayUntilFormLoads": true, "parameters": [{"name": "data","type": "string"}]},
-		"printCanvas": {"delayUntilFormLoads": true, "parameters": []},
+		"printCanvas": {"delayUntilFormLoads": true, "parameters": [{"name": "resolutionWidth","type": "int"}]},
 		"saveAsImage": {"delayUntilFormLoads": true, "parameters": [{"name": "imgCB","type": "function"}]},
 		"ZoomOnPoint": {"delayUntilFormLoads": true, "parameters": [{"name": "x","type": "int"},{"name": "y","type": "int"},{"name": "zoom","type": "int"}]},
 		"bringToFront": {"delayUntilFormLoads": true, "parameters": [{"name": "id","type": "string"}]},
