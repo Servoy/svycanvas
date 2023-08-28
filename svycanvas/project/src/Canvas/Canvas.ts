@@ -452,25 +452,66 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
             this.servoyService.executeInlineScript(cb.formname, cb.script, [JSON.stringify(this.canvasObjects)]);
         }
     }
-    printCanvas() {
-	    var dataUrl = this.canvas.toDataURL(); //attempt to save base64 string to server using this var  
-	    var windowContent = '<!DOCTYPE html>';
-	    windowContent += '<html>'	    
-	    windowContent += '<body>'
-	    windowContent += '<head><style> @page { size: auto;  margin: 0mm; }</style> <title> </title></head>'
-	    windowContent += '<img src="' + dataUrl + '">';
-	    windowContent += '</body>';
-	    windowContent += '</html>';
-	    var printWin = window.open();
-	    printWin.document.open();
-	    printWin.document.write(windowContent);
-	    printWin.document.close();
-	    printWin.focus();
-	    printWin.print();
-	    setTimeout(function(){
-		printWin.close();	
-		},1000)
-                
+    printCanvas(resolutionWidth) {
+		
+		var originWidth = this.canvas.getWidth();
+		if (!resolutionWidth) resolutionWidth = originWidth ;
+		//helper function to set print resolution
+        function zoom (width,canvas)
+            {
+                var scale = width / canvas.getWidth();
+                var height = scale * canvas.getHeight();
+
+                canvas.setDimensions({
+                    "width": width,
+                    "height": height
+                });
+
+                canvas.calcOffset();
+                var objects = canvas.getObjects();
+                for (var i in objects) {
+                    var scaleX = objects[i].scaleX;
+                    var scaleY = objects[i].scaleY;
+                    var left = objects[i].left;
+                    var top = objects[i].top;
+
+                    objects[i].scaleX = scaleX * scale;
+                    objects[i].scaleY = scaleY * scale;
+                    objects[i].left = left * scale;
+                    objects[i].top = top * scale;
+
+                    objects[i].setCoords();
+                }
+                canvas.renderAll();
+        }
+		var canvas_el = document.getElementById(this.servoyApi.getMarkupId());
+		canvas_el.style.opacity = '0';
+        zoom(resolutionWidth,this.canvas);
+		
+		setTimeout(function(){				
+			var dataUrl = this.canvas.toDataURL(); //attempt to save base64 string to server using this var  
+		    var windowContent = '<!DOCTYPE html>';
+		    windowContent += '<html>'	    
+		    windowContent += '<body>'
+		    windowContent += '<head><style> @page { size: auto;  margin: 0mm; }</style> <title> </title></head>'
+		    windowContent += '<img style="width:100vw;width:100vh;" src="' + dataUrl + '">';
+		    windowContent += '</body>';
+		    windowContent += '</html>';
+		    zoom(originWidth,this.canvas);
+		    var printWin = window.open();
+		    printWin.document.open();
+		    printWin.document.write(windowContent);
+		    printWin.document.close();
+		    printWin.focus();
+		    printWin.print();
+		    setTimeout(function(){		
+			printWin.close();
+			canvas_el.style.opacity = '100';	
+			}.bind(this),500);
+			
+		}.bind(this),1000)     
+		
+	                
     }
     ZoomOnPoint(x, y, zoom) {
         this.zoomX = x;
