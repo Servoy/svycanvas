@@ -17,18 +17,18 @@ function copySelectedObject() {
  * The callback has a single parameter 
  * which contains the base64 data of the canvas.  
  * 
- * @param {Function} cb
+ * @param {Function} imgCB
  */
-function saveAsImage(cb) {
+function saveAsImage(imgCB) {
 }
 
 /**
  * Save the canvas as a JSON object.  
  * The callback has a single parameter which contains the JSON object.   
  * This JSON object can be used with the loadCanvas method.
- * @param {Function} cb
+ * @param {Function} saveCB
  */
-function saveCanvas(cb) {
+function saveCanvas(saveCB) {
 }
 
 /**
@@ -53,6 +53,13 @@ function updateObject(obj, setItemActive) {
  * @param {Object} data
  */
 function loadCanvas(data) {
+}
+
+/**
+ * Print the current canvas view (TING only).  Can use an optional DPI resolution for higher quality prints.
+ * @param {Number} resolutionWidth  
+ */
+function printCanvas(resolutionWidth) {
 }
 
 /**
@@ -85,18 +92,10 @@ function setSelectedObject(ids) {
 }
 
 /**
- * Get the selected object, optionally re-select it.
+ * Get the selected object
  * @param {Function} cb 
- * @param {Boolean} sel 
  */
-function getSelectedObject(cb, sel) {
-}
-
-/**
- * @private
- * Private Method for internal use only
- */
-function draw() {
+function getSelectedObject(cb) {
 }
 
 /**
