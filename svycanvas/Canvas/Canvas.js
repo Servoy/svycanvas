@@ -585,6 +585,58 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                 group.setCoords()
                 $scope.canvas.renderAll()
             }
+            $scope.api.printCanvas = function() {            	
+            	var originWidth = $scope.canvas.getWidth();
+
+                function zoom (width)
+                    {
+                        var scale = width / $scope.canvas.getWidth();
+                        height = scale * $scope.canvas.getHeight();
+
+                        $scope.canvas.setDimensions({
+                            "width": width,
+                            "height": height
+                        });
+
+                        $scope.canvas.calcOffset();
+                        var objects = $scope.canvas.getObjects();
+                        for (var i in objects) {
+                            var scaleX = objects[i].scaleX;
+                            var scaleY = objects[i].scaleY;
+                            var left = objects[i].left;
+                            var top = objects[i].top;
+
+                            objects[i].scaleX = scaleX * scale;
+                            objects[i].scaleY = scaleY * scale;
+                            objects[i].left = left * scale;
+                            objects[i].top = top * scale;
+
+                            objects[i].setCoords();
+                        }
+                        $scope.canvas.renderAll();
+                }
+
+                zoom (100);
+            	
+        	    var dataUrl = $scope.canvas.toDataURL(); //attempt to save base64 string to server using this var  
+        	    var windowContent = '<!DOCTYPE html>';
+        	    windowContent += '<html>'	    
+        	    windowContent += '<body>'
+        	    windowContent += '<head><style> @page { size: auto;  margin: 0mm; }</style> <title> </title></head>'
+        	    windowContent += '<img style="width:100vw;width:100vh;" src="' + dataUrl + '">';
+        	    windowContent += '</body>';
+        	    windowContent += '</html>';
+        	    var printWin = window.open();
+        	    printWin.document.open();
+        	    printWin.document.write(windowContent);
+        	    printWin.document.close();
+        	    printWin.focus();
+        	    printWin.print();
+        	    setTimeout(function(){
+        		printWin.close();	
+        		zoom (originWidth);
+        		},1000)               
+            }
             $scope.api.startAnimate = function() {
                 var render = function() {
                     var applyChanges = false;
