@@ -5,6 +5,7 @@
 	"version": 1,
 	"icon": "svycanvas/Canvas/icon.png",
 	"definition": "svycanvas/Canvas/Canvas.js",
+	"doc": "svycanvas/Canvas/Canvas_doc.js",
 	"libraries": 
 	[
 		{
