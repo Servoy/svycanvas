@@ -3,7 +3,7 @@
     "displayName": "Canvas",
     "packageType": "Web-Component",
     "icon": "https://raw.githubusercontent.com/Servoy/svycanvas/master/icon.png",
-    "description": "Canvas Component for NG-Client",
+    "description": "Provides a Canvas Component for NG & Titanium Clients.",
     "wikiUrl": "https://github.com/Servoy/svycanvas/wiki",
     "sourceUrl": "https://github.com/Servoy/svycanvas",
     "releases": [
