@@ -444,12 +444,12 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
         });
         //url.download = 'canvas.png'
         if (cb) {
-            this.servoyService.executeInlineScript(cb.formname, cb.script, [url]);
+            cb(url);
         }
     }
     saveCanvas(cb) {
         if (cb) {
-            this.servoyService.executeInlineScript(cb.formname, cb.script, [JSON.stringify(this.canvasObjects)]);
+            cb(JSON.stringify(this.canvasObjects));
         }
     }
     printCanvas(resolutionWidth) {
@@ -696,7 +696,7 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
                 }
             }
             if (cb) {
-                return this.servoyService.executeInlineScript(cb.formname, cb.script, [os]);
+                return cb(os);
             }
         }
         var ao = this.canvas.getActiveObject();
