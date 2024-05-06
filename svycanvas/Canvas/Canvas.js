@@ -951,7 +951,11 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                     }
 
                 });
-
+                $scope.canvas.on('after:render',function(e){
+                    if ($scope.handlers.afterRender) {
+                        $scope.handlers.afterRender();
+                    }
+                })
             }
             window.addEventListener("resize", drawTimeout);
             setTimeout(loadImg, 0);

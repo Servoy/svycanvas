@@ -121,6 +121,7 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
     @Input() onLongPress: (e ? : Event, data ? : any) => void;
     @Input() onModified: (e ? : Event, data ? : any) => void;
     @Input() onReady: (e ? : Event, data ? : any) => void;
+    @Input() afterRender: (e ? : Event, data ? : any) => void;
 
     constructor(protected readonly renderer: Renderer2, protected cdRef: ChangeDetectorRef, private servoyService: ServoyPublicService, private window: WindowRefService) {
         super(renderer, cdRef);
@@ -1120,6 +1121,11 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
                 if (e.target)
                     e.target.hoverCursor = 'pointer';
             }           
+        }.bind(this));
+        this.canvas.on('after:render', function(e) {
+            if (this.afterRender) {
+                this.afterRender();
+            }      
         }.bind(this));
         this.canvas.on('mouse:down', function(e) {
            var obj = this.canvas.getActiveObject();

@@ -131,6 +131,7 @@
 		"onClick": {"parameters": []},
 		"onLongPress": {"parameters": []},
 		"onModified": {"parameters": []},
-		"onReady": {"parameters": []}
+		"onReady": {"parameters": []},
+		"afterRender": {"parameters": []}
 	}
 }
