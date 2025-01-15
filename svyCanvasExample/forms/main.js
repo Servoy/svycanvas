@@ -671,5 +671,16 @@ function onAction$printCanvas(event) {
  * @properties={typeid:24,uuid:"947554FA-48AF-494D-A6CA-74AD0C56C55A"}
  */
 function onReady() {
+	// add images to image loader
+	elements.canvas.imagesLoader = ['flower.png','kiwi.svg','sprite.png'];
+}
 
+/**
+
+ * @private
+ *
+ * @properties={typeid:24,uuid:"BEB8FE64-577C-4260-8AE4-2D5E7EE08D84"}
+ */
+function afterRender() {
+	application.output('after render')
 }
