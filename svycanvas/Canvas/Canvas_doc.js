@@ -1,3 +1,27 @@
+
+
+var handlers = {
+    /**
+     */
+    onClick: function() {},
+
+    /**
+     */
+    onLongPress: function() {},
+
+    /**
+     */
+    onModified: function() {},
+
+    /**
+     */
+    onReady: function() {},
+
+    /**
+     */
+    afterRender: function() {}
+};
+
 /**
  * Brings a specific element given it's ID, to the front layer of the canvas 
  * 
