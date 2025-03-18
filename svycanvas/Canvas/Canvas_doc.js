@@ -149,3 +149,103 @@ function startAnimate() {
  */
 function stopAnimate() {
 }
+
+
+var svy_types = {
+
+    canvasOptions: {
+
+        selectable : null,
+
+        skipTargetFind : null,
+
+        hasRotatingPoint : null,
+
+        renderOnAddRemove : null,
+
+        skipOffscreen : null,
+
+        ZoomOnMouseScroll : null,
+
+        animationSpeed : null,
+
+    },
+
+    canvasObject: {
+
+        objectType : null,
+
+        objects : null,
+
+        fill : null,
+
+        opacity : null,
+
+        width : null,
+
+        height : null,
+
+        radius : null,
+
+        left : null,
+
+        top : null,
+
+        rx : null,
+
+        ry : null,
+
+        stroke : null,
+
+        strokeWidth : null,
+
+        path : null,
+
+        points : null,
+
+        id : null,
+
+        scaleX : null,
+
+        scaleY : null,
+
+        text : null,
+
+        textAlign : null,
+
+        fontSize : null,
+
+        fontFamily : null,
+
+        angle : null,
+
+        strokeLineJoin : null,
+
+        mediaName : null,
+
+        spriteName : null,
+
+        spriteWidth : null,
+
+        spriteHeight : null,
+
+        spriteIndex : null,
+
+        frameTime : null,
+
+        flipX : null,
+
+        flipY : null,
+
+        selectable : null,
+
+        ctrl : null,
+
+        state : null,
+
+        stateHolder : null,
+
+        custom_data : null,
+
+    }
+}
