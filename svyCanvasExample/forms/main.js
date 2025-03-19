@@ -517,8 +517,7 @@ function onModified() {
 }
 
 /**
- * TODO generated, please specify type and doc for the params
- * @param objs
+ * @param {{id:String}} objs
  *
  * @properties={typeid:24,uuid:"B65DD271-D7EA-41CF-9007-BA05DE550346"}
  */
@@ -527,8 +526,7 @@ function objInfo(objs) {
 	var targets = []
 	targets.push({ top: 200, left: 450 }, { top: 200, left: 100 })
 
-	/** @type {{top:Number,left:Number}} */
-
+	/** @type {{top:Number,left:Number,id:String}} */
 	var d = objs[0];
 	application.output(objs)
 	if (!d || d.id != 'moveable_object') return;
