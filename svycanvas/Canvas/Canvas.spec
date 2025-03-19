@@ -108,15 +108,15 @@
 
 	"api": 
 	{
-		"addObject": {"delayUntilFormLoads": true, "parameters": [{"name": "object","type": "object"}, {"name": "setActive", "type":"boolean", "optional":true}]},		
+		"addObject": {"delayUntilFormLoads": true, "parameters": [{"name": "objs","type": "object[]"}, {"name": "setActive", "type":"boolean", "optional":true}]},		
 		"copySelectedObject": {"delayUntilFormLoads": true, "parameters": []},
-		"updateObject": {"delayUntilFormLoads": true, "parameters": [{"name": "object","type": "object"},{"name": "selectActiveItems","type": "boolean"}]},
+		"updateObject": {"delayUntilFormLoads": true, "parameters": [{"name": "obj","type": "object"},{"name": "selectActiveItems","type": "boolean"}]},
         "removeObject": {"delayUntilFormLoads": true, "parameters": [{"name": "id","type": "string"}]},        
         "clearCanvas":{"delayUntilFormLoads": true},
         "startAnimate":{"delayUntilFormLoads": true},
         "stopAnimate":{"delayUntilFormLoads": true},
 		"getSelectedObject": {"delayUntilFormLoads": true, "parameters": [{"name": "saveCB","type": "function"}]},
-		"setSelectedObject": {"delayUntilFormLoads": true, "parameters": [{"name": "ids","type": "object"}]},
+		"setSelectedObject": {"delayUntilFormLoads": true, "parameters": [{"name": "ids","type": "string[]"}]},
 		"saveCanvas": {"delayUntilFormLoads": true, "parameters": [{"name": "saveCB","type": "function"}]},
 		"loadCanvas": {"delayUntilFormLoads": true, "parameters": [{"name": "data","type": "string"}]},
 		"printCanvas": {"delayUntilFormLoads": true, "parameters": [{"name": "resolutionWidth","type": "int"}]},

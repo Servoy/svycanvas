@@ -1,6 +1,6 @@
 {
   "name": "svycanvas",
-  "version": "2024.3.2",
+  "version": "2025.3.0",
   "description": "Servoy Canvas component",
   "scripts": {
     "ng": "ng",
@@ -29,19 +29,26 @@
   },
   "homepage": "https://github.com/Servoy/svycanvas#readme",
   "dependencies": {
-    "@angular/core": "17.2.4",
-    "@angular/forms": "17.2.4",
-    "@servoy/public": "2024.3.0",
-    "@types/fabric": "5.3.7",
-    "fabric": "5.3.0"
+    "@angular/common": "^19.2.2",
+    "@angular/core": "19.2.2",
+    "@angular/forms": "19.2.2",
+    "@angular/platform-browser": "^19.2.2",
+    "@servoy/public": "^2025.3.0",
+    "@types/fabric": "5.3.10",
+    "fabric": "5.3.0",
+    "rxjs": "^7.8.2",
+    "zone.js": "^0.15.0"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "17.2.3",
-    "@angular/cli": "17.2.3",
-    "@angular/compiler-cli": "17.2.4",
-    "adm-zip": "0.5.10",
-    "eslint": "8.57.0",
-    "ng-packagr": "17.2.1",
-    "ts-node": "10.9.2"
+    "@angular-devkit/build-angular": "19.2.3",
+    "@angular/cli": "19.2.3",
+    "@angular/compiler-cli": "19.2.2",
+    "@angular/compiler": "^19.2.2",
+    "adm-zip": "0.5.16",
+    "eslint": "9.22.0",
+    "ng-packagr": "19.2.0",
+    "ts-node": "10.9.2",
+    "tslib": "^2.8.1",
+    "typescript": "5.8.2"
   }
 }

@@ -88,7 +88,8 @@ import { fabric } from 'fabric';
 @Component({
     selector: 'svycanvas-Canvas',
     templateUrl: './Canvas.html',
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
     //model
