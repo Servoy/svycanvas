@@ -736,9 +736,17 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
             this.canvas.dispose();
         }
 
-        // if (!this.canvasOptions) {
-        //     this.canvasOptions = {};
-        // }
+        if (!this.canvasOptions) {
+           this.canvasOptions = {
+			   selectable:0, 
+			   skipTargetFind:false, 
+			   hasRotatingPoint:0, 
+			   renderOnAddRemove:false,
+			   skipOffscreen:false, 
+			   ZoomOnMouseScroll:0, 
+			   animationSpeed:null
+		   };
+        }
 
         this.canvasOptions['preserveObjectStacking'] = true;
         this.canvas = new fabric.Canvas(this.svyMarkupId, this.canvasOptions);
