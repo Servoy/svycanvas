@@ -108,7 +108,7 @@
 
 	"api": 
 	{
-		"addObject": {"delayUntilFormLoads": true, "parameters": [{"name": "objs","type": "object[]"}, {"name": "setActive", "type":"boolean", "optional":true}]},		
+		"addObject": {"delayUntilFormLoads": true, "parameters": [{"name": "objs","type": "object"}, {"name": "setActive", "type":"boolean", "optional":true}]},		
 		"copySelectedObject": {"delayUntilFormLoads": true, "parameters": []},
 		"updateObject": {"delayUntilFormLoads": true, "parameters": [{"name": "obj","type": "object"},{"name": "selectActiveItems","type": "boolean"}]},
         "removeObject": {"delayUntilFormLoads": true, "parameters": [{"name": "id","type": "string"}]},        
