@@ -1,89 +1,100 @@
 import { Component, Input, SimpleChanges, Renderer2, ChangeDetectorRef, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
 import { ServoyBaseComponent, ServoyPublicService, WindowRefService } from '@servoy/public';
-import { fabric } from 'fabric';
+import * as fabric from 'fabric';
 
-(fabric as any).Sprite = fabric.util.createClass(fabric.Image, {
+export class Sprite extends fabric.FabricImage {
 
-  type: 'sprite',
+    static type = 'sprite';
+    spriteWidth: number;
+    spriteHeight: number;
+    spriteIndex: number = 0;
+    frameTime: number;
+    private spriteImages: HTMLImageElement[] = [];
+    private tmpCanvasEl: HTMLCanvasElement;
+    private animInterval: number | null = null;
 
-  spriteWidth: 50,
-  spriteHeight: 72,
-  spriteIndex: 0,
-  frameTime: 100,
+    constructor(element: fabric.ImageSource, options: any) {
 
-  initialize: function(element, options) {
-    options || (options = { });
+        super(element, options);
+        this.spriteWidth = options.spriteWidth || 50;
+        this.spriteHeight = options.spriteHeight || 72;
+        this.frameTime = options.frameTime || 100;
 
-    options.width = this.spriteWidth;
-    options.height = this.spriteHeight;
+        this.width = this.spriteWidth;
+        this.height = this.spriteHeight;
 
-    this.callSuper('initialize', element, options);
-
-    this.createTmpCanvas();
-    this.createSpriteImages();
-  },
-
-  createTmpCanvas: function() {
-    this.tmpCanvasEl = fabric.util.createCanvasElement();
-    this.tmpCanvasEl.width = this.spriteWidth || this.width;
-    this.tmpCanvasEl.height = this.spriteHeight || this.height;
-  },
-
-  createSpriteImages: function() {
-    this.spriteImages = [ ];
-
-    var steps = this._element.width / this.spriteWidth;
-    for (var i = 0; i < steps; i++) {
-      this.createSpriteImage(i);
+    	this.createTmpCanvas();
+        this.createSpriteImages();
     }
-  },
 
-  createSpriteImage: function(i) {
-    var tmpCtx = this.tmpCanvasEl.getContext('2d');
-    tmpCtx.clearRect(0, 0, this.tmpCanvasEl.width, this.tmpCanvasEl.height);
-    tmpCtx.drawImage(this._element, -i * this.spriteWidth, 0);
+    createTmpCanvas() {
+        this.tmpCanvasEl = fabric.util.createCanvasElement();
+        this.tmpCanvasEl.width = this.spriteWidth || this.width;
+        this.tmpCanvasEl.height = this.spriteHeight || this.height;
+    }
 
-    var dataURL = this.tmpCanvasEl.toDataURL('image/png');
-    var tmpImg = fabric.util.createImage();
+    createSpriteImages() {
+        if (!this.getElement()) return;
 
-    tmpImg.src = dataURL;
+        const steps = this.getElement().width / this.spriteWidth;
+        for (var i = 0; i < steps; i++) {
+            this.createSpriteImage(i);
+        }
+    }
 
-    this.spriteImages.push(tmpImg);
-  },
+    createSpriteImage(index: number) {
+        const tmpCtx = this.tmpCanvasEl.getContext('2d');
+        if (!tmpCtx || !this.getElement()) return;
 
-  _render: function(ctx) {
-    ctx.drawImage(
-      this.spriteImages[this.spriteIndex],
-      -this.width / 2,
-      -this.height / 2
-    );
-  },
+        tmpCtx.clearRect(0, 0, this.tmpCanvasEl.width, this.tmpCanvasEl.height);
+        tmpCtx.drawImage(this.getElement(), -index * this.spriteWidth, 0);
 
-  play: function() {
-    var _this = this;
-    this.animInterval = setInterval(function() {
+        const dataURL = this.tmpCanvasEl.toDataURL('image/png');
+        const tmpImg = fabric.util.createImage();
+        tmpImg.src = dataURL;
 
-      _this.onPlay && _this.onPlay();
-      _this.dirty = true;
-      _this.spriteIndex++;
-      if (_this.spriteIndex === _this.spriteImages.length) {
-        _this.spriteIndex = 0;
-      }
-    }, this.frameTime);
-  },
+        this.spriteImages.push(tmpImg);
+    }
 
-  stop: function() {
-    clearInterval(this.animInterval);
-  }
-});
 
-(fabric as any).Sprite.fromURL = function(url, callback, imgOptions) {
-  fabric.util.loadImage(url, function(img) {
-    callback(new (fabric as any).Sprite(img, imgOptions));
-  });
-};
+    _render(ctx: CanvasRenderingContext2D) {
+        if (this.spriteImages.length === 0) return;
 
-(fabric as any).Sprite.async = true;
+        ctx.drawImage(
+            this.spriteImages[this.spriteIndex],
+            -this.width! / 2,
+            -this.height! / 2
+        );
+    }
+
+    play() {
+        if (this.animInterval) return;
+
+        this.animInterval = window.setInterval(() => {
+            this.dirty = true;
+            this.spriteIndex = (this.spriteIndex + 1) % this.spriteImages.length;
+        }, this.frameTime);
+    }
+
+    stop() {
+        if (this.animInterval) {
+            clearInterval(this.animInterval);
+            this.animInterval = null;
+        }
+    }
+
+    static async fromURL<T extends fabric.TOptions<fabric.ImageProps>>(
+        url: string,
+        loadOptions?: { crossOrigin?: 'anonymous' | 'use-credentials' | null; signal?: AbortSignal },
+        imageOptions?: T
+    ): Promise<Sprite> {
+        const img = await fabric.util.loadImage(url, loadOptions);
+        return new Sprite(img as fabric.ImageSource, imageOptions);
+    }
+}
+// Register the class in Fabric.js
+fabric.classRegistry.setClass(Sprite);
+fabric.classRegistry.setSVGClass(Sprite);
 
 @Component({
     selector: 'svycanvas-Canvas',
@@ -91,14 +102,14 @@ import { fabric } from 'fabric';
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false
 })
-export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
+export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
     //model
-    @Input() canvasObjects: Array < canvasObject > ;
+    @Input() canvasObjects: Array<canvasObject>;
     @Output() canvasObjectsChange = new EventEmitter();
     @Input() showGrid: Boolean;
     @Input() snapToGrid: Boolean;
     @Input() gridSize: Number;
-    @Input() canvasOptions: canvasOptions;
+    @Input() canvasOptions: CanvasOptions;
     @Input() imagesLoader: any;
     @Input() styleClass: String;
     @Input() defObj: Object;
@@ -110,7 +121,7 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
     @Input() servoyApi: any;
     @Input() objects: any;
     @Input() images: Object;
-    @Input() reselect: Array < any > ;
+    @Input() reselect: Array<any>;
     @Input() zoom: Number;
     @Input() zoomX: Number;
     @Input() zoomY: Number;
@@ -118,16 +129,15 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
     @Input() objNum: any;
 
     //handlers
-    @Input() onClick: (e ? : Event, data ? : any) => void;
-    @Input() onLongPress: (e ? : Event, data ? : any) => void;
-    @Input() onModified: (e ? : Event, data ? : any) => void;
-    @Input() onReady: (e ? : Event, data ? : any) => void;
-    @Input() afterRender: (e ? : Event, data ? : any) => void;
+    @Input() onClick: (e?: Event, data?: any) => void;
+    @Input() onLongPress: (e?: Event, data?: any) => void;
+    @Input() onModified: (e?: Event, data?: any) => void;
+    @Input() onReady: (e?: Event, data?: any) => void;
+    @Input() afterRender: (e?: Event, data?: any) => void;
 
     constructor(protected readonly renderer: Renderer2, protected cdRef: ChangeDetectorRef, private servoyService: ServoyPublicService, private window: WindowRefService) {
         super(renderer, cdRef);
-        
-        fabric.util.createClass
+        // fabric.util.createClass is not necessary in Fabric.js v6 because it has been removed.
     }
 
     svyOnInit() {
@@ -162,7 +172,7 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
             flipY: 0,
             textAlign: 'left',
             selectable: null,
-            ctrl: null,            
+            ctrl: null,
             objects: null,
             points: null,
             path: ''
@@ -182,10 +192,10 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
             this.canvasObjects = [];
         }
 
-        this.window.nativeWindow['cancelRequestAnimFrame'] = (function() {
-            return window.cancelAnimationFrame || this.window.nativeWindow.webkitCancelRequestAnimationFrame || 
-            this.window.nativeWindow.mozCancelRequestAnimationFrame || this.window.nativeWindow.oCancelRequestAnimationFrame || 
-            this.window.nativeWindow.msCancelRequestAnimationFrame || clearTimeout
+        this.window.nativeWindow['cancelRequestAnimFrame'] = (function () {
+            return window.cancelAnimationFrame || this.window.nativeWindow.webkitCancelRequestAnimationFrame ||
+                this.window.nativeWindow.mozCancelRequestAnimationFrame || this.window.nativeWindow.oCancelRequestAnimationFrame ||
+                this.window.nativeWindow.msCancelRequestAnimationFrame || clearTimeout
         })();
 
         window.addEventListener("resize", () => this.drawTimeout());
@@ -206,8 +216,9 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
         if (!delay) delay = 0;
         if (this.isDrawing) return;
         this.isDrawing = true;
-        if (this.draw)
-            setTimeout(this.draw.bind(this), delay);
+        if (this.draw) {
+            setTimeout(() => { this.draw(); }, delay);
+        } 
     }
 
     loadImg() {
@@ -223,9 +234,9 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
                 }
             }
             if (img) {
-                img.onload = function() {
+                img.onload = () => {
                     this.drawTimeout();
-                }.bind(this);
+                };
             }
         }
     }
@@ -240,8 +251,8 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
     }
 
     cloneAndSave(obj) {
-        function upperCaseFirstLetter(string) {
-            return string.charAt(0).toUpperCase() + string.slice(1);
+        function upperCaseFirstLetter(str: string): string {
+            return str.charAt(0).toUpperCase() + str.slice(1);
         }
 
         if (!obj) return;
@@ -271,17 +282,17 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
                             o[i].objectType = "Text";
                         }
                     }
-                    
+
                     if (obj.src) {
                         o[i].mediaName = obj.src.split('/')[6].split('?')[0];
                         o[i].spriteName = obj.src.split('/')[6].split('?')[0];
                     }
-                    
+
                 }
             }
-                           
+
             this.canvasObjectsChange.emit(o);
-        } catch (e) {}
+        } catch (e) { console.error("Error in cloneAndSave:", e); }
     }
 
     updateModelObj(o) {
@@ -318,16 +329,16 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
         if (!g.textAlign) {
             g.textAlign = 'left';
         }
-        const options: fabric.IGroupOptions = {
+        const options: Partial<fabric.Group> = {
             cornerColor: !this.canvasOptions.selectable ? 'rgba(102,153,255,0.0)' : 'rgba(102,153,255,0.5)',
             borderColor: !this.canvasOptions.selectable ? 'rgba(102,153,255,0.0)' : 'rgba(102,153,255,0.5)',
-            hasControls: this.canvasOptions.selectable ? true: false,
+            hasControls: this.canvasOptions.selectable ? true : false,
             selectable: typeof g.selectable == 'undefined' ? true : g.selectable,
             lockMovementX: !this.canvasOptions.selectable,
             lockMovementY: !this.canvasOptions.selectable
         }
         for (var k in this.defObj) {
-            if (typeof g[k] != 'undefined')
+            if (typeof g[k] !== 'undefined')
                 options[k] = g[k]
         }
 
@@ -363,23 +374,23 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
                 item = new fabric.Line(g.path, options);
                 break;
             case 'Image':
-                item = new fabric.Image(this.images[g.mediaName], options);
+                if (this.images[g.mediaName]) item = new fabric.FabricImage(this.images[g.mediaName], options);
                 break;
             case 'Sprite':
                 if (this.images[g.spriteName])
-                    item = new (fabric as any).Sprite(this.images[g.spriteName], options)
+                    item = new Sprite(this.images[g.spriteName], options)
                 //else console.log('no image was found for creating a Sprite under name: ' + g.spriteName);
                 break;
             case 'Text':
-                item = new fabric.Textbox(g.text, options);
+                item = new fabric.Textbox(g.text || '', options);
                 break;
             default:
                 break;
         }
-       
-        if (item && !noAddToCanvas) {			
+
+        if (item && !noAddToCanvas) {
             this.canvas.add(item);
-            if (type == 'Sprite') {
+            if (type == 'Sprite' && item.play) {
                 item.play();
             }
         }
@@ -395,48 +406,56 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
         }
         this.canvas.renderAll();
     }
-    copySelectedObject() {
-        this.canvas.getActiveObject().clone(function(cloned) {
-            var _clipboard = cloned;
+    async copySelectedObject() {
+        const activeObject = this.canvas.getActiveObject();
+        if (!activeObject) return;
+    
+        try {
+            // Clone the object (returns a Promise)
+            const _clipboardObject = await activeObject.clone();
+
             // clone again, so you can do multiple copies.
-            _clipboard.clone(function(clonedObj) {
-                this.reselect = []
-                clonedObj.set({
-                    left: clonedObj.left + 10,
-                    top: clonedObj.top + 10,
-                    id: this.uuidv4(),
-                    evented: true
+            const clonedObj = await _clipboardObject.clone();
+            
+            // Modify cloned object's position & give it a new ID
+            clonedObj.set({
+                left: clonedObj.left! + 10,
+                top: clonedObj.top! + 10,
+                id: this.uuidv4(),  // Assign a new ID if needed
+                evented: true       // Ensure the new object is interactive
+            });
+
+            if (clonedObj instanceof fabric.ActiveSelection){
+                // active selection needs a reference to the canvas.
+                clonedObj.canvas = this.canvas;
+                clonedObj.forEachObject((obj) =>{
+                    (obj as any).id = this.uuidv4();
+                    this.reselect.push((obj as any).id)
+                    // obj.transparentCorners = true;
+                    this.canvas.add(obj);
                 });
+                // this should solve the unselectability
+                clonedObj.setCoords();
+            } else {
+                this.reselect.push(clonedObj.id)
+                this.canvas.add(clonedObj);
+            }
 
-                if (clonedObj.type === 'activeSelection') {
-                    // active selection needs a reference to the canvas.
-                    clonedObj.canvas = this.canvas;
-                    clonedObj.forEachObject(function(obj) {
-                        obj.id = this.uuidv4();
-                        this.reselect.push(obj.id)
-                        // obj.transparentCorners = true;
-                        this.canvas.add(obj);
-                    }.bind(this));
-                    // this should solve the unselectability
-                    clonedObj.setCoords();
-                } else {
-                    this.reselect.push(clonedObj.id)
-                    this.canvas.add(clonedObj);
-                }
-                _clipboard.top += 10;
-                _clipboard.left += 10;
-                _clipboard.id = this.uuidv4();
-                this.reselect.push(_clipboard.id)                
-                this.canvas.setActiveObject(clonedObj);
-                this.canvas.requestRenderAll();
-                this.canvas.discardActiveObject();
-                setTimeout(function() {
-                    this.setSelectedObject(this.reselect)
-                }.bind(this), 250)
-
-            }.bind(this));
-        }.bind(this));
-
+            _clipboardObject.top += 10;
+            _clipboardObject.left += 10;
+            _clipboardObject.id = this.uuidv4();
+            this.reselect.push(_clipboardObject.id)            
+            // Add cloned object to the canvas
+            //this.canvas.add(_clipboardObject);
+            this.canvas.setActiveObject(clonedObj);
+            this.canvas.requestRenderAll();
+            this.canvas.discardActiveObject();
+            setTimeout(() => {
+                this.setSelectedObject(this.reselect)
+            }, 250)
+        } catch (error) {
+            console.error("Error cloning object:", error);
+        }
     }
     saveAsImage(cb) {
         var canvas = document.getElementById(this.servoyApi.getMarkupId());
@@ -455,69 +474,69 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
         }
     }
     printCanvas(resolutionWidth) {
-		
-		var originWidth = this.canvas.getWidth();
-		if (!resolutionWidth) resolutionWidth = originWidth ;
-		//helper function to set print resolution
-        function zoom (width,canvas)
-            {
-                var scale = width / canvas.getWidth();
-                var height = scale * canvas.getHeight();
 
-                canvas.setDimensions({
-                    "width": width,
-                    "height": height
-                });
+        var originWidth = this.canvas.getWidth();
+        if (!resolutionWidth) resolutionWidth = originWidth;
+        //helper function to set print resolution
+        function zoom(width, canvas) {
+            var scale = width / canvas.getWidth();
+            var height = scale * canvas.getHeight();
 
-                canvas.calcOffset();
-                var objects = canvas.getObjects();
-                for (var i in objects) {
-                    var scaleX = objects[i].scaleX;
-                    var scaleY = objects[i].scaleY;
-                    var left = objects[i].left;
-                    var top = objects[i].top;
+            canvas.setDimensions({
+                "width": width,
+                "height": height
+            });
 
-                    objects[i].scaleX = scaleX * scale;
-                    objects[i].scaleY = scaleY * scale;
-                    objects[i].left = left * scale;
-                    objects[i].top = top * scale;
+            canvas.calcOffset();
+            var objects = canvas.getObjects();
+            for (var i in objects) {
+                var scaleX = objects[i].scaleX;
+                var scaleY = objects[i].scaleY;
+                var left = objects[i].left;
+                var top = objects[i].top;
 
-                    objects[i].setCoords();
-                }
-                canvas.renderAll();
+                objects[i].scaleX = scaleX * scale;
+                objects[i].scaleY = scaleY * scale;
+                objects[i].left = left * scale;
+                objects[i].top = top * scale;
+
+                objects[i].setCoords();
+            }
+            canvas.renderAll();
         }
-		var canvas_el = document.getElementById(this.servoyApi.getMarkupId());
-		canvas_el.style.opacity = '0';
-        zoom(resolutionWidth,this.canvas);
-		
-		setTimeout(function(){				
-			var dataUrl = this.canvas.toDataURL(); //attempt to save base64 string to server using this var  
-		    var windowContent = '<!DOCTYPE html>';
-		    windowContent += '<html>'	    
-		    windowContent += '<body>'
-		    windowContent += '<head><style> @page { size: auto;  margin: 0mm; }</style> <title> </title></head>'
-		    windowContent += '<img style="width:100vw;width:100vh;" src="' + dataUrl + '">';
-		    windowContent += '</body>';
-		    windowContent += '</html>';
-		    zoom(originWidth,this.canvas);
-		    var printWin = window.open();
-		    printWin.document.open();
-		    printWin.document.write(windowContent);
-		    printWin.document.close();
-		    printWin.focus();
-		    printWin.print();
-		    setTimeout(function(){		
-			printWin.close();
-			canvas_el.style.opacity = '100';	
-			}.bind(this),500);
-			
-		}.bind(this),1000)     
-		
-	                
+        var canvas_el = document.getElementById(this.servoyApi.getMarkupId());
+        canvas_el.style.opacity = '0';
+        zoom(resolutionWidth, this.canvas);
+
+        setTimeout(() => {
+            if (!this.canvas) return; // Ensure canvas exists
+            
+            var dataUrl = this.canvas.toDataURL(); //attempt to save base64 string to server using this var  
+            var windowContent = '<!DOCTYPE html>';
+            windowContent += '<html>'
+            windowContent += '<body>'
+            windowContent += '<head><style> @page { size: auto;  margin: 0mm; }</style> <title> </title></head>'
+            windowContent += '<img style="width:100vw;width:100vh;" src="' + dataUrl + '">';
+            windowContent += '</body>';
+            windowContent += '</html>';
+            zoom(originWidth, this.canvas);
+            const printWin: Window | null = window.open();
+            if (printWin) {
+                printWin.document.open();
+                printWin.document.write(windowContent);
+                printWin.document.close();
+                printWin.focus();
+                printWin.print();
+                setTimeout(() => {
+                    printWin.close();
+                    canvas_el.style.opacity = '100';
+                }, 500);
+            }
+        }, 1000)
     }
     ZoomOnPoint(x, y, zoom) {
         this.zoomX = x;
-        this.zoomX = y;
+        this.zoomY = y;
         this.zoom = zoom;
         this.drawTimeout(0);
     }
@@ -527,18 +546,18 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
             var ob = this.canvasObjects;
             if (!ob) return;
             for (var i in obj) {
+                if (!obj[i]) continue;
                 for (var j in ob) {
-                    if (!obj[i]) continue;
-                    if (!ob[j]) continue;
-                    if (obj[i].id == ob[j].id) {
+                    if (!ob[j] || obj[i].id !== ob[j].id) continue;
+                    if (obj[i].id === ob[j].id) {
                         sel.push(ob[j].id);
                         for (var k in obj[i]) {
                             ob[j][k] = obj[i][k];
-                        }                        
+                        }
                     }
                 }
             }
-            
+
             this.canvasObjectsChange.emit(this.canvasObjects);
 
             if (this.onModified) {
@@ -547,15 +566,15 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
 
             this.drawTimeout();
             if (setItemActive) {
-                setTimeout(function() {
+                setTimeout(() => {
                     this.setSelectedObject(sel);
-                }.bind(this), 250)
+                }, 250)
             }
         }
     }
     loadCanvas(data) {
         if (!data || (data.length < 1)) return;
-        this.canvasObjects = JSON.parse(data);      
+        this.canvasObjects = JSON.parse(data);
         this.canvasObjectsChange.emit(this.canvasObjects);
         this.drawTimeout();
     }
@@ -563,68 +582,64 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
         if (setActive != false) {
             setActive = true;
         }
-        this.reselect = []
-        var s = new fabric.ActiveSelection([], {
+        this.reselect = [];
+
+        const objectsToAdd = Array.isArray(objs) ? objs : [objs];
+
+        const activeSelection = new fabric.ActiveSelection([], {
             canvas: this.canvas
         });
+
         if (objs && objs.length > 0) {
             for (var i = 0; i < objs.length; i++) {
                 this.reselect.push(objs[i].id)
-                s.addWithUpdate(this.createObject(objs[i].objectType, objs[i]))
+                activeSelection.add(this.createObject(objs[i].objectType, objs[i]))
             }
         } else if (objs) {
             this.reselect.push(objs.id)
-            s.addWithUpdate(this.createObject(objs.objectType, objs))
+            activeSelection.add(this.createObject(objs.objectType, objs))
         }
 
-        this.canvas.setActiveObject(s);
-
-        if (!setActive) {
-            this.canvas.discardActiveObject();
+        if (setActive) {
+            this.canvas.setActiveObject(activeSelection);
+            setTimeout(() => {
+                this.setSelectedObject(this.reselect);
+            }, 50);
         } else {
             this.canvas.discardActiveObject();
-            setTimeout(function() {
-                this.setSelectedObject(this.reselect)
-            }.bind(this), 50)
         }
         this.canvas.renderAll();
-
+    
         if (this.onModified) {
             this.onModified();
         }
     }
-    removeObject(idx) {
-        var o = this.canvas.getActiveObject();
-        //check if in a group
-        function remove(id) {
-            if (id) {
-                var obj = this.canvasObjects;
-                for (var i in obj) {
-                    if (!obj[i]) continue;
-                    if (obj[i].id == id) {
-                        this.canvas.remove(o);
-                        delete obj[i];
-                    }
-                }
-            }
-        }
-        if (!o) return;
-        remove.call(this, o.id);
-        var ob = o._objects;
-        if (ob && ob.length > 1) {
-            for (var j = 0; j < ob.length; j++) {
-                var id = ob[j].id;
-                if (!id) continue;
-                remove.call(this, id);
-                this.canvas.remove(ob[j]);
-            }
-
+    removeObject() {
+        var activeObject = this.canvas.getActiveObject();
+        if (!activeObject) return;
+        // Helper function to remove object by id
+        const removeById = (id?: string | number) => {
+            if (!id) return;
+            this.canvasObjects = this.canvasObjects.filter(obj => obj.id !== id);
             this.canvasObjectsChange.emit(this.canvasObjects);
+        };
+
+        const removeObjectFromCanvas = (obj) => {
+            removeById(obj.id);
+            this.canvas.remove(obj);
+        };
+
+        if (activeObject instanceof fabric.Group) {
+            // If it's a group, remove each object in the group first
+            activeObject.getObjects().forEach(obj => {
+                removeObjectFromCanvas(obj);
+            });
         }
-        this.canvas.remove(o);
-        if (o._objects) {
-            this.canvas.remove(o._objects[0]);
-        }
+
+        // Remove the active object itself
+        removeObjectFromCanvas(activeObject);
+        
+        // Cleanup and update canvas
         this.canvas.discardActiveObject();
         this.canvas.renderAll();
     }
@@ -643,37 +658,35 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
             }
         }
 
-
         if (ids && ids.length > 0) {
-            var s = new fabric.ActiveSelection([], {
+            var activeSelection = new fabric.ActiveSelection([], {
                 canvas: this.canvas
             });
 
             for (i = 0; i < ids.length; i++) {
                 if (allObjects[ids[i]] && allObjects[ids[i]]._set){				
-		   			s.addWithUpdate(allObjects[ids[i]])
+		   			activeSelection.add(allObjects[ids[i]])
 				}			                    
             }                        
-            this.canvas.setActiveObject(s);       
-            if (s._objects[0] && s._objects[0]['ctrl']) {				
-				var ctr = s._objects[0]['ctrl'];
+            this.canvas.setActiveObject(activeSelection);       
+            if (activeSelection.getObjects()[0] && activeSelection.getObjects()[0]['ctrl']) {				
+				var ctr = activeSelection.getObjects()[0]['ctrl'];
 				for(var j in ctr) {
-					s.setControlVisible(j,ctr[j]);	
+					activeSelection.setControlVisible(j,ctr[j]);	
 				}									
 			}			
-                 
             this.canvas.renderAll();                                    
-        
         }
     }
     getSelectedObject(cb, sel) {
 
-        function selectHelper(ob) {
-            // console.log('selectHelper : ')
+        function selectHelper(ob): void {
             if (!ob) return;
-            if (ob._objects && ob.objectType != 'Group') {
-                for (var i = 0; i < ob._objects.length; i++) {
-                    selectHelper(ob._objects[i]);
+            
+            if (ob.objectType !== 'Group' && ob instanceof fabric.Group && ob.getObjects()) {
+                const allObjects = ob.getObjects();
+                for (var i = 0; i < allObjects.length; i++) {
+                    selectHelper(allObjects[i]);
                 }
             } else {
                 sel.push(ob.id);
@@ -682,18 +695,20 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
 
         if (!sel) {
             sel = []
-            var ao = this.canvas.getActiveObject();
-            selectHelper(ao);
+            const ao = this.canvas.getActiveObject();
+            if (ao) {
+                selectHelper(ao);
+            }
         }
 
         if (sel) {
             var co = this.canvasObjects;
             var os = [];
-            for (var i in co) {
-                for (var j = 0; j < sel.length; j++) {
+            for (const i in co) {
+                for (let j = 0; j < sel.length; j++) {
                     if (!co[i]) continue;
-                    if (co[i].id == sel[j]) {
-                        os.push(co[i])
+                    if (co[i].id === sel[j]) {
+                        os.push(co[i]);
                     }
                 }
             }
@@ -701,25 +716,23 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
                 return cb(os);
             }
         }
-        var ao = this.canvas.getActiveObject();
-        if (!ao) return null;        
-        var ob = ao._objects;
-        if (ao.objectType != 'Group' && ob && ob.length > 0) {
+        const ao = this.canvas.getActiveObject();
+        if (!ao) return null;
+        const ob = ao.getObjects();
+        if (ao.objectType !== 'Group' && ao instanceof fabric.Group && ob && ob.length > 0) {
             var grp = []
             for (var j = 0; j < ob.length; j++) {
                 if (!ob[j]) continue;
                 grp.push(ob[j].id);
             }
             this.canvas.discardActiveObject();
-            return setTimeout(function() {
+            return setTimeout(() => {
                 this.getSelectedObject(cb, grp)
-            }.bind(this), 250);
+            }, 250);
         }
         this.canvas.discardActiveObject();
 
-        return setTimeout(function() {
-            this.getSelectedObject(cb, [ao.id])
-        }.bind(this), 250);
+        setTimeout(() => this.getSelectedObject(cb, [(ao as any).id!]), 250);
     }
     draw() {
         this.grid = this.gridSize;
@@ -738,20 +751,20 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
         }
 
         if (!this.canvasOptions) {
-           this.canvasOptions = {
-			   selectable:0, 
-			   skipTargetFind:false, 
-			   hasRotatingPoint:0, 
-			   renderOnAddRemove:false,
-			   skipOffscreen:false, 
-			   ZoomOnMouseScroll:0, 
-			   animationSpeed:null
-		   };
+            this.canvasOptions = {
+                selectable: 0,
+                skipTargetFind: false,
+                hasRotatingPoint: 0,
+                renderOnAddRemove: false,
+                skipOffscreen: false,
+                ZoomOnMouseScroll: 0,
+                animationSpeed: null
+            };
         }
 
         this.canvasOptions['preserveObjectStacking'] = true;
         this.canvas = new fabric.Canvas(this.svyMarkupId, this.canvasOptions);
-        fabric.Object.prototype.transparentCorners = false;
+        fabric.FabricObject.prototype.transparentCorners = false;
         this.canvas.selection = this.canvasOptions.selectable;
         var gridWidth = document.getElementById(this.svyMarkupId + '-wrapper').clientWidth;
         var gridHeight = document.getElementById(this.svyMarkupId + '-wrapper').clientHeight;
@@ -776,12 +789,12 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
             var gridSize = (gridWidth > gridHeight) ? gridWidth : gridHeight
             for (var i = 0; i < (gridSize / this.grid); i++) {
                 this.canvas.add(new fabric.Line([i * this.grid, 0, i * this.grid, gridSize], {
-//                    id: 'grid',
+                    //                    id: 'grid',
                     stroke: '#ccc',
                     selectable: false
                 }));
                 this.canvas.add(new fabric.Line([0, i * this.grid, gridSize, i * this.grid], {
-//                    id: 'grid',
+                    //                    id: 'grid',
                     stroke: '#ccc',
                     selectable: false
                 }));
@@ -791,15 +804,15 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
         this.canvas.setWidth(gridWidth);
         this.canvas.setHeight(gridHeight);
 
-        var g = this.canvasObjects;
-        for (var j in g) {
+        var canvasObjectsVar = this.canvasObjects;
+        for (var j in canvasObjectsVar) {
             this.objNum++;
-            if (!g[j]) continue;
+            if (!canvasObjectsVar[j]) continue;
             //                      console.log(g[j].id + ' : ' + g[j].objectType);
             //                      console.log(g[j]);
             //create an fabric item
-            var type = g[j].objectType;
-            this.objects[g[j].id] = this.createObject(type, g[j]);
+            var type = canvasObjectsVar[j].objectType;
+            this.objects[canvasObjectsVar[j].id] = this.createObject(type, canvasObjectsVar[j]);
         }
 
         this.setupEvents();
@@ -814,20 +827,27 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
         }
         this.isDrawing = false;
     }
-    rotate(angle) {
-        var group = new fabric.Group(this.canvas.getObjects())
-        group.rotate(angle)
-        this.canvas.centerObject(group)
-        group.setCoords()
-        this.canvas.renderAll()
+
+    rotate(angle: number) {
+        const objects = this.canvas.getObjects();
+        if (objects.length === 0) return;
+
+        const group = new fabric.Group(objects);
+        group.rotate(angle);
+
+        this.canvas.centerObject(group);
+        group.setCoords();
+        this.canvas.requestRenderAll();
     }
+
     startAnimate() {
-        var render = function() {
-            var applyChanges = false;
+        if (this.render) return; 
+        const render = () => {
             try {
+                let applyChanges = false;
                 this.canvas.discardActiveObject();
                 var o = this.canvasObjects;
-                this.canvas.getObjects().concat().forEach(function(obj) {
+                this.canvas._objects.concat().forEach(function (obj) {
                     if (obj.id != 'grid' && typeof obj.id != 'undefined') {
                         //                                  this.canvasObjects.map(function(c) {
                         //                                      if (c.id == obj.id) {
@@ -845,10 +865,11 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
                     }
                 });
                 if (applyChanges) this.canvasObjectsChange.emit(this.canvasObjects);
-                this.canvas.renderAll();
-            } catch (e) {}
-
-        }
+                this.canvas.requestRenderAll();
+            } catch (e) { 
+                console.error("Animation error:", e);
+            }
+        };
 
         if (this.render) return;
         if (this.canvasOptions.animationSpeed == null || (this.canvasOptions.animationSpeed < 50))
@@ -856,38 +877,42 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
         this.render = setInterval(render.bind(this), this.canvasOptions.animationSpeed)
     }
     stopAnimate() {
-        clearInterval(this.render);
-        this.render = null;
+        if (this.render) {
+            clearInterval(this.render);
+            this.render = null;
+            this.canvas.requestRenderAll();
+        }
     }
 
     //setup events
     setupEvents() {
-        this.canvas.on('object:scaling', function(options) {
+        this.canvas.on('object:scaling', (options) => {
             if (this.snapToGrid) {
-                var target = options.target,
-                    w = target.width * target.scaleX,
-                    h = target.height * target.scaleY,
-                    snap = { // Closest snapping points
-                        top: Math.round(target.top / this.grid) * this.grid,
-                        left: Math.round(target.left / this.grid) * this.grid,
-                        bottom: Math.round((target.top + h) / this.grid) * this.grid,
-                        right: Math.round((target.left + w) / this.grid) * this.grid
-                    },
-                    threshold = this.grid,
-                    dist = { // Distance from snapping points
-                        top: Math.abs(snap.top - target.top),
-                        left: Math.abs(snap.left - target.left),
-                        bottom: Math.abs(snap.bottom - target.top - h),
-                        right: Math.abs(snap.right - target.left - w)
-                    },
-                    attrs = {
-                        scaleX: target.scaleX,
-                        scaleY: target.scaleY,
-                        top: target.top,
-                        left: target.left
-                    };
+                const target = options.target;
+                if (!target) return;
+                const w = target.width * target.scaleX;
+                const h = target.height * target.scaleY;
+                const snap = { // Closest snapping points
+                    top: Math.round(target.top / this.grid) * this.grid,
+                    left: Math.round(target.left / this.grid) * this.grid,
+                    bottom: Math.round((target.top + h) / this.grid) * this.grid,
+                    right: Math.round((target.left + w) / this.grid) * this.grid
+                };
+                const threshold = this.grid;
+                const dist = { // Distance from snapping points
+                    top: Math.abs(snap.top - target.top),
+                    left: Math.abs(snap.left - target.left),
+                    bottom: Math.abs(snap.bottom - target.top - h),
+                    right: Math.abs(snap.right - target.left - w)
+                };
+                const attrs = {
+                    scaleX: target.scaleX,
+                    scaleY: target.scaleY,
+                    top: target.top,
+                    left: target.left
+                };
                 switch (target.__corner) {
-                    case 'tl':
+                    case 'tl': // Top-left corner
                         if (dist.left < dist.top && dist.left < threshold) {
                             attrs.scaleX = (w - (snap.left - target.left)) / target.width;
                             attrs.scaleY = (attrs.scaleX / target.scaleX) * target.scaleY;
@@ -900,13 +925,13 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
                             attrs.top = snap.top;
                         }
                         break;
-                    case 'mt':
+                    case 'mt': // Middle-top
                         if (dist.top < threshold) {
                             attrs.scaleY = (h - (snap.top - target.top)) / target.height;
                             attrs.top = snap.top;
                         }
                         break;
-                    case 'tr':
+                    case 'tr': // Top-right corner
                         if (dist.right < dist.top && dist.right < threshold) {
                             attrs.scaleX = (snap.right - target.left) / target.width;
                             attrs.scaleY = (attrs.scaleX / target.scaleX) * target.scaleY;
@@ -917,16 +942,16 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
                             attrs.top = snap.top;
                         }
                         break;
-                    case 'ml':
+                    case 'ml': // Middle-left
                         if (dist.left < threshold) {
                             attrs.scaleX = (w - (snap.left - target.left)) / target.width;
                             attrs.left = snap.left;
                         }
                         break;
-                    case 'mr':
+                    case 'mr': // Middle-right
                         if (dist.right < threshold) attrs.scaleX = (snap.right - target.left) / target.width;
                         break;
-                    case 'bl':
+                    case 'bl': // Bottom-left corner
                         if (dist.left < dist.bottom && dist.left < threshold) {
                             attrs.scaleX = (w - (snap.left - target.left)) / target.width;
                             attrs.scaleY = (attrs.scaleX / target.scaleX) * target.scaleY;
@@ -937,10 +962,10 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
                             attrs.left = attrs.left + (w - target.width * attrs.scaleX);
                         }
                         break;
-                    case 'mb':
+                    case 'mb': // Middle-bottom
                         if (dist.bottom < threshold) attrs.scaleY = (snap.bottom - target.top) / target.height;
                         break;
-                    case 'br':
+                    case 'br': // Bottom-right corner
                         if (dist.right < dist.bottom && dist.right < threshold) {
                             attrs.scaleX = (snap.right - target.left) / target.width;
                             attrs.scaleY = (attrs.scaleX / target.scaleX) * target.scaleY;
@@ -951,6 +976,7 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
                         break;
                 }
                 target.set(attrs);
+                //target.setCoords(); // Update coordinates
             }
             var obj = this.canvas.getActiveObject();
             if (!obj) return;
@@ -961,29 +987,42 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
             //     this.onScale(obj.id, obj.scaleX, obj.scaleY);
             // }
             this.canvas.renderAll();
-        }.bind(this));
-        this.canvas.on('object:moving', function(options) {
+        });
+        this.canvas.on('object:moving', (options) => {
+            const target = options.target;
+            if (!target) return;
             //snap to grid
-            if (this.snapToGrid) {
-                options.target.set({
-                    left: Math.round(options.target.left / this.grid) * this.grid,
-                    top: Math.round(options.target.top / this.grid) * this.grid
-                });
+            if (this.snapToGrid && this.grid) {
+                const newLeft = Math.round(target.left! / this.grid) * this.grid;
+                const newTop = Math.round(target.top! / this.grid) * this.grid;
+
+                if (target.left !== newLeft || target.top !== newTop) {
+                    target.set({ left: newLeft, top: newTop });
+                }
             }
-            var obj = this.canvas.getActiveObject();
+            // Get the currently active object
+            const obj = this.canvas.getActiveObject();
             if (!obj) return;
+            // Apply temporary move settings
             obj.set({
-                hasControls: 0,
-                opacity: 0.3
+                hasControls: false,  // Hide controls while moving
+                opacity: 0.3        // Reduce opacity for feedback
             });
+
+            // Ensure that moving one object does not remove others
+            const allObjects = this.canvas.getObjects();
+            if (!allObjects.includes(obj)) {
+                console.warn("Object removed from canvas unexpectedly!");
+                return;
+            }
 
             // if (this.onMove) {
             //     this.onMove(obj.id, obj.left, obj.top);
             // }
 
             this.canvas.renderAll();
-        }.bind(this));
-        this.canvas.on('mouse:wheel', function(opt) {
+        });
+        this.canvas.on('mouse:wheel', (opt) => {
             if (!this.canvasOptions.ZoomOnMouseScroll) return;
             var delta = opt.e.deltaY;
             var pointer = this.canvas.getPointer(opt.e);
@@ -992,16 +1031,16 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
             if (zoom > 20) zoom = 20;
             if (zoom < 0.01) zoom = 0.01;
             this.zoomX = opt.e.offsetX;
-            this.zoomX = opt.e.offsetY;
+            this.zoomY = opt.e.offsetY;
             this.zoom = zoom;
             this.drawTimeout();
             opt.e.preventDefault();
             opt.e.stopPropagation();
-        }.bind(this));
-        this.canvas.on('mouse:up', function(options) {
-            var obj = this.canvas.getActiveObject();        
+        });
+        this.canvas.on('mouse:up', (options) => {
+            var obj = this.canvas.getActiveObject();
             if (!obj) return;
-            var o = this.canvasObjects;            
+            var o = this.canvasObjects;
 
             if (this.onClick && !this.canvasOptions.selectable && (typeof obj.id != 'undefined')) {
                 this.onClick(obj.id, obj);
@@ -1009,40 +1048,41 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
                 this.canvas.discardActiveObject();
                 this.canvas.renderAll();
             }
-        }.bind(this));
-        this.canvas.on('touch:longpress', function(options) {
+        });
+        this.canvas.on('touch:longpress', (options) => {
             var obj = this.canvas.getActiveObject();
-            if (!obj) return;                        
-           
+            if (!obj) return;
+
             if (this.onLongPress && !this.canvasOptions.selectable && (typeof obj.id != 'undefined')) {
                 this.onLongPress(obj.id, obj);
                 //when clicking don't allow overlapping
                 this.canvas.discardActiveObject();
                 this.canvas.renderAll();
             }
-        }.bind(this));
-        this.canvas.on('selection:cleared', function() {
+        });
+        this.canvas.on('selection:cleared', () => {
             if (!this.canvas.getActiveObject()) {
-                //save canvas to datamodel;
-                var o = this.canvas.getObjects();
+                // Save canvas to datamodel
+                const objects = this.canvas._objects;
 
-                function addToModel(obj) {
-                    if (obj.type === "textbox") {
-                        obj.type = "Text";
-                    }
+                const addToModel = (obj : any) => {
+                    if (!obj || !obj.type) return null;
 
-                    var objectType = obj.type.charAt(0).toUpperCase() + obj.type.slice(1);
-                    var mediaName = obj.mediaName;
-                    var spriteName = obj.spriteName;
+                    let objectType = obj.type === "textbox" ? "Text" : obj.type.charAt(0).toUpperCase() + obj.type.slice(1);
+
+                    let mediaName = obj.mediaName || "";
+                    let spriteName = obj.spriteName || "";
 
                     if (obj.src) {
-                        mediaName = obj.src.split('/')[6].split('?')[0];
-                        spriteName = obj.src.split('/')[6].split('?')[0];
+                        let srcParts = obj.src.split('/');
+                        let filename = srcParts[srcParts.length - 1].split('?')[0];
+                        mediaName = filename;
+                        spriteName = filename;
                     }
 
-                    var co = {};
-                    for (var l in this.defObj) {
-                        co[l] = obj[l] == null ? this.defObj[l] : obj[l];
+                    const co = { ...this.defObj }; // Clone default object properties
+                    for (let key in co) {
+                        co[key] = obj[key] != null ? obj[key] : this.defObj[key];
                     }
 
                     co['objectType'] = objectType;
@@ -1050,7 +1090,7 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
                     co['spriteName'] = spriteName;
 
                     //check if type is group and add objects
-                    if (co['objectType'] == 'Group') {
+                    if (co['objectType'] === 'Group' && obj._objects?.length) {
                         //  console.log('new group')
                         //  console.log(co)
                         //  console.log(obj)
@@ -1059,30 +1099,29 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
                         for (var n = 0; n < obj._objects.length; n++) {
                             co['objects'].push(addToModel.call(this, obj._objects[n]));
                         }
-                    }                    
+                    }
                     return co;
                 }
-                for (var i = 0; i < o.length; i++) {
-                    if (typeof o[i].id == 'undefined') continue;
-                    if (o[i].id == 'grid') continue;
+                for (var i = 0; i < objects.length; i++) {
+                    if (typeof objects[i].id === 'undefined') continue;
+                    if (objects[i].id === 'grid') continue;
 
-                    if (!this.objects[o[i].id]) {
+                    if (!this.objects[objects[i].id]) {
 
-                        var oo = addToModel.call(this, o[i])
-
-                        if (!this.canvasObjects) {
-                            this.canvasObjects = [];
+                        const objModel = addToModel(objects[i]);
+                        if (objModel) {
+                            if (!this.canvasObjects) {
+                                this.canvasObjects = [];
+                            }
+                            this.canvasObjects.push(objModel as any);
+                            this.objects[objects[i].id] = objModel;
                         }
-                        this.canvasObjects.push(oo);
-                        this.objects[o[i].id] = oo;
                     }
                 }
-                if (o.length > 0) {
-                    this.canvasObjectsChange.emit(this.canvasObjects);
-                }
+                this.canvasObjectsChange.emit(this.canvasObjects);
             }
-        }.bind(this));
-        this.canvas.on('object:modified', function() {
+        });
+        this.canvas.on('object:modified', () => {
             if (this.onModified) {
                 this.onModified();
             }
@@ -1091,106 +1130,96 @@ export class Canvas extends ServoyBaseComponent < HTMLDivElement > {
             obj.set({
                 hasControls: this.canvasOptions.selectable,
                 opacity: 1
-            });             
-            var sel = []
+            });
+            let selectedIds = [];
+            // Helper function to collect object IDs
+            const selectHelper = (o: fabric.Object) => {
+                if (!o) return;
 
-            function selectHelper(o) {
-                if (o) {
-
-                    if (o._objects && o._objects.length > 0) {
-                        for (var i = 0; i < o._objects.length; i++) {
-                            selectHelper(o._objects[i])
-                        }
-                    }
-
-                    if (o.objects && o.objects.length > 0) {
-                        for (i = 0; i < o.objects.length; i++) {
-                            selectHelper(o.objects[i])
-                        }
-                    }
-
-                    if (o.id) {
-                        sel.push(o.id)
-                    }
-										
+                if (o instanceof fabric.Group) {
+                    o._objects.forEach(selectHelper);
                 }
-            }						
-            this.canvas.discardActiveObject();
+
+                if ('id' in o && o.id) {
+                    selectedIds.push(o.id as string);
+                }
+            };
+            // Store selected objects before clearing selection
             selectHelper(obj);
+
+            // Clone and save the modified object
             this.cloneAndSave(obj);
 
-            //reselect objects
-            setTimeout(function() {
-                if (sel.length > 0)
-                    this.setSelectedObject(sel)
-            }.bind(this), 0)
-        }.bind(this));
-        this.canvas.on('mouse:over', function(e) {
+            // Delay reselection to avoid immediate recursion
+            setTimeout(() => {
+                if (selectedIds.length > 0) {
+                    this.setSelectedObject(selectedIds);
+                }
+            }, 10);
+        });
+        this.canvas.on('mouse:over', (e) => {
             if (!this.canvasOptions.selectable) {
                 if (e.target)
                     e.target.hoverCursor = 'pointer';
-            }           
-        }.bind(this));
-        this.canvas.on('after:render', function(e) {
+            }
+        });
+        this.canvas.on('after:render', (e) => {
             if (this.afterRender) {
                 this.afterRender();
-            }      
-        }.bind(this));
-        this.canvas.on('mouse:down', function(e) {
-           var obj = this.canvas.getActiveObject();
-           if (!obj) return;           
-		   
-		   if (obj.ctrl) {				
-				var ctr = obj.ctrl;
-				for(var j in ctr) {
-					obj.setControlVisible(j,ctr[j]);	
-				}									
-			}
-		   
-        }.bind(this));       
+            }
+        });
+        this.canvas.on('mouse:down', (e) => {
+            var obj = this.canvas.getActiveObject();
+            if (!obj || !obj.ctrl) return;
+
+            var ctr = obj.ctrl;
+            for (var j in ctr) {
+                obj.setControlVisible(j, ctr[j]);
+            }
+        });
     }
 
 }
 
-export class canvasOptions implements fabric.ICanvasOptions{
-    public selectable: number;
-    public skipTargetFind: boolean;
-    public hasRotatingPoint: number;
-    public renderOnAddRemove: boolean;
-    public skipOffscreen: boolean;
-    public ZoomOnMouseScroll: number;
-    public animationSpeed: number;
+export class CanvasOptions implements Partial<fabric.CanvasOptions> {
+    public selectable: number = 1;
+    public skipTargetFind: boolean = false;
+    public hasRotatingPoint: number = 0;
+    public renderOnAddRemove: boolean = true;
+    public skipOffscreen: boolean = false;
+    public ZoomOnMouseScroll: number = 0;
+    public animationSpeed: number = 1;
 }
 
-export class canvasObject  {
-    public objectType: String;
-    public objects: Object;
-    public fill: String;
-    public opacity: number;
-    public width: number;
-    public height: number;
-    public radius: number;
-    public left: number;
-    public top: number;
-    public rx: number;
-    public ry: number;
-    public stroke: String;
-    public id: any;
-    public scaleX: number;
-    public scaleY: number;
-    public text: String;
-    public textAlign: String;
-    public fontSize: number;
-    public fontFamily: String;
-    public angle: number;
-    public mediaName: String;
-    public spriteName: String;
-    public spriteWidth: number;
-    public spriteHeight: number;
-    public spriteIndex: number;
-    public frameTime: number;
-    public selectable: Boolean;
-    public ctrl: Object;    
-    public custom_data: object;
-    public state: any;
+export class canvasObject {
+    public objectType: string = '';
+    public objects: fabric.Object | null = null; // More specific type
+    public fill: string = '#000';
+    public opacity: number = 1.0;
+    public width: number = 0;
+    public height: number = 0;
+    public radius?: number; // Optional if not always used
+    public left: number = 0;
+    public top: number = 0;
+    public rx?: number;
+    public ry?: number;
+    public stroke?: string;
+    public id: string | number | null = null;
+    public scaleX: number = 1;
+    public scaleY: number = 1;
+    public text?: string;
+    public textAlign?: 'left' | 'center' | 'right' | 'justify';
+    public fontSize?: number;
+    public fontFamily?: string;
+    public angle?: number = 0;
+    public mediaName?: string;
+    public spriteName?: string;
+    public spriteWidth?: number;
+    public spriteHeight?: number;
+    public spriteIndex?: number = 0;
+    public frameTime?: number = 100;
+    public selectable: boolean = true;
+    public ctrl?: Record<string, any>; // More specific type than Object
+    public custom_data?: Record<string, any>;
+    public state?: any;
 }
