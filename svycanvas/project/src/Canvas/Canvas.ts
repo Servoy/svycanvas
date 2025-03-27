@@ -442,7 +442,7 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
                 this.reselect.push(clonedObj.id)
                 this.canvas.add(clonedObj);
             }
-
+        
             //Add cloned object to the canvas
             this.canvas.setActiveObject(clonedObj);
             this.canvas.requestRenderAll();
@@ -1005,13 +1005,6 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
                 hasControls: false,  // Hide controls while moving
                 opacity: 0.3        // Reduce opacity for feedback
             });
-
-            // Ensure that moving one object does not remove others
-            const allObjects = this.canvas.getObjects();
-            if (!allObjects.includes(obj)) {
-                console.warn("Object removed from canvas unexpectedly!");
-                return;
-            }
 
             // if (this.onMove) {
             //     this.onMove(obj.id, obj.left, obj.top);
