@@ -425,6 +425,8 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
                 evented: true       // Ensure the new object is interactive
             });
 
+            this.reselect = []; // Reset selection
+
             if (clonedObj instanceof fabric.ActiveSelection){
                 // active selection needs a reference to the canvas.
                 clonedObj.canvas = this.canvas;
@@ -441,12 +443,7 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
                 this.canvas.add(clonedObj);
             }
 
-            _clipboardObject.top += 10;
-            _clipboardObject.left += 10;
-            _clipboardObject.id = this.uuidv4();
-            this.reselect.push(_clipboardObject.id)            
-            // Add cloned object to the canvas
-            //this.canvas.add(_clipboardObject);
+            //Add cloned object to the canvas
             this.canvas.setActiveObject(clonedObj);
             this.canvas.requestRenderAll();
             this.canvas.discardActiveObject();
