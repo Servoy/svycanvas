@@ -95,7 +95,7 @@ function printCanvas(resolutionWidth) {
  * Add one or more canvas objects and optionally select it. 
  * If given more than one item in the objs array, the elements will be grouped as a single entity. 
  * 
- * @param {Array<Object>} objs An array of canvas objects to be added.
+ * @param {Object} objs An array of canvas objects to be added.
  * @param {Boolean} [setActive] If true, the added object(s) will be selected as the active item.
  */
 function addObject(objs, setActive) {
