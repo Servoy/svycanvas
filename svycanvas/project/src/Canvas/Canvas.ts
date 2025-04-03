@@ -1033,7 +1033,7 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
             var o = this.canvasObjects;
 
             if (this.onClick && !this.canvasOptions.selectable && (typeof obj.id != 'undefined')) {
-                this.onClick(obj.id, obj);
+                this.onClick(obj.id, obj.toObject());
                 //when clicking don't allow overlapping
                 this.canvas.discardActiveObject();
                 this.canvas.renderAll();
@@ -1044,7 +1044,7 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
             if (!obj) return;
 
             if (this.onLongPress && !this.canvasOptions.selectable && (typeof obj.id != 'undefined')) {
-                this.onLongPress(obj.id, obj);
+                this.onLongPress(obj.id, obj.toObject());
                 //when clicking don't allow overlapping
                 this.canvas.discardActiveObject();
                 this.canvas.renderAll();
