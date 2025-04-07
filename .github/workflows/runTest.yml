@@ -11,16 +11,14 @@ on:
 
 jobs:
   build:
+    runs-on: ubuntu-latest
 
-      runs-on: ubuntu-latest
-
-      steps:
+    steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Find component directory
-        id: find_component_dir
-        run: echo "COMPONENT_DIR=$(find . -type d -name 'META-INF' -exec dirname {} \;)" >> $GITHUB_ENV
+      - name: Set COMPONENT_DIR
+        run: echo "COMPONENT_DIR=." >> $GITHUB_ENV  # Set COMPONENT_DIR to the root of the repo
 
       - name: Use Node.js
         uses: actions/setup-node@v4
@@ -31,22 +29,20 @@ jobs:
       - name: Cache + Restore node_modules
         uses: actions/cache@v4
         with:
-            # Cache node_modules and Puppeteer chrome
-            path: |
-              ~/.cache
-              .angular
-              node_modules
-            key: ${{ runner.os }}-node_modules-${{ hashFiles('**/package-lock.json') }}
-            restore-keys: |
-              ${{ runner.os }}-node_modules-          
-          
-          
+          path: |
+            ~/.cache
+            .angular
+            node_modules
+          key: ${{ runner.os }}-node_modules-${{ hashFiles('package-lock.json') }}  # Cache based on package-lock.json in the root
+          restore-keys: |
+            ${{ runner.os }}-node_modules-
+
       - name: Install and run the cypress component tests
-        working-directory: ${{ env.COMPONENT_DIR }}
+        working-directory: ${{ env.COMPONENT_DIR }}  # Working in the root of the repo
         run: |
-          npm install
-          npm run cy:run
-          
+          npm install  # Install dependencies from the root
+          npm run cy:run  # Run your Cypress tests
+
       - name: Upload artifacts on failure
         if: failure()
         uses: actions/upload-artifact@v4
@@ -55,5 +51,3 @@ jobs:
           path: ${{ env.COMPONENT_DIR }}/cypress/screenshots/**
           if-no-files-found: ignore
           retention-days: 30
-          
-  
