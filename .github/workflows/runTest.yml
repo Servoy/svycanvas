@@ -17,8 +17,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set COMPONENT_DIR
-        run: echo "COMPONENT_DIR=." >> $GITHUB_ENV  # Set COMPONENT_DIR to the root of the repo
+      - name: Find component directory
+        id: find_component_dir
+        run: echo "COMPONENT_DIR=$(find . -type d -name 'META-INF' -exec dirname {} \;)" >> $GITHUB_ENV
 
       - name: Use Node.js
         uses: actions/setup-node@v4
