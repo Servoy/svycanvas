@@ -27,6 +27,18 @@ jobs:
       with:
         node-version: '22.x'
         cache: 'npm'
+        working-directory: ${{ env.COMPONENT_DIR }}
+
+    - name: Cache + Restore node_modules
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache
+          .angular
+          node_modules
+        key: ${{ runner.os }}-node_modules-${{ hashFiles(${{ env.COMPONENT_DIR }} + '/package-lock.json') }}  # Cache based on package-lock.json in the root
+        restore-keys: |
+          ${{ runner.os }}-node_modules-
 
     - name: Install and build component
       working-directory: ${{ env.COMPONENT_DIR }}
