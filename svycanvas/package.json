@@ -1,53 +1,60 @@
 {
-  "name": "svycanvas",
-  "version": "2025.3.0",
-  "description": "Servoy Canvas component",
-  "scripts": {
-    "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build --configuration production",
-    "build_debug": "ng build --watch",
-    "make_release": "ng build --configuration production && node scripts/build.js",
-    "test": "ng test --watch --browsers Chrome",
-    "test_edge": "ng test --watch --browsers Edge",
-    "test_edge_nowatch": "ng test --watch=false --browsers Edge",
-    "test_headless": "ng test --browsers headlessChrome --watch=false",
-    "lint": "ng lint"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Servoy/svycanvas.git"
-  },
-  "keywords": [
-    "servoy",
-    "canvas"
-  ],
-  "author": "Tuan Nguyen",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/Servoy/svycanvas/issues"
-  },
-  "homepage": "https://github.com/Servoy/svycanvas#readme",
-  "dependencies": {
-    "@angular/common": "^19.2.2",
-    "@angular/core": "19.2.2",
-    "@angular/forms": "19.2.2",
-    "@angular/platform-browser": "^19.2.2",
-    "@servoy/public": "^2025.3.0",
-    "fabric": "6.6.1",
-    "rxjs": "^7.8.2",
-    "zone.js": "^0.15.0"
-  },
-  "devDependencies": {
-    "@angular-devkit/build-angular": "19.2.3",
-    "@angular/cli": "19.2.3",
-    "@angular/compiler-cli": "19.2.2",
-    "@angular/compiler": "^19.2.2",
-    "adm-zip": "0.5.16",
-    "eslint": "9.22.0",
-    "ng-packagr": "19.2.0",
-    "ts-node": "10.9.2",
-    "tslib": "^2.8.1",
-    "typescript": "5.8.2"
-  }
+	"name": "svycanvas",
+	"version": "2025.3.0",
+	"description": "Servoy Canvas component",
+	"scripts": {
+		"ng": "ng",
+		"start": "ng serve",
+		"build": "ng build --configuration production @servoy/svycanvas",
+		"build_debug": "ng build @servoy/svycanvas --watch",
+		"build_debug_nowatch": "ng build @servoy/svycanvas --watch=false",
+		"make_release": "ng build --configuration production @servoy/svycanvas && node scripts/build.js",
+		"test": "ng test --watch --browsers Chrome",
+		"test_edge": "ng test --watch --browsers Edge",
+		"test_edge_nowatch": "ng test --watch=false --browsers Edge",
+		"test_headless": "ng test --browsers headlessChrome --watch=false",
+		"lint": "ng lint",
+		"cy:open": "cypress open",
+		"cy:run": "cypress run --config video=false --component --browser chrome",
+		"cy:run_spec": "cypress run --config video=false --component --browser chrome --headed --no-exit --spec "
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Servoy/svycanvas.git"
+	},
+	"keywords": [
+		"servoy",
+		"canvas"
+	],
+	"author": "Tuan Nguyen",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/Servoy/svycanvas/issues"
+	},
+	"homepage": "https://github.com/Servoy/svycanvas#readme",
+	"dependencies": {
+		"@angular/common": "^19.2.2",
+		"@angular/core": "19.2.2",
+		"@angular/forms": "19.2.2",
+		"@angular/platform-browser": "^19.2.2",
+		"@angular/platform-browser-dynamic": "^19.2.2",
+		"@angular/router": "^19.2.2",
+		"@servoy/public": "^2025.3.0",
+		"fabric": "6.6.1",
+		"rxjs": "^7.8.2",
+		"zone.js": "^0.15.0"
+	},
+	"devDependencies": {
+		"@angular-devkit/build-angular": "19.2.3",
+		"@angular/cli": "19.2.3",
+		"@angular/compiler": "^19.2.2",
+		"@angular/compiler-cli": "19.2.2",
+		"adm-zip": "0.5.16",
+		"cypress": "^14.2.1",
+		"eslint": "9.22.0",
+		"ng-packagr": "19.2.0",
+		"ts-node": "10.9.2",
+		"tslib": "^2.8.1",
+		"typescript": "5.8.2"
+	}
 }
