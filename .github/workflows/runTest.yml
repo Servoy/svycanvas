@@ -34,7 +34,7 @@ jobs:
             ~/.cache
             .angular
             node_modules
-          key: ${{ runner.os }}-node_modules-${{ hashFiles('package-lock.json') }}  # Cache based on package-lock.json in the root
+          key: ${{ runner.os }}-node_modules-${{ hashFiles('**/package-lock.json') }}  # Cache based on package-lock.json in the root
           restore-keys: |
             ${{ runner.os }}-node_modules-
 
