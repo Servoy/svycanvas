@@ -27,7 +27,6 @@ jobs:
       with:
         node-version: '22.x'
         cache: 'npm'
-        working-directory: ${{ env.COMPONENT_DIR }}
 
     - name: Cache + Restore node_modules
       uses: actions/cache@v4

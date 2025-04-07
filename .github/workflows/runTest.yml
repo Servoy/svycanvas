@@ -31,7 +31,6 @@ jobs:
       - name: Cache + Restore node_modules
         uses: actions/cache@v4
         with:
-          working-directory: ${{ env.COMPONENT_DIR }}
           path: |
             ~/.cache
             .angular
