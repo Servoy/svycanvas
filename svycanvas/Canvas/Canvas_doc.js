@@ -1,3 +1,8 @@
+/*
+ * A Canvas component created on top of the "fabric" library (https://fabricjs.com/).<br/>
+ * It can be used to draw various kinds of objects/content on the component.
+ */
+
 /**
  * Array of canvas objects to be rendered on the canvas.
  */
