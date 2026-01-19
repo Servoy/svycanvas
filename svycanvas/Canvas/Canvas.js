@@ -7,7 +7,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
             api: "=svyApi",
             svyServoyapi: "=svyServoyapi"
         },
-        controller: function($scope, $element, $attrs, $window) {
+			controller: function($scope, $element, $attrs, $window, $utils) {
             var defObj = {
                 id: '',
                 angle: 0,
@@ -16,6 +16,8 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                 fontFamily: 'Times New Roman',
                 scaleX: 1,
                 scaleY: 1,
+					zoomX: 1,
+					zoomY: 1,
                 left: 0,
                 top: 0,
                 width: 50,
@@ -52,6 +54,14 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
             $scope.zoom = null;
             $scope.zoomX = null;
             $scope.zoomY = null;
+				
+				$scope.isDragging;
+				$scope.lastPosX;
+				$scope.lastPosY;
+				
+				var clickTimer;
+				var preventClick;
+				
             if (!$scope.model.canvasObjects) {
                 $scope.model.canvasObjects = [];
             }
@@ -95,6 +105,47 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                 }
                 return copy;
             }
+
+				function getObjectById(objectId) {
+					for (var i = 0; i < $scope.model.canvasObjects.length; i++) {
+						if ($scope.model.canvasObjects[i].id == objectId) {
+							return $scope.model.canvasObjects[i];
+						}
+					}
+					return null;
+				}
+				
+				function updateModelObject(canvasObj, modelObj) {
+					for (var k in modelObj) {
+						if (k != 'id') {
+							modelObj[k] = canvasObj[k] == null ? modelObj[k] : canvasObj[k];
+						}
+					}
+				}
+				
+				function getObjectsFromEvent(evt, update) {
+					var result = [];
+					var modelObj;
+					if (evt && evt.target && evt.target._objects) {
+						for (var i = 0; i < evt.target._objects.length; i++) {
+							var obj = evt.target._objects[i];
+							if (obj.id) {
+								modelObj = getObjectById(obj.id);
+								if (update) {
+									updateModelObject(obj, modelObj);
+								}
+								result.push(modelObj);
+							}
+						}
+					} else if (evt && evt.target && evt.target.id) {
+						modelObj = getObjectById(evt.target.id);
+						if (update) {
+							updateModelObject(evt.target, modelObj);
+						}
+						result.push(modelObj)
+					}
+					return result;
+				}				
 
             function cloneAndSave(obj) {
                 function upperCaseFirstLetter(string) {
@@ -244,15 +295,24 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                 return item;
             }
 
-            $scope.api.bringToFront = function(idx) {
+				/**
+				 * Brings the object with the given ID to front
+				 * 
+				 * @param {String} objectId
+				 */
+				$scope.api.bringToFront = function(objectId) {
                 var o = $scope.canvas._objects;
                 for (var i = 0; i < o.length; i++) {
-                    if (o[i].id == idx) {
+						if (o[i].id == objectId) {
                         o[i].bringToFront();
                     }
                 }
                 $scope.canvas.renderAll();
             }
+				
+				/**
+				 * Copies the selected object
+				 */
             $scope.api.copySelectedObject = function() {
                 $scope.canvas.getActiveObject().clone(function(cloned) {
                     _clipboard = cloned;
@@ -296,15 +356,31 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                 });
 
             }
-            $scope.api.saveAsImage = function(cb) {
+				
+				/**
+				 * @param {Function} callbackMethod
+				 */
+				$scope.api.saveAsImage = function(callbackMethod) {
                 var canvas = document.getElementById($scope.model.svyMarkupId);
                 var url = canvas.toDataURL({
                     format: 'png',
                     quality: 1.0
                 });
                 url.download = 'canvas.png'
-                $window.executeInlineScript(cb.formname, cb.script, [url]);
+                $window.executeInlineScript(callbackMethod.formname, callbackMethod.script, [url]);
             }
+			/**
+							 * Returns a URL for a png image of the canvas
+							 * @return {String} url
+							 */
+							$scope.api.getImageUrl = function() {
+								var url = $scope.canvas.toDataURL({
+									format: 'png',
+									quality: 1
+								});
+								return url.replace('data:image/png;base64,', '');
+							}	
+			
             $scope.api.saveCanvas = function(cb) {
                 $window.executeInlineScript(cb.formname, cb.script, [JSON.stringify($scope.model.canvasObjects)]);
             }
@@ -424,9 +500,15 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                 $scope.canvas.discardActiveObject();
                 $scope.canvas.renderAll();
             }
+				
+				/**
+				 * Clears the canvas
+				 * 
+				 */
             $scope.api.clearCanvas = function() {
-                if ($scope.canvas)
+					if ($scope.canvas) {
                     $scope.canvas.clear();
+					}
                 drawTimeout();
             }
             $scope.api.setSelectedObject = function(ids) {
@@ -443,7 +525,13 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                     $scope.canvas.renderAll();
                 }
             }
-            $scope.api.getSelectedObject = function(cb, sel) {
+
+				/**
+				 * Gets the object selected and calls the callback method
+				 * 
+				 * @param {Function} callbackMethod
+				 */
+				$scope.api.getSelectedObject = function(callbackMethod, sel) {
 
                 function selectHelper(ob) {
                     if (ob._objects && ob.objectType != 'Group') {
@@ -472,7 +560,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                             }
                         }
                     }
-                    return $window.executeInlineScript(cb.formname, cb.script, [os]);
+						return $window.executeInlineScript(callbackMethod.formname, callbackMethod.script, [os]);
                 }
                 var ao = $scope.canvas.getActiveObject();
                 if (!ao) return;
@@ -485,15 +573,20 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                     }
                     $scope.canvas.discardActiveObject();
                     return setTimeout(function() {
-                        $scope.api.getSelectedObject(cb, grp)
+								$scope.api.getSelectedObject(callbackMethod, grp)
                     }, 250);
                 }
                 $scope.canvas.discardActiveObject();
 
                 return setTimeout(function() {
-                    $scope.api.getSelectedObject(cb, [ao.id])
+							$scope.api.getSelectedObject(callbackMethod, [ao.id])
                 }, 250);
             }
+				
+				/**
+				 * (Re-)draws the canvas
+				 * 
+				 */
             $scope.api.draw = function() {
                 grid = $scope.model.gridSize;
                 $scope.objects = {};
@@ -521,8 +614,9 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                 var gridHeight = document.getElementById($scope.model.svyMarkupId + '-wrapper').clientHeight;
 
                 //setup zoom
-                if ($scope.zoom)
+					if ($scope.zoom) {
                     $scope.canvas.zoomToPoint({ x: $scope.zoomX, y: $scope.zoomY }, $scope.zoom);
+					}
 
                 //TODO : set scale based on targetScale options
                 //					if ($scope.model.canvasOptions.targetScaleW && $scope.model.canvasOptions.targetScaleH) {
@@ -578,6 +672,12 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                 }
                 $scope.isDrawing = false;
             }
+				
+				/**
+				 * Rotates the canvas with the given angle
+				 * 
+				 * @param {Number} angle
+				 */
             $scope.api.rotate = function(angle) {
                 var group = new fabric.Group($scope.canvas.getObjects())
                 group.rotate(angle)
@@ -637,6 +737,9 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
         		zoom (originWidth);
         		},1000)               
             }
+			/**
+			 * Starts animation
+			 */
             $scope.api.startAnimate = function() {
                 var render = function() {
                     var applyChanges = false;
@@ -671,6 +774,10 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                     $scope.model.canvasOptions.animationSpeed = 50;
                 $scope.render = setInterval(render, $scope.model.canvasOptions.animationSpeed)
             }
+				
+				/**
+				 * Stops animation
+				 */
             $scope.api.stopAnimate = function() {
                 clearInterval($scope.render);
                 $scope.render = null;

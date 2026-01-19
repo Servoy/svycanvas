@@ -24,26 +24,27 @@
 
 	"model": 
 	{
-		"canvasObjects": {"type": "canvasObject[]","pushToServer": "allow"},
-		"showGrid": {"type": "int","values": [{"Yes": 1},{"No": 0}],"default": 0},
-		"snapToGrid": {"type": "int","values": [{"Yes": 1},{"No": 0}],"default": 0},
-		"gridSize":{"type": "int","default": 10},
-		"canvasOptions": {"type": "canvasOptions"},
-		"imagesLoader": {"type": "media[]"},
-		"styleClass": {"type":"styleclass"}
+		"canvasObjects": 				{ "type": "canvasObject[]", "pushToServer": "allow" },
+		"showGrid": 					{ "type": "int", "values": [{"Yes": 1},{"No": 0}], "default": 0 },
+		"snapToGrid": 					{ "type": "int", "values": [{"Yes": 1},{"No": 0}], "default": 0 },
+		"gridSize":						{ "type": "int", "default": 10 },
+		"canvasOptions": 				{ "type": "canvasOptions" },
+		"imagesLoader": 				{ "type": "media[]" },
+		"styleClass": 					{ "type": "styleclass" }
 	},
 
 	"types": 
 	{
 		"canvasOptions": 
 		{
-			"selectable": {"type": "int","values": [{"Yes": 1},{"No": 0}],"default": 1},
-			"skipTargetFind": {"type": "int","values": [{"Yes": 1},{"No": 0}],"default": 0},
-			"hasRotatingPoint": {"type": "int","values": [{"Yes": 1},{"No": 0}],"default": 1},
-			"renderOnAddRemove": {"type": "int","values": [{"Yes": 1},{"No": 0}],"default": 0},
-			"skipOffscreen": {"type": "int","values": [{"Yes": 1},{"No": 0}],"default": 1},
-			"ZoomOnMouseScroll": {"type": "int","values": [{"Yes": 1},{"No": 0}],"default": 0},
-			"animationSpeed": {"type": "float","default": 50}		
+			"selectable": 				{"type": "int", "values": [{"Yes": 1}, {"No": 0}], "default": 1 },
+			"skipTargetFind": 			{"type": "int", "values": [{"Yes": 1}, {"No": 0}], "default": 0 },
+			"hasRotatingPoint": 		{"type": "int", "values": [{"Yes": 1}, {"No": 0}], "default": 1 },
+			"renderOnAddRemove": 		{"type": "int", "values": [{"Yes": 1}, {"No": 0}], "default": 0 },
+			"skipOffscreen": 			{"type": "int", "values": [{"Yes": 1}, {"No": 0}], "default": 1 },
+			"ZoomOnMouseScroll": 		{"type": "int", "deprecated": "Use zoomOnMouseScroll instead", "values": [{"Yes": 1}, {"No": 0}], "default": 0 },
+			"zoomOnMouseScroll": 		{"type": "int", "values": [{"Yes": 1}, {"No": 0}], "default": 0 },
+			"animationSpeed": 			{"type": "float", "default": 50 }		
 		},
 
 		"canvasObject": 
@@ -108,6 +109,13 @@
 
 	"api": 
 	{
+		"createObject": {
+			"returns": "canvasObject",
+			"parameters": [
+				{"name": "id","type": "string"}, 
+				{"name": "type","type": "string"}
+			]
+		},	
 		"addObject": {"delayUntilFormLoads": true, "parameters": [{"name": "objs","type": "object"}, {"name": "setActive", "type":"boolean", "optional":true}]},		
 		"copySelectedObject": {"delayUntilFormLoads": true, "parameters": []},
 		"updateObject": {"delayUntilFormLoads": true, "parameters": [{"name": "obj","type": "object"},{"name": "selectActiveItems","type": "boolean"}]},
@@ -128,9 +136,37 @@
 
 	"handlers": 
 	{
-		"onClick": {"parameters": []},
-		"onLongPress": {"parameters": []},
-		"onModified": {"parameters": []},
+		"onClick": { 
+			"parameters": [ 
+				{"name": "objectId", "type": "string"}, 
+				{"name": "object", "type": "canvasObject"} 
+			]
+		},
+		"onRightClick": { 
+			"parameters": [ 
+				{"name": "event", "type": "JSEvent"}, 
+				{"name": "objectId", "type": "string"}, 
+				{"name": "object", "type": "canvasObject"} 
+			]
+		},
+		"onDoubleClick": { 
+			"parameters": [ 
+				{"name": "event", "type": "JSEvent"}, 
+				{"name": "objectId", "type": "string"}, 
+				{"name": "object", "type": "canvasObject"} 
+			]
+		},
+		"onLongPress": { 
+			"parameters": [ 
+				{"name": "objectId", "type": "string"}, 
+				{"name": "object", "type": "canvasObject"} 
+			]
+		},
+		"onModified": {
+			"parameters": [ 
+				{"name": "objectsModified", "type": "canvasObject[]"} 
+			]
+		},
 		"onReady": {"parameters": []},
 		"afterRender": {"parameters": []}
 	}
