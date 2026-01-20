@@ -517,6 +517,20 @@ function onModified() {
 }
 
 /**
+ * TODO generated, please specify type and doc for the params
+ * @param objects
+ *
+ * @properties={typeid:24,uuid:"4D0D0917-EC34-46C5-946C-D9A242183176"}
+ */
+function onModified1(objects) {
+	var objIds = objects.map(function getId(item) {
+		return item.id;
+	})
+	application.output('Objects modified: ' + objIds.join('\n'))
+	elements.canvas.getSelectedObject(objInfo)
+}
+ 
+/**
  * @param {{id:String}} objs
  *
  * @properties={typeid:24,uuid:"B65DD271-D7EA-41CF-9007-BA05DE550346"}
@@ -681,4 +695,65 @@ function onReady() {
  */
 function afterRender() {
 	application.output('after render')
+}
+
+/**
+ * @properties={typeid:24,uuid:"08A6F41D-619E-4F79-A1C1-36D519CD1658"}
+ */
+function saveAsImage() {
+	elements.canvas.saveAsImage(saveAsImageCallback)
+}
+
+/**
+ * TODO generated, please specify type and doc for the params
+ * @param url
+ *
+ *
+ * @properties={typeid:24,uuid:"FCECC3D0-38D9-4F8D-8352-E7478295F7EC"}
+ */
+function saveAsImageCallback(url) {
+	application.output(url);
+}
+
+/**
+ *
+ * @properties={typeid:24,uuid:"0642C008-021D-4245-A597-AC9465B61360"}
+ */
+function getImage() {
+	application.output(elements.canvas.getImageUrl())
+}
+
+/**
+ * @param {JSEvent} event
+ * @param {string} objectId
+ * @param {CustomType<svycanvas-Canvas.canvasObject>} object
+ *
+ * @private
+ *
+ *
+ * @properties={typeid:24,uuid:"1EA18C5A-DBBD-4CF3-B872-3EC26C1B4C9D"}
+ */
+function onRightClick(event, objectId, object) {
+	application.output(objectId);	
+	var popup = plugins.window.createPopupMenu();
+	popup.addMenuItem('Hello');
+	popup.addMenuItem('World');
+	popup.addMenuItem('Foo');
+	popup.addMenuItem('Bar');
+	popup.show(event.getX() + 1, event.getY());
+}
+
+/**
+ * @param {JSEvent} event
+ * @param {string} objectId
+ * @param {CustomType<svycanvas-Canvas.canvasObject>} object
+ *
+ * @private
+ *
+ *
+ * @properties={typeid:24,uuid:"668E0468-E509-484E-A0EC-876A0C998018"}
+ */
+function onDoubleClick(event, objectId, object) {
+	application.output(event);
+	application.output(objectId);
 }
