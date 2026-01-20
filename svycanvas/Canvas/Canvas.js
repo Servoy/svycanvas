@@ -10,7 +10,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 			controller: function($scope, $element, $attrs, $window, $utils) {
             var defObj = {
                 id: '',
-                angle: 0,
+					angle: '',
                 fontSize: 8,
                 text: '',
                 fontFamily: 'Times New Roman',
@@ -199,8 +199,8 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                 // console.log('update ' + o.id);
                 // console.log(o.left + ' , ' + o.top)
                 var d = $scope.model.canvasObjects;
-                if (o[i].type === "i-text") {
-                    o[i].type = "Text";
+					if (o.type === "i-text") {
+						o.type = "Text";
                 }
                 var objectType = o.type.charAt(0).toUpperCase() + o.type.slice(1);
                 for (var j in d) {
@@ -378,6 +378,10 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 					return url.replace('data:image/png;base64,', '');
 				}
 
+				/**
+				 * @param {Function} cb
+				 * @deprecated use getCanvasState instead
+				 */
             $scope.api.saveCanvas = function(cb) {
                 $window.executeInlineScript(cb.formname, cb.script, [JSON.stringify($scope.model.canvasObjects)]);
             }
@@ -457,7 +461,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                 if (objs && objs.length > 0) {
                     for (var i = 0; i < objs.length; i++) {
                         $scope.reselect.push(objs[i].id)
-                        s.addWithUpdate(createObject(objs[i].objectType, objs[i]))
+							s.addWithUpdate(createObject(objs[i].objectType, objs[i]))
                     }
                 } else if (objs) {
                     $scope.reselect.push(objs.id)
@@ -475,7 +479,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
                     }, 50)
                 }
                 $scope.canvas.renderAll();
-				$scope.svyServoyapi.apply("canvasObjects");
+				//$scope.svyServoyapi.apply("canvasObjects");
 
                 if ($scope.handlers.onModified) {
 						$scope.handlers.onModified([objs]);

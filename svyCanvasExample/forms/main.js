@@ -1,4 +1,9 @@
 /**
+ * @properties={typeid:35,uuid:"8D69466A-EEEB-4206-875B-6245A6570EE2",variableType:-4}
+ */
+var zoom = null;
+
+/**
  * @type {Number}
  *
  * @properties={typeid:35,uuid:"4CBC99AB-31CC-45A6-AA54-B9618A3402CD",variableType:8}
@@ -143,7 +148,7 @@ function onAction$addObject(event) {
 		obj.fill = color;
 		obj.opacity = 1;
 	}
-	elements.canvas.addObject([obj], true);
+	elements.canvas.addObject(obj, true);
 }
 
 /**
