@@ -482,7 +482,11 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 				//$scope.svyServoyapi.apply("canvasObjects");
 
                 if ($scope.handlers.onModified) {
+                	if (objs instanceof Array) {
+						$scope.handlers.onModified(objs);
+                	} else {
 						$scope.handlers.onModified([objs]);
+					}
                 }
             }
        

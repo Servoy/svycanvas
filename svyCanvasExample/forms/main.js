@@ -148,7 +148,7 @@ function onAction$addObject(event) {
 		obj.fill = color;
 		obj.opacity = 1;
 	}
-	elements.canvas.addObject(obj, true);
+	elements.canvas.addObject([obj], true);
 }
 
 /**
