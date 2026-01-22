@@ -10,7 +10,7 @@ angular.module('svycanvasCanvas', ['servoy']).directive('svycanvasCanvas', funct
 			controller: function($scope, $element, $attrs, $window, $utils) {
             var defObj = {
                 id: '',
-					angle: '',
+				angle: '',
                 fontSize: 8,
                 text: '',
                 fontFamily: 'Times New Roman',
