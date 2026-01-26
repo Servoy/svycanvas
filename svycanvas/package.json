@@ -1,6 +1,6 @@
 {
 	"name": "svycanvas",
-	"version": "2025.3.0",
+	"version": "2025.3.1",
 	"description": "Servoy Canvas component",
 	"scripts": {
 		"ng": "ng",
