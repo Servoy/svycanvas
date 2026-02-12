@@ -699,7 +699,7 @@ function onReady() {
  * @properties={typeid:24,uuid:"BEB8FE64-577C-4260-8AE4-2D5E7EE08D84"}
  */
 function afterRender() {
-	application.output('after render')
+
 }
 
 /**
