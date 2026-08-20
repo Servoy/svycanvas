@@ -1,4 +1,5 @@
-import { Component, Input, SimpleChanges, Renderer2, ChangeDetectorRef, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
+import { Component, SimpleChanges, ChangeDetectionStrategy, input, output, inject, Input, Output, EventEmitter } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { ServoyBaseComponent, ServoyPublicService, WindowRefService } from '@servoy/public';
 import * as fabric from 'fabric';
 
@@ -10,7 +11,7 @@ export class Sprite extends fabric.FabricImage {
     spriteIndex: number = 0;
     frameTime: number;
     private spriteImages: HTMLImageElement[] = [];
-    private tmpCanvasEl: HTMLCanvasElement;
+    private tmpCanvasEl!: HTMLCanvasElement;
     private animInterval: number | null = null;
 
     constructor(element: fabric.ImageSource, options: any) {
@@ -100,53 +101,56 @@ fabric.classRegistry.setSVGClass(Sprite);
     selector: 'svycanvas-Canvas',
     templateUrl: './Canvas.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    standalone: true,
+    imports: [CommonModule]
 })
 export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
     //model
-    @Input() canvasObjects: Array<canvasObject>;
-    @Output() canvasObjectsChange = new EventEmitter();
-    @Input() showGrid: Boolean;
-    @Input() snapToGrid: Boolean;
-    @Input() gridSize: Number;
-    @Input() canvasOptions: CanvasOptions;
-    @Input() imagesLoader: any;
-    @Input() styleClass: String;
-    @Input() defObj: Object;
-    @Input() isDrawing: Boolean;
-    @Input() isReady: Boolean;
-    @Input() canvas: any;
-    @Input() render: any;
-    @Input() grid: any;
-    @Input() servoyApi: any;
-    @Input() objects: any;
-    @Input() images: Object;
-    @Input() reselect: Array<any>;
-    @Input() zoom: Number;
-    @Input() zoomX: Number;
-    @Input() zoomY: Number;
-    @Input() svyMarkupId: string;
-    @Input() objNum: any;
-
-    isDragging: Boolean;
-    lastPosX: number;
-    lastPosY: number;
+    @Input() canvasObjects!: Array<canvasObject>;
+    @Output() canvasObjectsChange = new EventEmitter<Array<canvasObject>>();
+    readonly showGrid = input<Boolean>(undefined as any);
+    readonly snapToGrid = input<Boolean>(undefined as any);
+    readonly gridSize = input<Number>(undefined as any);
+    readonly canvasOptions = input<CanvasOptions>(undefined as any);
+    readonly imagesLoader = input<any>(undefined as any);
+    readonly styleClass = input<String>(undefined as any);
 
     //handlers
-    @Input() onClick: (e?: Event, data?: any) => void;
-    @Input() onRightClick: (e: Event, objectId?: String, object?: canvasObject) => void;
-    @Input() onDoubleClick: (e: Event, objectId?: String, object?: canvasObject) => void;
-    @Input() onLongPress: (e?: Event, data?: any) => void;
-    @Input() onModified: (objectsModified: Array<canvasObject>, e?: Event, data?: any) => void;
-    @Input() onReady: (e?: Event, data?: any) => void;
-    @Input() afterRender: (e?: Event, data?: any) => void;
+    readonly onClick = input<((e?: Event, data?: any) => void) | undefined>(undefined);
+    readonly onRightClick = input<((e: Event, objectId?: String, object?: canvasObject) => void) | undefined>(undefined);
+    readonly onDoubleClick = input<((e: Event, objectId?: String, object?: canvasObject) => void) | undefined>(undefined);
+    readonly onLongPress = input<((e?: Event, data?: any) => void) | undefined>(undefined);
+    readonly onModified = input<((objectsModified: Array<canvasObject>, e?: Event, data?: any) => void) | undefined>(undefined);
+    readonly onReady = input<((e?: Event, data?: any) => void) | undefined>(undefined);
+    readonly afterRender = input<((e?: Event, data?: any) => void) | undefined>(undefined);
+
+    defObj: any;
+    isDrawing!: Boolean;
+    isReady!: Boolean;
+    canvas: any;
+    render: any;
+    grid: any;
+    objects: any;
+    images: any = {};
+    reselect: Array<any> = [];
+    zoom!: Number | null;
+    zoomX!: Number | null;
+    zoomY!: Number | null;
+    svyMarkupId!: string;
+    objNum: any;
+
+    isDragging!: Boolean;
+    lastPosX: number | null = null;
+    lastPosY: number | null = null;
 
     clickTimer: any;
     preventClick: boolean = false;
 
-    constructor(protected readonly renderer: Renderer2, protected cdRef: ChangeDetectorRef, private servoyService: ServoyPublicService, private window: WindowRefService) {
-        super(renderer, cdRef);
-        // fabric.util.createClass is not necessary in Fabric.js v6 because it has been removed.
+    private servoyService = inject(ServoyPublicService);
+    private window = inject(WindowRefService);
+
+    constructor() {
+        super();
     }
 
     svyOnInit() {
@@ -186,7 +190,7 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
             points: null,
             path: ''
         }
-        this.svyMarkupId = this.servoyApi.getMarkupId();
+        this.svyMarkupId = this.servoyApi().getMarkupId();
         this.isDrawing = false;
         this.isReady = false;
         this.canvas = null;
@@ -201,18 +205,14 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
         this.lastPosX = null;
         this.lastPosY = null;
 
-        if (!this.canvasObjects) {
-            this.canvasObjects = [];
-        }
-
-        this.window.nativeWindow['cancelRequestAnimFrame'] = (function () {
-            return window.cancelAnimationFrame || this.window.nativeWindow.webkitCancelRequestAnimationFrame ||
-                this.window.nativeWindow.mozCancelRequestAnimationFrame || this.window.nativeWindow.oCancelRequestAnimationFrame ||
-                this.window.nativeWindow.msCancelRequestAnimationFrame || clearTimeout
+        (this.window.nativeWindow as any)['cancelRequestAnimFrame'] = (() => {
+            return window.cancelAnimationFrame || (this.window.nativeWindow as any).webkitCancelRequestAnimationFrame ||
+                (this.window.nativeWindow as any).mozCancelRequestAnimationFrame || (this.window.nativeWindow as any).oCancelRequestAnimationFrame ||
+                (this.window.nativeWindow as any).msCancelRequestAnimationFrame || clearTimeout
         })();
 
         window.addEventListener("resize", () => this.drawTimeout());
-        setTimeout(this.loadImg, 0);
+        setTimeout(() => this.loadImg(), 0);
         this.drawTimeout();
     }
 
@@ -235,13 +235,14 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
     }
 
     loadImg() {
-        if (this.imagesLoader && this.imagesLoader.length > 0) {
-            var im = this.imagesLoader;
+        if (this.imagesLoader() && this.imagesLoader().length > 0) {
+            var im = this.imagesLoader();
+            var img: HTMLImageElement | undefined;
             for (var i in im) {
                 if (!im[i] || !im[i].split) continue;
                 var imgName = im[i].split('/')[3].split('?')[0];
                 if (!this.images[imgName]) {
-                    var img = new Image();
+                    img = new Image();
                     img.src = im[i];
                     this.images[imgName] = img;
                 }
@@ -264,23 +265,24 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
     }
 
     getObjectById(objectId: string) {
-        for (var i = 0; i < this.canvasObjects.length; i++) {
-            if (this.canvasObjects[i].id == objectId) {
-                return this.canvasObjects[i];
+        const arr = this.canvasObjects;
+        for (var i = 0; i < arr.length; i++) {
+            if (arr[i].id == objectId) {
+                return arr[i];
             }
         }
         return null;
     }
 
-    updateModelObject(canvasObj, modelObj) {
+    updateModelObject(canvasObj: any, modelObj: any) {
         for (var k in modelObj) {
             if (k != 'id') {
                 modelObj[k] = canvasObj[k] == null ? modelObj[k] : canvasObj[k];
             }
         }
     }
-    getObjectsFromEvent(evt, update) {
-        var result = [];
+    getObjectsFromEvent(evt: any, update: any) {
+        var result: any[] = [];
         var modelObj;
         if (evt && evt.target && evt.target._objects) {
             for (var i = 0; i < evt.target._objects.length; i++) {
@@ -303,7 +305,7 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
         return result;
     }
 
-    cloneAndSave(obj) {
+    cloneAndSave(obj: any) {
         function upperCaseFirstLetter(str: string): string {
             return str.charAt(0).toUpperCase() + str.slice(1);
         }
@@ -326,7 +328,7 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
                 if (o[i].id == obj.id) {
                     for (var k in this.defObj) {
                         if (k != 'id')
-                            o[i][k] = obj[k];
+                            (o[i] as any)[k] = obj[k];
                     }
 
                     if (typeof obj.objectType == 'undefined') {
@@ -344,11 +346,11 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
                 }
             }
 
-            this.canvasObjectsChange.emit(o);
+            this.canvasObjectsChange.emit(this.canvasObjects);
         } catch (e) { console.error("Error in cloneAndSave:", e); }
     }
 
-    updateModelObj(o) {
+    updateModelObj(o: any) {
         //if it has no identifier don't update
         if (!o.id) return;
         // console.log('update ' + o.id);
@@ -363,7 +365,7 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
 
                 for (var k in this.defObj) {
                     if (k != 'id')
-                        d[j][k] = o[k] == null ? this.defObj[k] : o[k]
+                        (d[j] as any)[k] = o[k] == null ? this.defObj[k] : o[k]
                 }
             }
         }
@@ -375,20 +377,20 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
         })
     }
 
-    createObject(type, g, noAddToCanvas?: boolean) {
+    createObject(type: any, g: any, noAddToCanvas?: boolean) {
         //                  console.log('create object : ' + type);
         //                  console.log(g.objects)
         let item;
         if (!g.textAlign) {
             g.textAlign = 'left';
         }
-        const options: Partial<fabric.Group> = {
-            cornerColor: !this.canvasOptions.selectable ? 'rgba(102,153,255,0.0)' : 'rgba(102,153,255,0.5)',
-            borderColor: !this.canvasOptions.selectable ? 'rgba(102,153,255,0.0)' : 'rgba(102,153,255,0.5)',
-            hasControls: this.canvasOptions.selectable ? true : false,
+        const options: any = {
+            cornerColor: !this.canvasOptions().selectable ? 'rgba(102,153,255,0.0)' : 'rgba(102,153,255,0.5)',
+            borderColor: !this.canvasOptions().selectable ? 'rgba(102,153,255,0.0)' : 'rgba(102,153,255,0.5)',
+            hasControls: this.canvasOptions().selectable ? true : false,
             selectable: typeof g.selectable == 'undefined' ? true : g.selectable,
-            lockMovementX: !this.canvasOptions.selectable,
-            lockMovementY: !this.canvasOptions.selectable
+            lockMovementX: !this.canvasOptions().selectable,
+            lockMovementY: !this.canvasOptions().selectable
         }
         for (var k in this.defObj) {
             if (typeof g[k] !== 'undefined')
@@ -397,7 +399,7 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
 
         switch (type) {
             case 'Group':
-                const groupedItems = []
+                const groupedItems: any[] = []
                 if (g && g.objects) {
                     for (var i = 0; i < g.objects.length; i++) {
                         groupedItems.push(this.createObject(g.objects[i].objectType, g.objects[i], true));
@@ -443,14 +445,14 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
 
         if (item && !noAddToCanvas) {
             this.canvas.add(item);
-            if (type == 'Sprite' && item.play) {
-                item.play();
+            if (type == 'Sprite' && (item as any).play) {
+                (item as any).play();
             }
         }
         return item;
     }
 
-    bringToFront(idx) {
+    bringToFront(idx: any) {
         var o = this.canvas._objects;
         for (var i = 0; i < o.length; i++) {
             if (o[i].id == idx) {
@@ -507,8 +509,8 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
             console.error("Error cloning object:", error);
         }
     }
-    saveAsImage(cb) {
-        var canvas = document.getElementById(this.servoyApi.getMarkupId());
+    saveAsImage(cb: any) {
+        var canvas = document.getElementById(this.servoyApi().getMarkupId());
         var url = this.canvas.toDataURL({
             format: 'png',
             quality: 1.0
@@ -525,17 +527,17 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
         });
         return url.replace('data:image/png;base64,', '');
     }
-    saveCanvas(cb) {
+    saveCanvas(cb: any) {
         if (cb) {
             cb(JSON.stringify(this.canvasObjects));
         }
     }
-    printCanvas(resolutionWidth) {
+    printCanvas(resolutionWidth: any) {
 
         var originWidth = this.canvas.getWidth();
         if (!resolutionWidth) resolutionWidth = originWidth;
         //helper function to set print resolution
-        function zoom(width, canvas) {
+        function zoom(width: any, canvas: any) {
             var scale = width / canvas.getWidth();
             var height = scale * canvas.getHeight();
 
@@ -561,7 +563,7 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
             }
             canvas.renderAll();
         }
-        var canvas_el = document.getElementById(this.servoyApi.getMarkupId());
+        var canvas_el = document.getElementById(this.servoyApi().getMarkupId())!;
         canvas_el.style.opacity = '0';
         zoom(resolutionWidth, this.canvas);
 
@@ -591,15 +593,15 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
             }
         }, 1000)
     }
-    ZoomOnPoint(x, y, zoom) {
+    ZoomOnPoint(x: any, y: any, zoom: any) {
         this.zoomX = x;
         this.zoomY = y;
         this.zoom = zoom;
         this.drawTimeout(0);
     }
-    updateObject(obj, setItemActive) {
+    updateObject(obj: any, setItemActive: any) {
         if (obj) {
-            var sel = [];
+            var sel: any[] = [];
             var ob = this.canvasObjects;
             if (!ob) return;
             for (var i in obj) {
@@ -609,7 +611,7 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
                     if (obj[i].id === ob[j].id) {
                         sel.push(ob[j].id);
                         for (var k in obj[i]) {
-                            ob[j][k] = obj[i][k];
+                            (ob[j] as any)[k] = obj[i][k];
                         }
                     }
                 }
@@ -617,11 +619,11 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
 
             this.canvasObjectsChange.emit(this.canvasObjects);
 
-            if (this.onModified) {
+            if (this.onModified()) {
                 if (obj instanceof Array) {
-                    this.onModified(obj);
+                    this.onModified()!(obj);
                 } else {
-                    this.onModified([obj]);
+                    this.onModified()!([obj]);
                 }
             }
 
@@ -633,13 +635,13 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
             }
         }
     }
-    loadCanvas(data) {
+    loadCanvas(data: any) {
         if (!data || (data.length < 1)) return;
         this.canvasObjects = JSON.parse(data);
         this.canvasObjectsChange.emit(this.canvasObjects);
         this.drawTimeout();
     }
-    addObject(objs, setActive) {
+    addObject(objs: any, setActive: any) {
         if (setActive != false) {
             setActive = true;
         }
@@ -654,11 +656,11 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
         if (objs && objs.length > 0) {
             for (var i = 0; i < objs.length; i++) {
                 this.reselect.push(objs[i].id)
-                activeSelection.add(this.createObject(objs[i].objectType, objs[i]))
+                activeSelection.add(this.createObject(objs[i].objectType, objs[i])!)
             }
         } else if (objs) {
             this.reselect.push(objs.id)
-            activeSelection.add(this.createObject(objs.objectType, objs))
+            activeSelection.add(this.createObject(objs.objectType, objs)!)
         }
 
         if (setActive) {
@@ -671,11 +673,11 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
         }
         this.canvas.renderAll();
 
-        if (this.onModified) {
+        if (this.onModified()) {
             if (objs instanceof Array) {
-                this.onModified(objs);
+                this.onModified()!(objs);
             } else {
-                this.onModified([objs]);
+                this.onModified()!([objs]);
             }
         }
     }
@@ -689,7 +691,7 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
             this.canvasObjectsChange.emit(this.canvasObjects);
         };
 
-        const removeObjectFromCanvas = (obj) => {
+        const removeObjectFromCanvas = (obj: any) => {
             removeById(obj.id);
             this.canvas.remove(obj);
         };
@@ -713,10 +715,10 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
             this.canvas.clear();
         this.drawTimeout();
     }
-    setSelectedObject(ids) {
+    setSelectedObject(ids: any) {
         this.canvas.discardActiveObject();
         var o = this.canvas.getObjects();
-        var allObjects = {};
+        var allObjects: any = {};
         for (var i = 0; i < o.length; i++) {
             if (o[i].id != 'grid') {
                 allObjects[o[i].id] = o[i];
@@ -734,8 +736,8 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
                 }
             }
             this.canvas.setActiveObject(activeSelection);
-            if (activeSelection.getObjects()[0] && activeSelection.getObjects()[0]['ctrl']) {
-                var ctr = activeSelection.getObjects()[0]['ctrl'];
+            if (activeSelection.getObjects()[0] && (activeSelection.getObjects()[0] as any)['ctrl']) {
+                var ctr = (activeSelection.getObjects()[0] as any)['ctrl'];
                 for (var j in ctr) {
                     activeSelection.setControlVisible(j, ctr[j]);
                 }
@@ -743,9 +745,9 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
             this.canvas.renderAll();
         }
     }
-    getSelectedObject(cb, sel) {
+    getSelectedObject(cb: any, sel?: any) {
 
-        function selectHelper(ob): void {
+        function selectHelper(ob: any): void {
             if (!ob) return;
 
             if (ob.objectType !== 'Group' && ob instanceof fabric.Group && ob.getObjects()) {
@@ -768,7 +770,7 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
 
         if (sel) {
             var co = this.canvasObjects;
-            var os = [];
+            var os: any[] = [];
             for (const i in co) {
                 for (let j = 0; j < sel.length; j++) {
                     if (!co[i]) continue;
@@ -785,7 +787,7 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
         if (!ao) return null;
         const ob = ao.getObjects();
         if (ao.objectType !== 'Group' && ao instanceof fabric.Group && ob && ob.length > 0) {
-            var grp = []
+            var grp: any[] = []
             for (var j = 0; j < ob.length; j++) {
                 if (!ob[j]) continue;
                 grp.push(ob[j].id);
@@ -800,7 +802,7 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
         setTimeout(() => this.getSelectedObject(cb, [(ao as any).id!]), 250);
     }
     draw() {
-        this.grid = this.gridSize;
+        this.grid = this.gridSize();
         this.objects = {};
         this.objNum = -1;
         //need to destroy canvas completely
@@ -815,30 +817,31 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
             this.canvas.dispose();
         }
 
-        if (!this.canvasOptions) {
-            this.canvasOptions = {
+        var canvasOpts = this.canvasOptions();
+        if (!canvasOpts) {
+            canvasOpts = {
                 selectable: 0,
                 skipTargetFind: false,
                 hasRotatingPoint: 0,
                 renderOnAddRemove: false,
                 skipOffscreen: false,
                 ZoomOnMouseScroll: 0,
-                animationSpeed: null
+                animationSpeed: null as any
             };
         }
 
-        this.canvasOptions['preserveObjectStacking'] = true;
+        (canvasOpts as any)['preserveObjectStacking'] = true;
 
-        if (this.onRightClick) {// is this necessary?
-            // this.canvasOptions.fireRightClick = true;
-            // this.canvasOptions.stopContextMenu = true;
+        if (this.onRightClick()) {// is this necessary?
+            // canvasOpts.fireRightClick = true;
+            // canvasOpts.stopContextMenu = true;
         }
 
-        this.canvas = new fabric.Canvas(this.svyMarkupId, this.canvasOptions);
+        this.canvas = new fabric.Canvas(this.svyMarkupId, canvasOpts);
         fabric.FabricObject.prototype.transparentCorners = false;
-        this.canvas.selection = this.canvasOptions.selectable;
-        var gridWidth = document.getElementById(this.svyMarkupId + '-wrapper').clientWidth;
-        var gridHeight = document.getElementById(this.svyMarkupId + '-wrapper').clientHeight;
+        this.canvas.selection = canvasOpts.selectable;
+        var gridWidth = document.getElementById(this.svyMarkupId + '-wrapper')!.clientWidth;
+        var gridHeight = document.getElementById(this.svyMarkupId + '-wrapper')!.clientHeight;
 
         //setup zoom
         if (this.zoom)
@@ -855,7 +858,7 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
         //                  }
 
         //draw grid
-        if (this.showGrid) {
+        if (this.showGrid()) {
             // create grid
             var gridSize = (gridWidth > gridHeight) ? gridWidth : gridHeight
             for (var i = 0; i < (gridSize / this.grid); i++) {
@@ -883,7 +886,7 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
             //                      console.log(g[j]);
             //create an fabric item
             var type = canvasObjectsVar[j].objectType;
-            this.objects[canvasObjectsVar[j].id] = this.createObject(type, canvasObjectsVar[j]);
+            this.objects[canvasObjectsVar[j].id!] = this.createObject(type, canvasObjectsVar[j]);
         }
 
         this.setupEvents();
@@ -893,7 +896,7 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
         }
 
         if (!this.isReady) {
-            if (this.onReady) this.onReady();
+            if (this.onReady()) this.onReady()!();
             this.isReady = true;
         }
         this.isDrawing = false;
@@ -918,7 +921,7 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
                 let applyChanges = false;
                 this.canvas.discardActiveObject();
                 var o = this.canvasObjects;
-                this.canvas._objects.concat().forEach(function (obj) {
+                this.canvas._objects.concat().forEach(function (obj: any) {
                     if (obj.id != 'grid' && typeof obj.id != 'undefined') {
                         //                                  this.canvasObjects.map(function(c) {
                         //                                      if (c.id == obj.id) {
@@ -943,9 +946,9 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
         };
 
         if (this.render) return;
-        if (this.canvasOptions.animationSpeed == null || (this.canvasOptions.animationSpeed < 50))
-            this.canvasOptions.animationSpeed = 50;
-        this.render = setInterval(render.bind(this), this.canvasOptions.animationSpeed)
+        if (this.canvasOptions().animationSpeed == null || (this.canvasOptions().animationSpeed < 50))
+            this.canvasOptions().animationSpeed = 50;
+        this.render = setInterval(render.bind(this), this.canvasOptions().animationSpeed)
     }
     stopAnimate() {
         if (this.render) {
@@ -955,9 +958,9 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
         }
     }
 
-    fireClickHandler(obj) {
-        if (this.onClick && !this.canvasOptions.selectable && (typeof obj.id != 'undefined')) {
-            this.onClick(obj.id, this.getObjectById(obj.id));
+    fireClickHandler(obj: any) {
+        if (this.onClick() && !this.canvasOptions().selectable && (typeof obj.id != 'undefined')) {
+            this.onClick()!(obj.id, this.getObjectById(obj.id));
             //when clicking don't allow overlapping
             this.canvas.discardActiveObject();
             this.canvas.renderAll();
@@ -966,8 +969,8 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
 
     //setup events
     setupEvents() {
-        this.canvas.on('object:scaling', (options) => {
-            if (this.snapToGrid) {
+        this.canvas.on('object:scaling', (options: any) => {
+            if (this.snapToGrid()) {
                 const target = options.target;
                 if (!target) return;
                 const w = target.width * target.scaleX;
@@ -1068,11 +1071,11 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
             // }
             this.canvas.renderAll();
         });
-        this.canvas.on('object:moving', (options) => {
+        this.canvas.on('object:moving', (options: any) => {
             const target = options.target;
             if (!target) return;
             //snap to grid
-            if (this.snapToGrid && this.grid) {
+            if (this.snapToGrid() && this.grid) {
                 const newLeft = Math.round(target.left! / this.grid) * this.grid;
                 const newTop = Math.round(target.top! / this.grid) * this.grid;
 
@@ -1095,8 +1098,8 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
 
             this.canvas.renderAll();
         });
-        this.canvas.on('mouse:wheel', (opt) => {
-            if (!this.canvasOptions.ZoomOnMouseScroll) return;
+        this.canvas.on('mouse:wheel', (opt: any) => {
+            if (!this.canvasOptions().ZoomOnMouseScroll) return;
             var delta = opt.e.deltaY;
             var pointer = this.canvas.getPointer(opt.e);
             var zoom = this.canvas.getZoom();
@@ -1110,7 +1113,7 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
             opt.e.preventDefault();
             opt.e.stopPropagation();
         });
-        this.canvas.on('mouse:down', (opt) => {
+        this.canvas.on('mouse:down', (opt: any) => {
             var evt = opt.e;
             if (evt.altKey === true) {
                 this.isDragging = true;
@@ -1118,7 +1121,7 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
                 this.lastPosX = evt.clientX;
                 this.lastPosY = evt.clientY;
 
-            } else if (evt.type === 'contextmenu' && this.onRightClick) {
+            } else if (evt.type === 'contextmenu' && this.onRightClick()) {
 
                 //var jsevent = this.servoyService.createJSEvent(evt, evt.type);
                 evt.preventDefault();
@@ -1132,13 +1135,13 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
                     }
                 }
                 if (obj) {
-                    this.onRightClick(evt, obj.id, this.getObjectById(obj.id));
+                    this.onRightClick()!(evt, obj.id, this.getObjectById(obj.id)!);
                 } else {
-                    this.onRightClick(evt);
+                    this.onRightClick()!(evt);
                 }
             }
         });
-        this.canvas.on('contextmenu', (opt) => {
+        this.canvas.on('contextmenu', (opt: any) => {
             // var obj = this.canvas.getActiveObject();
             // if (!obj || !obj.ctrl) return;
 
@@ -1147,7 +1150,7 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
             //     obj.setControlVisible(j, ctr[j]);
             // }
 var evt = opt.e;
-            if (evt.type === 'contextmenu' && this.onRightClick) {
+            if (evt.type === 'contextmenu' && this.onRightClick()) {
 
                 //var jsevent = this.servoyService.createJSEvent(evt, evt.type);
                 evt.preventDefault();
@@ -1161,25 +1164,25 @@ var evt = opt.e;
                     }
                 }
                 if (obj) {
-                    this.onRightClick(evt, obj.id, this.getObjectById(obj.id));
+                    this.onRightClick()!(evt, obj.id, this.getObjectById(obj.id)!);
                 } else {
-                    this.onRightClick(evt);
+                    this.onRightClick()!(evt);
                 }
             }
         });
-        this.canvas.on('mouse:move', (opt) => {
+        this.canvas.on('mouse:move', (opt: any) => {
             if (this.isDragging) {
                 var e = opt.e;
                 var vpt = this.canvas.viewportTransform;
                 //							console.warn(vpt)
-                vpt[4] += e.clientX - this.lastPosX;
-                vpt[5] += e.clientY - this.lastPosY;
+                vpt[4] += e.clientX - this.lastPosX!;
+                vpt[5] += e.clientY - this.lastPosY!;
                 this.canvas.requestRenderAll();
                 this.lastPosX = e.clientX;
                 this.lastPosY = e.clientY;
             }
         });
-        this.canvas.on('mouse:up', (options) => {
+        this.canvas.on('mouse:up', (options: any) => {
             if (this.isDragging) {
                 this.canvas.setViewportTransform(this.canvas.viewportTransform);
                 this.isDragging = false;
@@ -1190,14 +1193,14 @@ var evt = opt.e;
             if (!obj) return;
             var o = this.canvasObjects;
 
-            if (this.onClick && !this.canvasOptions.selectable && (typeof obj.id != 'undefined')) {
-                this.onClick(obj.id, obj.toObject());
+            if (this.onClick() && !this.canvasOptions().selectable && (typeof obj.id != 'undefined')) {
+                this.onClick()!(obj.id, obj.toObject());
                 //when clicking don't allow overlapping
                 this.canvas.discardActiveObject();
                 this.canvas.renderAll();
             }
 
-            if (this.onDoubleClick) {
+            if (this.onDoubleClick()) {
                 this.clickTimer = setTimeout(() => {
                     if (!this.preventClick) {
                         this.fireClickHandler(obj);
@@ -1208,8 +1211,8 @@ var evt = opt.e;
                 this.fireClickHandler(obj);
             }
         });
-        this.canvas.on('mouse:dblclick', (options) => {
-            if (this.onDoubleClick) {
+        this.canvas.on('mouse:dblclick', (options: any) => {
+            if (this.onDoubleClick()) {
                 clearTimeout(this.clickTimer);
                 this.preventClick = true;
                 var evt = options.e;
@@ -1221,18 +1224,18 @@ var evt = opt.e;
                     }
                 }
                 if (obj) {
-                    this.onDoubleClick(evt, obj.id, this.getObjectById(obj.id));
+                    this.onDoubleClick()!(evt, obj.id, this.getObjectById(obj.id)!);
                 } else {
-                    this.onDoubleClick(evt);
+                    this.onDoubleClick()!(evt);
                 }
             }
         });
-        this.canvas.on('touch:longpress', (options) => {
+        this.canvas.on('touch:longpress', (options: any) => {
             var obj = this.canvas.getActiveObject();
             if (!obj) return;
 
-            if (this.onLongPress && !this.canvasOptions.selectable && (typeof obj.id != 'undefined')) {
-                this.onLongPress(obj.id, this.getObjectById(obj.id));
+            if (this.onLongPress() && !this.canvasOptions().selectable && (typeof obj.id != 'undefined')) {
+                this.onLongPress()!(obj.id, this.getObjectById(obj.id));
                 //when clicking don't allow overlapping
                 this.canvas.discardActiveObject();
                 this.canvas.renderAll();
@@ -1299,18 +1302,18 @@ var evt = opt.e;
                 this.canvasObjectsChange.emit(this.canvasObjects);
             }
         });
-        this.canvas.on('object:modified', (event) => {
+        this.canvas.on('object:modified', (event: any) => {
             var objsModified = this.getObjectsFromEvent(event, true);
-            if (this.onModified) {
-                this.onModified(objsModified);
+            if (this.onModified()) {
+                this.onModified()!(objsModified as canvasObject[]);
             }
             var obj = this.canvas.getActiveObject();
             if (!obj) return;
             obj.set({
-                hasControls: this.canvasOptions.selectable,
+                hasControls: this.canvasOptions().selectable,
                 opacity: 1
             });
-            let selectedIds = [];
+            let selectedIds: string[] = [];
             // Helper function to collect object IDs
             const selectHelper = (o: fabric.Object) => {
                 if (!o) return;
@@ -1336,15 +1339,15 @@ var evt = opt.e;
                 }
             }, 10);
         });
-        this.canvas.on('mouse:over', (e) => {
-            if (!this.canvasOptions.selectable) {
+        this.canvas.on('mouse:over', (e: any) => {
+            if (!this.canvasOptions().selectable) {
                 if (e.target)
                     e.target.hoverCursor = 'pointer';
             }
         });
-        this.canvas.on('after:render', (e) => {
-            if (this.afterRender) {
-                this.afterRender();
+        this.canvas.on('after:render', (_e: any) => {
+            if (this.afterRender()) {
+                this.afterRender()!();
             }
         });
     }

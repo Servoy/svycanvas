@@ -4,9 +4,8 @@ Bundle-Name: Canvas
 Bundle-Version: 2025.3.1
 Package-Type: Web-Component
 NPM-PackageName: @servoy/svycanvas
-NG2-Module: svycanvasModule
+NG2-Components: Canvas
 Entry-Point: dist
 
 Name: Canvas/Canvas.spec
 Web-Component: True
-

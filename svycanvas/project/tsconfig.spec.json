@@ -2,15 +2,20 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "outDir": "../out-tsc/spec",
-    "types": [
-      "jasmine"
-    ]
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "types": []
   },
-  "files": [
-    "src/test.ts"
-  ],
   "include": [
-    "**/*.cy.ts",
-    "**/*.d.ts"
-  ]
+    "src/**/*.spec.ts",
+    "src/**/*.d.ts"
+  ],
+  "angularCompilerOptions": {
+    "extendedDiagnostics": {
+      "checks": {
+        "nullishCoalescingNotNullable": "suppress",
+        "optionalChainNotNullable": "suppress"
+      }
+    }
+  }
 }

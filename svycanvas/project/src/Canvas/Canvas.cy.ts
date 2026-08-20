@@ -2,7 +2,7 @@
 import { canvasObject, CanvasOptions, Canvas } from './Canvas';
 import { MountConfig } from 'cypress/angular'
 import { ServoyApi, ServoyApiTesting, ServoyPublicTestingModule, JSEvent } from '@servoy/public'
-import { Component, SimpleChanges, Input, Renderer2, ChangeDetectorRef, Output, EventEmitter, Inject, ViewChild } from '@angular/core';
+import { Component, SimpleChanges, Input, Renderer2, ChangeDetectorRef, Output, EventEmitter, Inject, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
 	template: `
@@ -36,6 +36,7 @@ import { Component, SimpleChanges, Input, Renderer2, ChangeDetectorRef, Output, 
             >
         </svycanvas-Canvas>
     `,
+	changeDetection: ChangeDetectionStrategy.Eager,
 	standalone: false
 })
 class WrapperComponent {

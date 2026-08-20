@@ -7,14 +7,17 @@
     "declarationMap": true,
     "inlineSources": true,
     "allowJs": true,
-    "types": [],
-    "lib": [
-      "dom",
-      "es2018"
-    ]
+    "noImplicitAny": false,
+    "types": []
   },
   "angularCompilerOptions": {
     "skipTemplateCodegen": true,
+    "extendedDiagnostics": {
+      "checks": {
+        "nullishCoalescingNotNullable": "suppress",
+        "optionalChainNotNullable": "suppress"
+      }
+    },
     "strictMetadataEmit": true,
     "enableResourceInlining": true
   },
