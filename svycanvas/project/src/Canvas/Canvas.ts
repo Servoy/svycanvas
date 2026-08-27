@@ -875,8 +875,7 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
             }
         }
 
-        this.canvas.setWidth(gridWidth);
-        this.canvas.setHeight(gridHeight);
+        this.canvas.setDimensions({ width: gridWidth, height: gridHeight });
 
         var canvasObjectsVar = this.canvasObjects;
         for (var j in canvasObjectsVar) {
