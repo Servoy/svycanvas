@@ -69,9 +69,7 @@
             "outputPath": "dist/dummy",
             "index": "projects/dummy/src/index.html",
             "browser": "projects/dummy/src/main.ts",
-            "polyfills": [
-              "zone.js"
-            ],
+            "polyfills": [],
             "tsConfig": "projects/dummy/tsconfig.app.json",
             "assets": [
               {
@@ -109,10 +107,7 @@
               "aot": false,
               "optimization": false,
               "extractLicenses": false,
-              "polyfills": [
-                "zone.js",
-                "zone.js/testing"
-              ]
+              "polyfills": []
             }
           },
           "defaultConfiguration": "production"
