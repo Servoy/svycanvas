@@ -1,4 +1,4 @@
-import { Component, SimpleChanges, ChangeDetectionStrategy, input, output, inject, Input, Output, EventEmitter } from '@angular/core';
+import { Component, SimpleChanges, ChangeDetectionStrategy, input, inject, model } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ServoyBaseComponent, ServoyPublicService, WindowRefService } from '@servoy/public';
 import * as fabric from 'fabric';
@@ -106,8 +106,7 @@ fabric.classRegistry.setSVGClass(Sprite);
 })
 export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
     //model
-    @Input() canvasObjects!: Array<canvasObject>;
-    @Output() canvasObjectsChange = new EventEmitter<Array<canvasObject>>();
+    readonly canvasObjects = model<Array<canvasObject>>(undefined as any);
     readonly showGrid = input<Boolean>(undefined as any);
     readonly snapToGrid = input<Boolean>(undefined as any);
     readonly gridSize = input<Number>(undefined as any);
@@ -265,7 +264,7 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
     }
 
     getObjectById(objectId: string) {
-        const arr = this.canvasObjects;
+        const arr = this.canvasObjects();
         for (var i = 0; i < arr.length; i++) {
             if (arr[i].id == objectId) {
                 return arr[i];
@@ -320,7 +319,7 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
         }
 
         try {
-            var o = this.canvasObjects;
+            var o = this.canvasObjects();
             var ct = -1;
             for (var i in o) {
                 if (!o[i]) continue;
@@ -346,7 +345,7 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
                 }
             }
 
-            this.canvasObjectsChange.emit(this.canvasObjects);
+            this.canvasObjects.set([...o]);
         } catch (e) { console.error("Error in cloneAndSave:", e); }
     }
 
@@ -355,7 +354,7 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
         if (!o.id) return;
         // console.log('update ' + o.id);
         // console.log(o.left + ' , ' + o.top)
-        var d = this.canvasObjects;
+        var d = this.canvasObjects();
         // if (o[i].type === "i-text") {
         //     o[i].type = "Text";
         // }
@@ -529,7 +528,7 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
     }
     saveCanvas(cb: any) {
         if (cb) {
-            cb(JSON.stringify(this.canvasObjects));
+            cb(JSON.stringify(this.canvasObjects()));
         }
     }
     printCanvas(resolutionWidth: any) {
@@ -602,7 +601,7 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
     updateObject(obj: any, setItemActive: any) {
         if (obj) {
             var sel: any[] = [];
-            var ob = this.canvasObjects;
+            var ob = this.canvasObjects();
             if (!ob) return;
             for (var i in obj) {
                 if (!obj[i]) continue;
@@ -617,7 +616,7 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
                 }
             }
 
-            this.canvasObjectsChange.emit(this.canvasObjects);
+            this.canvasObjects.set([...ob]);
 
             if (this.onModified()) {
                 if (obj instanceof Array) {
@@ -637,8 +636,7 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
     }
     loadCanvas(data: any) {
         if (!data || (data.length < 1)) return;
-        this.canvasObjects = JSON.parse(data);
-        this.canvasObjectsChange.emit(this.canvasObjects);
+        this.canvasObjects.set(JSON.parse(data));
         this.drawTimeout();
     }
     addObject(objs: any, setActive: any) {
@@ -687,8 +685,7 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
         // Helper function to remove object by id
         const removeById = (id?: string | number) => {
             if (!id) return;
-            this.canvasObjects = this.canvasObjects.filter(obj => obj.id !== id);
-            this.canvasObjectsChange.emit(this.canvasObjects);
+            this.canvasObjects.set(this.canvasObjects().filter(obj => obj.id !== id));
         };
 
         const removeObjectFromCanvas = (obj: any) => {
@@ -769,7 +766,7 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
         }
 
         if (sel) {
-            var co = this.canvasObjects;
+            var co = this.canvasObjects();
             var os: any[] = [];
             for (const i in co) {
                 for (let j = 0; j < sel.length; j++) {
@@ -877,7 +874,7 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
 
         this.canvas.setDimensions({ width: gridWidth, height: gridHeight });
 
-        var canvasObjectsVar = this.canvasObjects;
+        var canvasObjectsVar = this.canvasObjects();
         for (var j in canvasObjectsVar) {
             this.objNum++;
             if (!canvasObjectsVar[j]) continue;
@@ -919,7 +916,7 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
             try {
                 let applyChanges = false;
                 this.canvas.discardActiveObject();
-                var o = this.canvasObjects;
+                var o = this.canvasObjects();
                 this.canvas._objects.concat().forEach(function (obj: any) {
                     if (obj.id != 'grid' && typeof obj.id != 'undefined') {
                         //                                  this.canvasObjects.map(function(c) {
@@ -937,7 +934,7 @@ export class Canvas extends ServoyBaseComponent<HTMLDivElement> {
                         //                                  });
                     }
                 });
-                if (applyChanges) this.canvasObjectsChange.emit(this.canvasObjects);
+                if (applyChanges) this.canvasObjects.set([...this.canvasObjects()]);
                 this.canvas.requestRenderAll();
             } catch (e) {
                 console.error("Animation error:", e);
@@ -1190,7 +1187,7 @@ var evt = opt.e;
 
             var obj = this.canvas.getActiveObject();
             if (!obj) return;
-            var o = this.canvasObjects;
+            var o = this.canvasObjects();
 
             if (this.onClick() && !this.canvasOptions().selectable && (typeof obj.id != 'undefined')) {
                 this.onClick()!(obj.id, obj.toObject());
@@ -1290,15 +1287,13 @@ var evt = opt.e;
 
                         const objModel = addToModel(objects[i]);
                         if (objModel) {
-                            if (!this.canvasObjects) {
-                                this.canvasObjects = [];
-                            }
-                            this.canvasObjects.push(objModel as any);
+                            const current = this.canvasObjects() ?? [];
+                            current.push(objModel as any);
+                            this.canvasObjects.set([...current]);
                             this.objects[objects[i].id] = objModel;
                         }
                     }
                 }
-                this.canvasObjectsChange.emit(this.canvasObjects);
             }
         });
         this.canvas.on('object:modified', (event: any) => {
