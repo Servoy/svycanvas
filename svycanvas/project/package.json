@@ -1,6 +1,6 @@
 {
   "name": "@servoy/svycanvas",
-  "version": "2026.9.1",
+  "version": "2026.9.2",
   "dependencies": {
     "fabric": "^6",
     "tslib": "*"
